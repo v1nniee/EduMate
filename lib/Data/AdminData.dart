@@ -7,21 +7,21 @@ import 'package:edumateapp/Models/Category.dart';
 
 const AdminFunctionCategories = [
   Category(
-    id: 'ts1',
+    id: 'a1',
     title: 'Report',
     color: Colors.white,
     icon: Icons.assessment, 
     nextPage: AdminHome(),
   ),
   Category(
-    id: 'ts2',
+    id: 'a2',
     title: 'Tutor Registration Verification',
     color: Colors.white,
     icon: Icons.verified, 
     nextPage: AdminHome(),
   ),
   Category(
-    id: 'ts3',
+    id: 'a3',
     title: 'Tutor Disqualification',
     color: Colors.white,
     icon: Icons.cancel,

@@ -76,7 +76,7 @@ class _UserImagePickerState extends State<UserImagePicker> {
       }
     } else {
       // Return a placeholder if no image is available
-      return AssetImage('assets/images/s.png');
+      return AssetImage('assets/images/tutor_seeker_profile.png');
     }
   }
 

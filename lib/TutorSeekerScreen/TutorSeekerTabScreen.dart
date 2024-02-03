@@ -25,7 +25,7 @@ class _TutorSeekerTabScreenState extends State<TutorSeekerTabScreen> {
   @override
   void initState() {
     super.initState();
-    _selectedPageIndex = widget.initialPageIndex; // Set the initial page index from the widget parameter
+    _selectedPageIndex = widget.initialPageIndex; 
   }
 
   void _selectPage(int index) {

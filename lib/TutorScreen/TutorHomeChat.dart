@@ -10,7 +10,7 @@ import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 class TutorHomeChat extends StatefulWidget {
-  const TutorHomeChat({super.key});
+  const TutorHomeChat({super.key, required String ReceiverUserId});
 
   @override
   _TutorHomeChatState createState() => _TutorHomeChatState();
@@ -18,7 +18,7 @@ class TutorHomeChat extends StatefulWidget {
 
 class _TutorHomeChatState extends State<TutorHomeChat> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  late String TutorSeekerName;
+  late String TutorName;
 
   Stream<List<ChatPreviewData>> getChatPreviews() {
     final currentUser = FirebaseAuth.instance.currentUser!;
@@ -42,14 +42,14 @@ class _TutorHomeChatState extends State<TutorHomeChat> {
             : currentUser.uid == TutorSeekerId;
 
         FirebaseFirestore.instance
-            .collection("Tutor Seeker")
-            .doc(TutorSeekerId)
+            .collection(userType!)
+            .doc(TutorId)
             .get()
             .then((DocumentSnapshot documentSnapshot) {
           if (documentSnapshot.exists) {
             Map<String, dynamic> userProfileData =
                 documentSnapshot.data() as Map<String, dynamic>;
-            TutorSeekerName = userProfileData['Name'];
+            TutorName = userProfileData['Name'];
           } else {
             print("UserProfile document does not exist on the database");
           }
@@ -69,7 +69,7 @@ class _TutorHomeChatState extends State<TutorHomeChat> {
 
             chatPreviews.add(ChatPreviewData(
               chatId: chatSnapshot.id,
-              name: TutorSeekerName,
+              name: TutorName,
               lastMessage: chatSnapshot.get('LastMessage') ?? 'No message',
               imageUrl: messageData['SenderUserImage'] ?? 'default_image_url',
               timestamp: (messageData['CreatedAt'] as Timestamp).toDate(),

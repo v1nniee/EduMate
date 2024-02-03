@@ -1,3 +1,4 @@
+import 'package:edumateapp/TutorScreen/TutorAddPost.dart';
 import 'package:edumateapp/TutorScreen/TutorHome.dart';
 import 'package:flutter/material.dart';
 import 'package:edumateapp/Models/Category.dart';
@@ -6,28 +7,35 @@ import 'package:edumateapp/Models/Category.dart';
 
 const TutorFunctionCategories = [
   Category(
-    id: 'ts1',
-    title: 'Add/Edit Post',
+    id: 't1',
+    title: 'Add Post',
+    color: Colors.white,
+    icon: Icons.add, 
+    nextPage: TutorAddPost(),
+  ),
+  Category(
+    id: 't2',
+    title: 'Edit Post',
     color: Colors.white,
     icon: Icons.edit, 
     nextPage: TutorHome(),
   ),
   Category(
-    id: 'ts2',
+    id: 't3',
     title: 'My Student',
     color: Colors.white,
     icon: Icons.group, 
     nextPage: TutorHome(),
   ),
   Category(
-    id: 'ts3',
+    id: 't4',
     title: 'Tutor Seeker Application Request',
     color: Colors.white,
     icon: Icons.assignment,
     nextPage: TutorHome(),
   ),
   Category(
-    id: 'ts4',
+    id: 't5',
     title: 'My Student Payment',
     color: Colors.white,
     icon: Icons.payment, 

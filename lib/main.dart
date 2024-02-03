@@ -19,7 +19,6 @@ import 'package:flutter/material.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(
@@ -32,23 +31,19 @@ void main() async {
           create: (context) => UserTypeNotifier()),
       ChangeNotifierProvider<UserTokenNotifier>(
           create: (context) => UserTokenNotifier()),
-      
     ],
     child: const OverlaySupport.global(child: MyApp()),
   ));
 }
 
-
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
-  
-
   @override
   Widget build(BuildContext context) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       FCMSetup.initFCM(context);
     });
-    
+
     return MaterialApp(
       navigatorKey: navigatorKey,
       routes: {
@@ -98,7 +93,6 @@ class MyApp extends StatelessWidget {
               },
             );
           } else {
-            // If snapshot doesn't have data, meaning no user is logged in
             return const AuthenticatePage();
           }
         },
@@ -107,13 +101,12 @@ class MyApp extends StatelessWidget {
   }
 }
 
-
 Future<void> deleteUserTypeFromCollection(String collectionPath) async {
-    //collectionPath can be 'Tutor' or 'Tutor Seeker'
-    var firestore = FirebaseFirestore.instance;
-    var collection = firestore.collection(collectionPath);
-    var snapshots = await collection.get();
-    for (var doc in snapshots.docs) {
-      await doc.reference.update({'UserType': FieldValue.delete()});
-    }
+  //collectionPath can be 'Tutor' or 'Tutor Seeker'
+  var firestore = FirebaseFirestore.instance;
+  var collection = firestore.collection(collectionPath);
+  var snapshots = await collection.get();
+  for (var doc in snapshots.docs) {
+    await doc.reference.update({'UserType': FieldValue.delete()});
   }
+}

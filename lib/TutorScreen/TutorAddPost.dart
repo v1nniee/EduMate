@@ -8,15 +8,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 
-
-
 class TutorAddPost extends StatefulWidget {
-  final VoidCallback onSaved;
-  const TutorAddPost({super.key, required this.onSaved});
+  const TutorAddPost({super.key});
 
   @override
-  State<TutorAddPost> createState() =>
-      _TutorAddPostState();
+  State<TutorAddPost> createState() => _TutorAddPostState();
 }
 
 class _TutorAddPostState extends State<TutorAddPost> {
@@ -30,7 +26,6 @@ class _TutorAddPostState extends State<TutorAddPost> {
   var _enteredState = '';
   var _enteredCity = '';
 
-
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
   final TextEditingController _dateController = TextEditingController();
@@ -39,7 +34,6 @@ class _TutorAddPostState extends State<TutorAddPost> {
   final _zipController = TextEditingController();
   final _stateController = TextEditingController();
   final _cityController = TextEditingController();
-
 
   var _isLoading = false;
   File? _selectedImageFile;
@@ -95,12 +89,12 @@ class _TutorAddPostState extends State<TutorAddPost> {
       };
 
       try {
-         await FirebaseFirestore.instance
-          .collection('Tutor')
-          .doc(userId)
-          .collection('UserProfile') 
-          .doc(userId) // The document ID will be the same as the userId
-          .set(userProfileData, SetOptions(merge: true)); 
+        await FirebaseFirestore.instance
+            .collection('Tutor')
+            .doc(userId)
+            .collection('UserProfile')
+            .doc(userId) // The document ID will be the same as the userId
+            .set(userProfileData, SetOptions(merge: true));
 
         await FirebaseFirestore.instance
             .collection('Tutor')
@@ -109,7 +103,7 @@ class _TutorAddPostState extends State<TutorAddPost> {
         setState(() {
           _isLoading = false;
         });
-        
+
         await FirebaseFirestore.instance
             .collection('Tutor')
             .doc(userId)
@@ -118,10 +112,7 @@ class _TutorAddPostState extends State<TutorAddPost> {
           _isLoading = false;
         });
 
-        
-        
-
-        widget.onSaved();
+        //widget.onSaved();
       } catch (error) {
         print('Error saving profile: $error');
       } finally {
@@ -184,8 +175,7 @@ class _TutorAddPostState extends State<TutorAddPost> {
     double screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(
       appBar: AppBar(
-        automaticallyImplyLeading: false,
-        backgroundColor: const Color.fromARGB(255, 255, 255, 115),
+        backgroundColor: const Color.fromARGB(255, 255, 116, 36),
         elevation: 0,
         toolbarHeight: screenHeight * 0.05,
       ),
@@ -198,8 +188,8 @@ class _TutorAddPostState extends State<TutorAddPost> {
           child: Column(
             children: <Widget>[
               const PageHeader(
-                  backgroundColor: Color.fromARGB(255, 255, 255, 115),
-                  headerTitle: "Tutor Profile"),
+                  backgroundColor: Color.fromARGB(255, 255, 116, 36),
+                  headerTitle: "Tutor Add Post"),
               Container(
                 width: screenWidth * 0.9,
                 height: screenHeight * 0.15,
@@ -452,8 +442,6 @@ class _TutorAddPostState extends State<TutorAddPost> {
                             _enteredState = value!;
                           },
                         ),
-                        
-                        
                         if (_isValid) SizedBox(height: 12),
                         if (!_isValid)
                           if (_isLoading) const CircularProgressIndicator(),
