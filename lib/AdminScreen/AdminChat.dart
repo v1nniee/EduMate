@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:edumateapp/Widgets/SendNotification.dart';
+import 'package:edumateapp/FCM/SendNotification.dart';
 import 'package:http/http.dart' as http;
 import 'package:edumateapp/Screen/CategoriesScreen.dart';
 import 'package:edumateapp/Widgets/HomeHeader.dart';
@@ -19,7 +19,7 @@ class AdminChat extends StatelessWidget {
       body: Center(
         child: ElevatedButton(
             onPressed: () {
-              SendNotificationClass().sendNotification("title", "body");
+              
             },
             child: const Text("Hi")),
       ),

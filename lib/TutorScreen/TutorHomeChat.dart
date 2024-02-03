@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:edumateapp/Provider/UserTypeNotifier.dart';
 import 'package:edumateapp/TutorScreen/TutorChat.dart';
 import 'package:edumateapp/TutorSeekerScreen/TutorSeekerChat.dart';
 import 'package:edumateapp/TutorSeekerScreen/TutorSeekerTutorSearchScreen.dart';

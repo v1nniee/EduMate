@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:edumateapp/Provider/UserTypeNotifier.dart';
 import 'package:edumateapp/Screen/Authenticate.dart';
 import 'package:edumateapp/Screen/CategoriesScreen.dart';
 import 'package:edumateapp/TutorSeekerScreen/TutorSeekerRegistration.dart';
@@ -113,6 +114,8 @@ class _TutorSeekerProfileState extends State<TutorSeekerProfile> {
     final userTypeNotifier =
         Provider.of<UserTypeNotifier>(context, listen: false);
     final userType = userTypeNotifier.userType;
+
+
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -138,8 +141,7 @@ class _TutorSeekerProfileState extends State<TutorSeekerProfile> {
                       snapshot.data!.data() as Map<String, dynamic>;
                   imageUrl = userData['ImageUrl'];
                   return Positioned(
-                    top:
-                        100, 
+                    top: 100,
                     left: 0,
                     right: 0,
                     child: Card(
@@ -194,7 +196,7 @@ class _TutorSeekerProfileState extends State<TutorSeekerProfile> {
               return const CircularProgressIndicator();
             },
           ),
-          SizedBox(height:20),
+          SizedBox(height: 20),
           Align(
             alignment: Alignment.bottomCenter,
             child: Padding(
@@ -202,7 +204,6 @@ class _TutorSeekerProfileState extends State<TutorSeekerProfile> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  
                   ElevatedButton(
                     onPressed: () {
                       // Navigate to settings screen
@@ -234,8 +235,9 @@ class _TutorSeekerProfileState extends State<TutorSeekerProfile> {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  
-                  SizedBox(height: 15,),
+                  SizedBox(
+                    height: 15,
+                  ),
                   const Text(
                     "<EduMate>",
                     style: TextStyle(color: Colors.grey),

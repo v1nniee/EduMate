@@ -1,19 +1,24 @@
-import 'package:edumateapp/Widgets/SendNotification.dart';
+import 'package:edumateapp/FCM/SendNotification.dart';
+import 'package:edumateapp/Provider/TokenNotifier.dart';
+import 'package:edumateapp/Provider/UserTypeNotifier.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:overlay_support/overlay_support.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class FirebaseAPI {
-
   final _firebaseMessaging = FirebaseMessaging.instance;
 
-  Future<void> initNotifications() async {
+  Future<void> initNotifications(BuildContext context) async {
     // Requesting permission
     await _firebaseMessaging.requestPermission();
 
     // Getting the token
     final FCMToken = await _firebaseMessaging.getToken();
     print('Token: $FCMToken');
+
+    // Assuming you have access to the context here. If not, you'll need to pass it to this method.
+    Provider.of<UserTokenNotifier>(context, listen: false).setToken(FCMToken!);
 
     // Configure foreground message handling
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
@@ -36,7 +41,6 @@ class FirebaseAPI {
                     icon: Icon(Icons.close),
                     onPressed: () {
                       OverlaySupportEntry.of(context)!.dismiss();
-                      
                     }),
               ),
             ),

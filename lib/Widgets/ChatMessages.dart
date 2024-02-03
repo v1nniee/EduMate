@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:edumateapp/Provider/UserTypeNotifier.dart';
 import 'package:edumateapp/Widgets/MessageBubble.dart';
 import 'package:edumateapp/main.dart';
 import 'package:firebase_auth/firebase_auth.dart';

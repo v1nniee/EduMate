@@ -8,7 +8,7 @@ import 'package:http/http.dart' as http;
 class SendNotificationClass {
 
 
-  Future<void> sendNotification(String title, String body) async {
+  Future<void> sendNotification(String title, String body, String tokenID) async {
     const String cloudFunctionEndpoint = 'https://fcm.googleapis.com/fcm/send';
 
     try {
@@ -28,7 +28,7 @@ class SendNotificationClass {
         body: jsonEncode(<String, dynamic>{
           'notification': jsonDecode(jsonEncode(notificationBody)),
           'to':
-              "dAuinOMLTJieJYmQfy4AOo:APA91bFNFJhhTWM6n65WLRLGKwsn1bEz_T7WpBGhj53xY0_-Ib9FP5kpSzy_L7PJAYn-_sI1dDBS-pJcwUIaFGzeCkW0cNrs17-iHysnzgd_7VEJceMafNePsdo2fKoNhzVGum5PnJZ9"
+              tokenID,
         }),
       );
 
