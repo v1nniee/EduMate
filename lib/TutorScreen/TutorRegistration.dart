@@ -45,7 +45,7 @@ class _TutorRegistrationState extends State<TutorRegistration> {
   File? _selectedImageFile;
   var _isValid = false;
   var _gender = 'Male';
-  final List<String> _userTypes = ['Male', 'Female'];
+  final List<String> _genderTypes = ['Male', 'Female'];
 
   void _submit() async {
     if (!_formKey.currentState!.validate()) {
@@ -321,7 +321,7 @@ class _TutorRegistrationState extends State<TutorRegistration> {
                             ),
                             filled: true,
                           ),
-                          items: _userTypes.map((String value) {
+                          items: _genderTypes.map((String value) {
                             return DropdownMenuItem<String>(
                               value: value,
                               child: Text(value),

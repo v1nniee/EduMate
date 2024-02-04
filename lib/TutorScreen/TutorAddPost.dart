@@ -1,12 +1,17 @@
-import 'dart:io';
 
+//select start time, and select how many hours in registration. - should be in one time availibility section, not in tutor post
+
+import 'dart:io';
+import 'package:edumateapp/TutorScreen/AvailibilitySlot.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:edumateapp/Data/ZipCodeData.dart';
 import 'package:edumateapp/Widgets/PageHeader.dart';
-import 'package:edumateapp/Widgets/UserImagePicker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+import 'package:path/path.dart';
+
 
 class TutorAddPost extends StatefulWidget {
   const TutorAddPost({super.key});
@@ -16,30 +21,91 @@ class TutorAddPost extends StatefulWidget {
 }
 
 class _TutorAddPostState extends State<TutorAddPost> {
-  final _formKey = GlobalKey<FormState>();
-  var _enteredFirstName = '';
-  var _enteredLastName = '';
-  var _enteredDate = '';
-  var _enteredMobileNumer = '';
-  var _enteredAddress = '';
-  var _enteredZip = '';
-  var _enteredState = '';
-  var _enteredCity = '';
+  @override
+  void initState() {
+    super.initState();
+    // Initialize with one availability slot
+    _availability.add({
+      'day': null,
+      'startTime': null,
+      'endTime': null,
+    });
+  }
 
-  final _firstNameController = TextEditingController();
-  final _lastNameController = TextEditingController();
-  final TextEditingController _dateController = TextEditingController();
-  final _mobileNumberController = TextEditingController();
-  final _addressController = TextEditingController();
-  final _zipController = TextEditingController();
-  final _stateController = TextEditingController();
-  final _cityController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  var _subject = 'Lower Primary Science';
+  var _level = 'Beginner';
+  var _ratePerHour = '';
+  List<Map<String, dynamic>> _availability = [];
+
+  final _ratePerHourController = TextEditingController();
+
+  List<File> _selectedDocuments = [];
+
 
   var _isLoading = false;
-  File? _selectedImageFile;
   var _isValid = false;
-  var _gender = 'Male';
-  final List<String> _userTypes = ['Male', 'Female'];
+
+  final List<String> _SubjectsList = [
+    'Lower Primary Bahasa Melayu',
+    'Lower Primary English',
+    'Lower Primary Tamil',
+    'Lower Primary Mandarin',
+    'Lower Primary Moral',
+    'Lower Primary Science',
+    'Lower Primary Mathematics',
+    'Upper Primary Bahasa Melayu',
+    'Upper Primary English',
+    'Upper Primary Tamil',
+    'Upper Primary Mandarin',
+    'Upper Primary Moral',
+    'Upper Primary Science',
+    'Upper Primary Mathematics',
+    'Upper Primary Sejarah',
+    'Lower Secondary Bahasa Melayu',
+    'Lower Secondary English',
+    'Lower Secondary Moral',
+    'Lower Secondary Sejarah',
+    'Lower Secondary Mathematics',
+    'Lower Secondary Science',
+    'Upper Secondary Bahasa Melayu',
+    'Upper Secondary English',
+    'Upper Secondary Moral',
+    'Upper Secondary Science',
+    'Upper Secondary Mathematics',
+    'Upper Secondary Sejarah',
+    'Upper Secondary Physics',
+    'Upper Secondary Chemistry',
+    'Upper Secondary Biology',
+    'Upper Secondary Additional Math',
+    'Upper Secondary Accounting',
+    'Upper Secondary Business Studies',
+  ];
+
+  final List<String> _TeachingLevel = [
+    'Beginner',
+    'Intermediate',
+    'Advanced',
+  ];
+
+  Future<List<String>> _uploadFiles() async {
+  List<String> downloadUrls = [];
+
+  for (var file in _selectedDocuments) {
+    String fileName = basename(file.path);
+    Reference storageRef = FirebaseStorage.instance.ref().child('TutorExperience/$fileName');
+
+    // Upload the file to Firebase Storage
+    UploadTask uploadTask = storageRef.putFile(file);
+
+    // Retrieve download URL
+    String downloadUrl = await (await uploadTask).ref.getDownloadURL();
+    downloadUrls.add(downloadUrl);
+  }
+
+  return downloadUrls;
+}
+
 
   void _submit() async {
     if (!_formKey.currentState!.validate()) {
@@ -55,66 +121,60 @@ class _TutorAddPostState extends State<TutorAddPost> {
         _isLoading = true;
       });
 
-      String? imageURL;
+      // Format availability for storage
+      List<Map<String, dynamic>> formattedAvailability =
+          _availability.map((slot) {
+        return {
+          'day': slot['day'],
+          'startTime': slot['startTime'] != null
+              ? DateFormat('HH:mm').format(
+                  DateTime(
+                    DateTime.now().year,
+                    DateTime.now().month,
+                    DateTime.now().day,
+                    slot['startTime'].hour,
+                    slot['startTime'].minute,
+                  ),
+                )
+              : null,
+          'endTime': slot['endTime'] != null
+              ? DateFormat('HH:mm').format(
+                  DateTime(
+                    DateTime.now().year,
+                    DateTime.now().month,
+                    DateTime.now().day,
+                    slot['endTime'].hour,
+                    slot['endTime'].minute,
+                  ),
+                )
+              : null,
+        };
+      }).toList();
 
-      if (_selectedImageFile != null) {
-        String fileName = 'TutorProfileImages';
-        Reference storageRef =
-            FirebaseStorage.instance.ref().child(fileName).child('$userId.jpg');
+      List<String> fileUrls = await _uploadFiles();
 
-        try {
-          UploadTask uploadTask = storageRef.putFile(_selectedImageFile!);
-          // Wait for the upload to complete
-          TaskSnapshot taskSnapshot = await uploadTask;
-
-          // After upload is complete, get the download URL
-          imageURL = await taskSnapshot.ref.getDownloadURL();
-
-          print(imageURL); // This is your image URL
-        } on FirebaseException catch (error) {
-          print('Error uploading image: $error');
-        }
-      }
-
-      Map<String, dynamic> userProfileData = {
-        'Name': _enteredFirstName + ' ' + _enteredLastName,
-        'DOB': _enteredDate,
-        'Gender': _gender,
-        'MobileNumber': _enteredMobileNumer,
-        'Address': _enteredAddress,
-        'ZipCode': _enteredZip,
-        'State': _enteredState,
-        'City': _enteredCity,
-        if (imageURL != null) 'ImageUrl': imageURL else 'ImageUrl': null,
+      Map<String, dynamic> TutorPostData = {
+        'SubjectsToTeach': _subject,
+        'LevelofTeaching': _level,
+        'RatePerHour': _ratePerHour,
+        'Experience': fileUrls, 
+        'TeacherAvailability': formattedAvailability,
       };
 
       try {
         await FirebaseFirestore.instance
             .collection('Tutor')
             .doc(userId)
-            .collection('UserProfile')
-            .doc(userId) // The document ID will be the same as the userId
-            .set(userProfileData, SetOptions(merge: true));
+            .collection('TutorPost')
+            .add(TutorPostData);
 
-        await FirebaseFirestore.instance
-            .collection('Tutor')
-            .doc(userId)
-            .set({'Name': userProfileData['Name']}, SetOptions(merge: true));
-        setState(() {
-          _isLoading = false;
-        });
-
-        await FirebaseFirestore.instance
-            .collection('Tutor')
-            .doc(userId)
-            .set({'UserType': "Tutor"}, SetOptions(merge: true));
         setState(() {
           _isLoading = false;
         });
 
         //widget.onSaved();
       } catch (error) {
-        print('Error saving profile: $error');
+        print('Error saving tutor post: $error');
       } finally {
         setState(() {
           _isLoading = false;
@@ -125,48 +185,72 @@ class _TutorAddPostState extends State<TutorAddPost> {
     }
   }
 
-  void searchAndAutoFill(String zipCode) {
-    bool found = false;
+  Future<void> _pickDocument() async {
+  FilePickerResult? result = await FilePicker.platform.pickFiles(allowMultiple: true);
 
-    for (var stateData in ZipCodeData['state']) {
-      for (var state in stateData['state']) {
-        for (var city in state['city']) {
-          if (city['postcode'].contains(zipCode)) {
-            setState(() {
-              _stateController.text = state['name'];
-              _cityController.text = city['name'];
-            });
-            found = true;
-            return;
-          }
-        }
-      }
-    }
+  if (result != null) {
+    List<File> files = result.paths.map((path) => File(path!)).toList();
+    setState(() {
+      _selectedDocuments.addAll(files); // This adds the newly picked files to the existing list.
+    });
+  }
+}
 
-    if (!found) {
-      // Zip code not found
-      setState(() {
-        _stateController.clear();
-        _cityController.clear();
+
+  // Method to add a new availability slot
+  void _addAvailability() {
+    setState(() {
+      _availability.add({
+        'day': null,
+        'startTime': null,
+        'endTime': null,
       });
+    });
+  }
 
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('Zip code not found')));
+// Method to remove an availability slot
+  void _removeAvailability(int index) {
+    setState(() {
+      _availability.removeAt(index);
+    });
+  }
+
+  void _updateStartTime(int slotIndex, TimeOfDay? picked) {
+    if (picked != null) {
+      setState(() {
+        _availability[slotIndex]['startTime'] = picked;
+      });
     }
   }
 
-  Future<void> _pickDate(BuildContext context) async {
-    final DateTime? pickedDate = await showDatePicker(
-      context: context,
-      initialDate: DateTime.now(),
-      firstDate: DateTime(1900),
-      lastDate: DateTime.now(),
-    );
-    if (pickedDate != null && pickedDate != DateTime.now()) {
+  void _updateEndTime(int slotIndex, TimeOfDay? picked) {
+    if (picked != null) {
       setState(() {
-        _dateController.text = "${pickedDate.toLocal()}".split(' ')[0];
+        _availability[slotIndex]['endTime'] = picked;
       });
     }
+  }
+
+  Future<void> _selectTime(
+      BuildContext context, int slotIndex, String key) async {
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: _availability[slotIndex][key] ?? TimeOfDay.now(),
+    );
+
+    if (key == 'startTime') {
+      _updateStartTime(slotIndex, picked);
+    } else if (key == 'endTime') {
+      _updateEndTime(slotIndex, picked);
+    }
+  }
+
+  String _formatTimeOfDay(TimeOfDay? tod) {
+    final now = DateTime.now();
+    final dt = DateTime(
+        now.year, now.month, now.day, tod?.hour ?? 0, tod?.minute ?? 0);
+    final format = DateFormat.jm(); // for AM/PM formatting
+    return tod != null ? format.format(dt) : "Select Time";
   }
 
   @override
@@ -190,20 +274,6 @@ class _TutorAddPostState extends State<TutorAddPost> {
               const PageHeader(
                   backgroundColor: Color.fromARGB(255, 255, 116, 36),
                   headerTitle: "Tutor Add Post"),
-              Container(
-                width: screenWidth * 0.9,
-                height: screenHeight * 0.15,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(30),
-                ),
-                child: UserImagePicker(onPickImage: (pickedImage) {
-                  setState(() {
-                    _selectedImageFile = pickedImage;
-                    print(_selectedImageFile!.path.split('/').last);
-                  });
-                }),
-              ),
               const SizedBox(
                 height: 10,
               ),
@@ -219,99 +289,22 @@ class _TutorAddPostState extends State<TutorAddPost> {
                     key: _formKey,
                     child: Column(
                       children: <Widget>[
-                        const Text("Basic Information",
+                        const Text("Professional Details",
                             style: TextStyle(fontSize: 20)),
                         const SizedBox(
-                          height: 10,
-                        ),
-                        TextFormField(
-                          controller: _firstNameController,
-                          decoration: InputDecoration(
-                            labelText: 'First Name',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(20),
-                              borderSide: BorderSide.none,
-                            ),
-                            filled: true,
-                          ),
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'Please enter a valid first name.';
-                            }
-                            return null;
-                          },
-                          onSaved: (value) {
-                            _enteredFirstName = value!;
-                          },
-                        ),
-                        const SizedBox(
-                          height: 10,
-                        ),
-                        TextFormField(
-                          controller: _lastNameController,
-                          decoration: InputDecoration(
-                            labelText: 'Last Name',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(20),
-                              borderSide: BorderSide.none,
-                            ),
-                            filled: true,
-                          ),
-                          autocorrect: false,
-                          textCapitalization: TextCapitalization.none,
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'Please enter a valid last name.';
-                            }
-                            return null;
-                          },
-                          onSaved: (value) {
-                            _enteredLastName = value!;
-                          },
-                        ),
-                        const SizedBox(
-                          height: 10,
-                        ),
-                        TextFormField(
-                          controller: _dateController,
-                          decoration: InputDecoration(
-                            labelText: 'Date of Birth',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(20),
-                              borderSide: BorderSide.none,
-                            ),
-                            filled: true,
-                          ),
-                          onTap: () {
-                            FocusScope.of(context).requestFocus(
-                                new FocusNode()); // to prevent opening the keyboard
-                            _pickDate(context);
-                          },
-                          readOnly: true,
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'Please pick a date.';
-                            }
-                            return null;
-                          },
-                          onSaved: (value) {
-                            _enteredDate = value!;
-                          },
-                        ),
-                        const SizedBox(
-                          height: 10,
+                          height: 20,
                         ),
                         DropdownButtonFormField<String>(
-                          value: _gender,
+                          value: _subject,
                           decoration: InputDecoration(
-                            labelText: 'Gender',
+                            labelText: 'Subject to Teach',
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(20),
                               borderSide: BorderSide.none,
                             ),
                             filled: true,
                           ),
-                          items: _userTypes.map((String value) {
+                          items: _SubjectsList.map((String value) {
                             return DropdownMenuItem<String>(
                               value: value,
                               child: Text(value),
@@ -319,41 +312,81 @@ class _TutorAddPostState extends State<TutorAddPost> {
                           }).toList(),
                           onChanged: (newValue) {
                             setState(() {
-                              _gender = newValue!;
+                              _subject = newValue!;
                             });
                           },
                         ),
                         const SizedBox(
                           height: 10,
                         ),
-                        TextFormField(
-                          controller: _mobileNumberController,
+                        DropdownButtonFormField<String>(
+                          value: _level,
                           decoration: InputDecoration(
-                            labelText: 'Mobile Number',
+                            labelText: 'Level of Teaching',
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(20),
                               borderSide: BorderSide.none,
                             ),
                             filled: true,
                           ),
-                          keyboardType: TextInputType.phone,
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'Please enter a valid mobile number.';
-                            }
-                            return null;
-                          },
-                          onSaved: (value) {
-                            _enteredMobileNumer = value!;
+                          items: _TeachingLevel.map((String value) {
+                            return DropdownMenuItem<String>(
+                              value: value,
+                              child: Text(value),
+                            );
+                          }).toList(),
+                          onChanged: (newValue) {
+                            setState(() {
+                              _level = newValue!;
+                            });
                           },
                         ),
                         const SizedBox(
                           height: 10,
                         ),
+                        const Text("Experience",
+                            style: TextStyle(fontSize: 20)),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        // Section for displaying picked document names
+                for (var file in _selectedDocuments)
+                  ListTile(
+                    title: Text(
+                      basename(file.path),
+                      style: const TextStyle(fontSize: 16),
+                    ),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.delete, color: Colors.red),
+                      onPressed: () {
+                        setState(() {
+                          _selectedDocuments.remove(file);
+                        });
+                      },
+                    ),
+                  ),
+
+                // Button to pick documents
+                TextButton(
+                  onPressed: _pickDocument,
+                  style: TextButton.styleFrom(
+                    backgroundColor: Colors.orange,
+                    primary: Colors.white,
+                  ),
+                  child: const Text('Upload Document'),
+                ),
+                        
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        const Text("Fees", style: TextStyle(fontSize: 20)),
+                        const SizedBox(
+                          height: 10,
+                        ),
                         TextFormField(
-                          controller: _addressController,
+                          controller: _ratePerHourController,
                           decoration: InputDecoration(
-                            labelText: 'Address',
+                            labelText: 'Rate per Hour (RM)',
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(20),
                               borderSide: BorderSide.none,
@@ -362,103 +395,150 @@ class _TutorAddPostState extends State<TutorAddPost> {
                           ),
                           validator: (value) {
                             if (value == null || value.trim().isEmpty) {
-                              return 'Please enter a valid address.';
+                              return 'Please enter a valid rate per hour.';
                             }
                             return null;
                           },
                           onSaved: (value) {
-                            _enteredAddress = value!;
+                            _ratePerHour = value!;
                           },
                         ),
                         const SizedBox(
                           height: 10,
                         ),
-                        TextFormField(
-                          controller: _zipController,
-                          decoration: InputDecoration(
-                            labelText: 'Zip Code',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(20),
-                              borderSide: BorderSide.none,
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Padding(
+                                padding: const EdgeInsets.only(left: 16.0),
+                                child: Text(
+                                  "Teacher Availability",
+                                  style: TextStyle(fontSize: 20),
+                                ),
+                              ),
                             ),
-                            filled: true,
-                          ),
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'Please enter a valid zip code.';
-                            }
-                            return null;
-                          },
-                          onSaved: (value) {
-                            _enteredZip = value!;
-                          },
-                          onFieldSubmitted: (value) async {
-                            searchAndAutoFill(value);
-                          },
-                        ),
-                        const SizedBox(
-                          height: 10,
-                        ),
-                        TextFormField(
-                          controller: _cityController,
-                          decoration: InputDecoration(
-                            labelText: 'City',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(20),
-                              borderSide: BorderSide.none,
+                            Padding(
+                              padding: const EdgeInsets.only(right: 16.0),
+                              child: ElevatedButton(
+                                onPressed: _addAvailability,
+                                style: ElevatedButton.styleFrom(
+                                  primary: Colors
+                                      .transparent, // Use your theme color here
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                ),
+                                child: Text('Add'),
+                              ),
                             ),
-                            filled: true,
-                          ),
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'Please enter a valid city.';
-                            }
-                            return null;
-                          },
-                          onSaved: (value) {
-                            _enteredCity = value!;
-                          },
+                          ],
                         ),
-                        const SizedBox(
-                          height: 10,
-                        ),
-                        TextFormField(
-                          controller: _stateController,
-                          decoration: InputDecoration(
-                            labelText: 'State',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(20),
-                              borderSide: BorderSide.none,
+                        ..._availability.map((slot) {
+                          return Card(
+                            margin: const EdgeInsets.all(8.0),
+                            child: Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Column(
+                                children: [
+                                  DropdownButtonFormField<String>(
+                                    value: slot['day'],
+                                    decoration: InputDecoration(
+                                      labelText: 'Week day',
+                                      border: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      filled: true,
+                                      fillColor: Colors.white,
+                                    ),
+                                    items: [
+                                      'Monday',
+                                      'Tuesday',
+                                      'Wednesday',
+                                      'Thursday',
+                                      'Friday',
+                                      'Saturday',
+                                      'Sunday'
+                                    ]
+                                        .map((String value) =>
+                                            DropdownMenuItem<String>(
+                                              value: value,
+                                              child: Text(value),
+                                            ))
+                                        .toList(),
+                                    onChanged: (newValue) {
+                                      setState(() {
+                                        slot['day'] = newValue;
+                                      });
+                                    },
+                                  ),
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: InkWell(
+                                          onTap: () => _selectTime(
+                                              context,
+                                              _availability.indexOf(slot),
+                                              'startTime'),
+                                          child: Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                                vertical: 8.0),
+                                            child: Text(
+                                              _formatTimeOfDay(
+                                                  slot['startTime']),
+                                              style:
+                                                  TextStyle(color: Colors.blue),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                      Expanded(
+                                        child: InkWell(
+                                          onTap: () => _selectTime(
+                                              context,
+                                              _availability.indexOf(slot),
+                                              'endTime'),
+                                          child: Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                                vertical: 8.0),
+                                            child: Text(
+                                              _formatTimeOfDay(slot['endTime']),
+                                              style:
+                                                  TextStyle(color: Colors.blue),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  IconButton(
+                                    icon: Icon(Icons.delete, color: Colors.red),
+                                    onPressed: () => _removeAvailability(
+                                        _availability.indexOf(slot)),
+                                  ),
+                                ],
+                              ),
                             ),
-                            filled: true,
-                          ),
-                          validator: (value) {
-                            if (value == null || value.trim().isEmpty) {
-                              return 'Please enter a valid state.';
-                            }
-                            return null;
-                          },
-                          onSaved: (value) {
-                            _enteredState = value!;
-                          },
-                        ),
-                        if (_isValid) SizedBox(height: 12),
-                        if (!_isValid)
-                          if (_isLoading) const CircularProgressIndicator(),
-                        if (!_isLoading)
-                          ElevatedButton(
-                            onPressed: _submit,
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor:
-                                  const Color.fromARGB(255, 255, 255, 115),
-                            ),
-                            child: const Text("Save"),
-                          ),
+                          );
+                        }).toList(),
                       ],
                     ),
                   ),
                 ),
               ),
+              SizedBox(height: 12),
+              if (_isValid) SizedBox(height: 12),
+              if (!_isValid)
+                if (_isLoading) const CircularProgressIndicator(),
+              if (!_isLoading)
+                ElevatedButton(
+                  onPressed: _submit,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color.fromARGB(255, 255, 255, 115),
+                  ),
+                  child: const Text("Save"),
+                ),
+              SizedBox(height: 12),
             ],
           ),
         ),
@@ -468,14 +548,7 @@ class _TutorAddPostState extends State<TutorAddPost> {
 
   @override
   void dispose() {
-    _firstNameController.dispose();
-    _lastNameController.dispose();
-    _dateController.dispose();
-    _mobileNumberController.dispose();
-    _addressController.dispose();
-    _zipController.dispose();
-    _stateController.dispose();
-    _cityController.dispose();
+    _ratePerHourController.dispose();
     super.dispose();
   }
 }
