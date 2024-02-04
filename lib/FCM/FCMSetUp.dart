@@ -5,7 +5,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:edumateapp/FCM/FirebaseAPI.dart';
-import 'package:edumateapp/FCM/MessagingBackgroundHandler.dart'; // Adjust the import path as necessary
+ // Adjust the import path as necessary
 
 class FCMSetup {
   static Future<void> initFCM(BuildContext context) async {
