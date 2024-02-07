@@ -1,4 +1,5 @@
 
+import 'package:edumateapp/TutorSeekerScreen/TutorSeekerFindTutor.dart';
 import 'package:edumateapp/TutorSeekerScreen/TutorSeekerHome.dart';
 import 'package:edumateapp/TutorSeekerScreen/TutorSeekerTabScreen.dart';
 import 'package:flutter/material.dart';
@@ -14,9 +15,7 @@ const TutorSeekerFunctionCategories = [
     title: 'Find a Tutor',
     color: Colors.white,
     icon: Icons.search,
-    nextPage: TutorSeekerTabScreen(
-              initialPageIndex: 0,
-            ),
+    nextPage: TutorSeekerFindTutor(),
   ),
   Category(
     id: 'ts2',
