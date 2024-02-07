@@ -21,22 +21,12 @@ class TutorAddPost extends StatefulWidget {
 }
 
 class _TutorAddPostState extends State<TutorAddPost> {
-  @override
-  void initState() {
-    super.initState();
-    // Initialize with one availability slot
-    _availability.add({
-      'day': null,
-      'startTime': null,
-      'endTime': null,
-    });
-  }
+
 
   final _formKey = GlobalKey<FormState>();
   var _subject = 'Lower Primary Science';
   var _level = 'Beginner';
   var _ratePerHour = '';
-  List<Map<String, dynamic>> _availability = [];
 
   final _ratePerHourController = TextEditingController();
 
@@ -121,35 +111,7 @@ class _TutorAddPostState extends State<TutorAddPost> {
         _isLoading = true;
       });
 
-      // Format availability for storage
-      List<Map<String, dynamic>> formattedAvailability =
-          _availability.map((slot) {
-        return {
-          'day': slot['day'],
-          'startTime': slot['startTime'] != null
-              ? DateFormat('HH:mm').format(
-                  DateTime(
-                    DateTime.now().year,
-                    DateTime.now().month,
-                    DateTime.now().day,
-                    slot['startTime'].hour,
-                    slot['startTime'].minute,
-                  ),
-                )
-              : null,
-          'endTime': slot['endTime'] != null
-              ? DateFormat('HH:mm').format(
-                  DateTime(
-                    DateTime.now().year,
-                    DateTime.now().month,
-                    DateTime.now().day,
-                    slot['endTime'].hour,
-                    slot['endTime'].minute,
-                  ),
-                )
-              : null,
-        };
-      }).toList();
+      
 
       List<String> fileUrls = await _uploadFiles();
 
@@ -158,7 +120,6 @@ class _TutorAddPostState extends State<TutorAddPost> {
         'LevelofTeaching': _level,
         'RatePerHour': _ratePerHour,
         'Experience': fileUrls, 
-        'TeacherAvailability': formattedAvailability,
       };
 
       try {
@@ -195,63 +156,6 @@ class _TutorAddPostState extends State<TutorAddPost> {
     });
   }
 }
-
-
-  // Method to add a new availability slot
-  void _addAvailability() {
-    setState(() {
-      _availability.add({
-        'day': null,
-        'startTime': null,
-        'endTime': null,
-      });
-    });
-  }
-
-// Method to remove an availability slot
-  void _removeAvailability(int index) {
-    setState(() {
-      _availability.removeAt(index);
-    });
-  }
-
-  void _updateStartTime(int slotIndex, TimeOfDay? picked) {
-    if (picked != null) {
-      setState(() {
-        _availability[slotIndex]['startTime'] = picked;
-      });
-    }
-  }
-
-  void _updateEndTime(int slotIndex, TimeOfDay? picked) {
-    if (picked != null) {
-      setState(() {
-        _availability[slotIndex]['endTime'] = picked;
-      });
-    }
-  }
-
-  Future<void> _selectTime(
-      BuildContext context, int slotIndex, String key) async {
-    final TimeOfDay? picked = await showTimePicker(
-      context: context,
-      initialTime: _availability[slotIndex][key] ?? TimeOfDay.now(),
-    );
-
-    if (key == 'startTime') {
-      _updateStartTime(slotIndex, picked);
-    } else if (key == 'endTime') {
-      _updateEndTime(slotIndex, picked);
-    }
-  }
-
-  String _formatTimeOfDay(TimeOfDay? tod) {
-    final now = DateTime.now();
-    final dt = DateTime(
-        now.year, now.month, now.day, tod?.hour ?? 0, tod?.minute ?? 0);
-    final format = DateFormat.jm(); // for AM/PM formatting
-    return tod != null ? format.format(dt) : "Select Time";
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -406,121 +310,7 @@ class _TutorAddPostState extends State<TutorAddPost> {
                         const SizedBox(
                           height: 10,
                         ),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                              child: Padding(
-                                padding: const EdgeInsets.only(left: 16.0),
-                                child: Text(
-                                  "Teacher Availability",
-                                  style: TextStyle(fontSize: 20),
-                                ),
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.only(right: 16.0),
-                              child: ElevatedButton(
-                                onPressed: _addAvailability,
-                                style: ElevatedButton.styleFrom(
-                                  primary: Colors
-                                      .transparent, // Use your theme color here
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                ),
-                                child: Text('Add'),
-                              ),
-                            ),
-                          ],
-                        ),
-                        ..._availability.map((slot) {
-                          return Card(
-                            margin: const EdgeInsets.all(8.0),
-                            child: Padding(
-                              padding: const EdgeInsets.all(16.0),
-                              child: Column(
-                                children: [
-                                  DropdownButtonFormField<String>(
-                                    value: slot['day'],
-                                    decoration: InputDecoration(
-                                      labelText: 'Week day',
-                                      border: OutlineInputBorder(
-                                        borderRadius: BorderRadius.circular(20),
-                                      ),
-                                      filled: true,
-                                      fillColor: Colors.white,
-                                    ),
-                                    items: [
-                                      'Monday',
-                                      'Tuesday',
-                                      'Wednesday',
-                                      'Thursday',
-                                      'Friday',
-                                      'Saturday',
-                                      'Sunday'
-                                    ]
-                                        .map((String value) =>
-                                            DropdownMenuItem<String>(
-                                              value: value,
-                                              child: Text(value),
-                                            ))
-                                        .toList(),
-                                    onChanged: (newValue) {
-                                      setState(() {
-                                        slot['day'] = newValue;
-                                      });
-                                    },
-                                  ),
-                                  Row(
-                                    children: [
-                                      Expanded(
-                                        child: InkWell(
-                                          onTap: () => _selectTime(
-                                              context,
-                                              _availability.indexOf(slot),
-                                              'startTime'),
-                                          child: Padding(
-                                            padding: const EdgeInsets.symmetric(
-                                                vertical: 8.0),
-                                            child: Text(
-                                              _formatTimeOfDay(
-                                                  slot['startTime']),
-                                              style:
-                                                  TextStyle(color: Colors.blue),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                      Expanded(
-                                        child: InkWell(
-                                          onTap: () => _selectTime(
-                                              context,
-                                              _availability.indexOf(slot),
-                                              'endTime'),
-                                          child: Padding(
-                                            padding: const EdgeInsets.symmetric(
-                                                vertical: 8.0),
-                                            child: Text(
-                                              _formatTimeOfDay(slot['endTime']),
-                                              style:
-                                                  TextStyle(color: Colors.blue),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  IconButton(
-                                    icon: Icon(Icons.delete, color: Colors.red),
-                                    onPressed: () => _removeAvailability(
-                                        _availability.indexOf(slot)),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-                        }).toList(),
+                        
                       ],
                     ),
                   ),
