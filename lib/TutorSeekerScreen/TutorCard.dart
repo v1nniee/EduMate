@@ -17,25 +17,30 @@ class TutorCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => TutorDetailPage(tutorId: tutorId),
+    // Add padding around the Card
+    return Padding(
+      padding: const EdgeInsets.all(8.0), // Adjust the padding as needed
+      child: InkWell(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => TutorDetailPage(tutorId: tutorId),
+            ),
+          );
+        },
+        child: Card(
+          elevation: 4.0, // Optional: add shadow to card
+          child: ListTile(
+            leading: CircleAvatar(
+              backgroundImage: NetworkImage(imageURL),
+              onBackgroundImageError: (exception, stackTrace) {
+                print("onBackgroundImageError");
+              },
+            ),
+            title: Text(name),
+            subtitle: Text(subject),
           ),
-        );
-      },
-      child: Card(
-        child: ListTile(
-          leading: CircleAvatar(
-            backgroundImage: NetworkImage(imageURL),
-            onBackgroundImageError: (exception, stackTrace) {
-              print("onBackgroundImageError");
-            },
-          ),
-          title: Text(name),
-          subtitle: Text(subject),
         ),
       ),
     );

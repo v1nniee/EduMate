@@ -1,5 +1,5 @@
 
-
+import 'package:edumateapp/Widgets/PageHeader.dart';
 import 'package:flutter/material.dart';
 
 class TutorDetailPage extends StatelessWidget {
@@ -9,14 +9,18 @@ class TutorDetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Fetch more details using tutorId, like 'TutorPost'
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Tutor Details'),
+        backgroundColor: const Color.fromARGB(255, 255, 255, 115),
+        elevation: 0,
       ),
-      body: Center(
-        // Display more details here
-        child: Text('Details for tutor $tutorId'),
+      body: const Column(
+        children: [
+          PageHeader(
+            backgroundColor: Color.fromARGB(255, 255, 255, 115),
+            headerTitle: 'Tutor Details',
+          ), 
+          Text("a"),]
       ),
     );
   }
