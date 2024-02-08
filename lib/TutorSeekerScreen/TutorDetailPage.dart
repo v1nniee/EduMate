@@ -6,14 +6,26 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:edumateapp/Widgets/PageHeader.dart';
 import 'package:flutter/material.dart';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:edumateapp/Widgets/PageHeader.dart';
+import 'package:flutter/material.dart';
+
 class TutorDetailPage extends StatelessWidget {
   final String tutorId;
   final String tutorPostId;
 
-  const TutorDetailPage({Key? key, required this.tutorId, required this.tutorPostId}) : super(key: key);
+  const TutorDetailPage(
+      {Key? key, required this.tutorId, required this.tutorPostId})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    String tutorName;
+    var rate;
+    var mode;
+    var subject;
+    var aboutMe;
+
     FirebaseFirestore firestore = FirebaseFirestore.instance;
 
     return Scaffold(
@@ -34,21 +46,80 @@ class TutorDetailPage extends StatelessWidget {
             }
 
             var tutorData = snapshot.data!;
-            String tutorName = tutorData.get('Name') ?? 'Unavailable';
+            tutorName = tutorData.get('Name') ?? 'Unavailable';
 
-            return const Column(
-              children: [
-                PageHeader(
-                  backgroundColor: Color.fromARGB(255, 255, 255, 115),
-                  headerTitle: 'Tutor Details',
-                ),
-                SizedBox(height: 20),
-                Card(
-                  child: ListTile(
-                    title: Text('Name: \nExperience:'))
-                ),
-                
-              ],
+            return FutureBuilder<DocumentSnapshot>(
+              future: firestore
+                  .collection('Tutor')
+                  .doc(tutorId)
+                  .collection('TutorPost')
+                  .doc(tutorPostId)
+                  .get(),
+              builder: (context,
+                  AsyncSnapshot<DocumentSnapshot> tutorPostSnapshot) {
+                if (tutorPostSnapshot.connectionState ==
+                    ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                if (!tutorPostSnapshot.hasData ||
+                    !tutorPostSnapshot.data!.exists) {
+                  return const Center(child: Text("Tutor post not found."));
+                }
+
+                var tutorPostData = tutorPostSnapshot.data!;
+                mode = tutorPostData.get('Mode') ?? 'Unavailable';
+                subject = tutorPostData.get('SubjectsToTeach') ?? 'Unavailable';
+                rate = tutorPostData.get('RatePerHour') ?? 'Unavailable';
+
+                return FutureBuilder<DocumentSnapshot>(
+                  future: firestore
+                      .collection('Tutor')
+                      .doc(tutorId)
+                      .collection('UserProfile')
+                      .doc(tutorId)
+                      .get(),
+                  builder: (context,
+                      AsyncSnapshot<DocumentSnapshot> userProfileSnapshot) {
+                    if (userProfileSnapshot.connectionState ==
+                        ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+
+                    if (!userProfileSnapshot.hasData ||
+                        !userProfileSnapshot.data!.exists) {
+                      return const Center(child: Text("User profile not found."));
+                    }
+
+                    var userProfileData = userProfileSnapshot.data!;
+                    aboutMe = userProfileData.get('AboutMe') ?? 'Unavailable';
+
+                    return Column(
+                      children: [
+                        const PageHeader(
+                          backgroundColor: Color.fromARGB(255, 255, 255, 115),
+                          headerTitle: 'Tutor Details',
+                        ),
+                        SizedBox(height: 20),
+                        Card(
+                          child: ListTile(
+                            title: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('Name: $tutorName'),
+                                Text('Rate/hour: RM$rate'),
+                                Text('Mode: $mode'),
+                                Text('Subject: $subject'),
+                                Text('About Me: $aboutMe'),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
             );
           },
         ),
