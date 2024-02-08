@@ -99,8 +99,10 @@ class _TutorSeekerFindTutorState extends State<TutorSeekerFindTutor> {
                     : snapshot.data!.docs;
                 return ListView(
                   children: filteredDocs.map((document) {
-                    return FutureBuilder<QuerySnapshot>(
-                      future: document.reference.collection('TutorPost').get(),
+                    return StreamBuilder<QuerySnapshot>(
+                      stream: document.reference
+                          .collection('TutorPost')
+                          .snapshots(),
                       builder: (context,
                           AsyncSnapshot<QuerySnapshot> tutorPostSnapshot) {
                         if (!tutorPostSnapshot.hasData) {
@@ -110,40 +112,54 @@ class _TutorSeekerFindTutorState extends State<TutorSeekerFindTutor> {
                             ),
                           );
                         }
+                        var tutorPosts = tutorPostSnapshot.data!.docs;
 
-                        String subject = tutorPostSnapshot.data!.docs.isNotEmpty
-                            ? tutorPostSnapshot.data!.docs.first
-                                .get('SubjectsToTeach')
-                            : 'Subject not specified';
+                       
+                        List<Widget> tutorCards = [];
+                        for (var tutorPostDoc in tutorPosts) {
+                          String subject =
+                              tutorPostDoc.get('SubjectsToTeach') ??
+                                  'Subject not specified';
+                          String fees = tutorPostDoc.get('RatePerHour') ??
+                              'Rate not specified';
+                          String tutorPostId = tutorPostDoc.id;
 
-                        return FutureBuilder<DocumentSnapshot>(
-                          future: document.reference
-                              .collection('UserProfile')
-                              .doc(document.id)
-                              .get(),
-                          builder: (context,
-                              AsyncSnapshot<DocumentSnapshot>
-                                  userProfileSnapshot) {
-                            if (!userProfileSnapshot.hasData) {
-                              return const Card(
-                                child: ListTile(
-                                  leading: CircularProgressIndicator(),
-                                ),
-                              );
-                            }
+                          tutorCards.add(
+                            FutureBuilder<DocumentSnapshot>(
+                              future: document.reference
+                                  .collection('UserProfile')
+                                  .doc(document.id)
+                                  .get(),
+                              builder: (context,
+                                  AsyncSnapshot<DocumentSnapshot>
+                                      userProfileSnapshot) {
+                                if (!userProfileSnapshot.hasData) {
+                                  return const Card(
+                                    child: ListTile(
+                                      leading: CircularProgressIndicator(),
+                                    ),
+                                  );
+                                }
+                                String imageUrl = userProfileSnapshot
+                                        .data!.exists
+                                    ? userProfileSnapshot.data!.get('ImageUrl')
+                                    : 'tutor_seeker_profile.png';
 
-                            String imageUrl = userProfileSnapshot.data!.exists
-                                ? userProfileSnapshot.data!.get('ImageUrl')
-                                : 'tutor_seeker_profile.png';
-
-                            return TutorCard(
-                              tutorId: document.id,
-                              name: document['Name'],
-                              subject: subject,
-                              imageURL: imageUrl,
-                            );
-                          },
-                        );
+                                return TutorCard(
+                                  tutorId: document.id,
+                                  tutorPostId: tutorPostId,
+                                  name: document['Name'],
+                                  subject: subject,
+                                  imageURL: imageUrl,
+                                  rating:
+                                      4.0, 
+                                  fees: fees,
+                                );
+                              },
+                            ),
+                          );
+                        }
+                        return Column(children: tutorCards);
                       },
                     );
                   }).toList(),

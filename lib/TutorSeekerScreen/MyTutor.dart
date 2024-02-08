@@ -113,6 +113,10 @@ class _MyTutorState extends State<MyTutor> {
                             ? tutorPostSnapshot.data!.docs.first
                                 .get('SubjectsToTeach')
                             : 'Subject not specified';
+                        String fees = tutorPostSnapshot.data!.docs.isNotEmpty
+                            ? tutorPostSnapshot.data!.docs.first
+                                .get('RatePerHour')
+                            : 'Rate not specified';
 
                         return FutureBuilder<DocumentSnapshot>(
                           future: document.reference
@@ -136,9 +140,12 @@ class _MyTutorState extends State<MyTutor> {
 
                             return TutorCard(
                               tutorId: document.id,
+                              tutorPostId: "",
                               name: document['Name'],
                               subject: subject,
                               imageURL: imageUrl,
+                              rating: 4.0, 
+                              fees: fees,
                             );
                           },
                         );

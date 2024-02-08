@@ -29,6 +29,7 @@ class _TutorRegistrationState extends State<TutorRegistration> {
   var _enteredZip = '';
   var _enteredState = '';
   var _enteredCity = '';
+  var _enteredAboutme = '';
 
 
   final _firstNameController = TextEditingController();
@@ -39,6 +40,7 @@ class _TutorRegistrationState extends State<TutorRegistration> {
   final _zipController = TextEditingController();
   final _stateController = TextEditingController();
   final _cityController = TextEditingController();
+  final _enteredAboutmeController = TextEditingController();
 
 
   var _isLoading = false;
@@ -91,6 +93,7 @@ class _TutorRegistrationState extends State<TutorRegistration> {
         'ZipCode': _enteredZip,
         'State': _enteredState,
         'City': _enteredCity,
+        'AboutMe': _enteredAboutme,
         if (imageURL != null) 'ImageUrl': imageURL else 'ImageUrl': null,
       };
 
@@ -453,7 +456,23 @@ class _TutorRegistrationState extends State<TutorRegistration> {
                           },
                         ),
                         
-                        
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        TextFormField(
+                          controller: _enteredAboutmeController,
+                          decoration: InputDecoration(
+                            labelText: 'About Me',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(20),
+                              borderSide: BorderSide.none,
+                            ),
+                            filled: true,
+                          ),
+                          onSaved: (value) {
+                            _enteredAboutme = value!;
+                          },
+                        ),
                         if (_isValid) SizedBox(height: 12),
                         if (!_isValid)
                           if (_isLoading) const CircularProgressIndicator(),

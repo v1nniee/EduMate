@@ -1,4 +1,3 @@
-
 //select start time, and select how many hours in registration. - should be in one time availibility section, not in tutor post
 
 import 'dart:io';
@@ -12,7 +11,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:path/path.dart';
 
-
 class TutorAddPost extends StatefulWidget {
   const TutorAddPost({super.key});
 
@@ -21,17 +19,15 @@ class TutorAddPost extends StatefulWidget {
 }
 
 class _TutorAddPostState extends State<TutorAddPost> {
-
-
   final _formKey = GlobalKey<FormState>();
   var _subject = 'Lower Primary Science';
   var _level = 'Beginner';
   var _ratePerHour = '';
+  var _mode = 'Online';
 
   final _ratePerHourController = TextEditingController();
 
   List<File> _selectedDocuments = [];
-
 
   var _isLoading = false;
   var _isValid = false;
@@ -78,24 +74,30 @@ class _TutorAddPostState extends State<TutorAddPost> {
     'Advanced',
   ];
 
+  final List<String> _TeachingMode = [
+    'Online',
+    'Hybrid',
+    'Physical',
+  ];
+
   Future<List<String>> _uploadFiles() async {
-  List<String> downloadUrls = [];
+    List<String> downloadUrls = [];
 
-  for (var file in _selectedDocuments) {
-    String fileName = basename(file.path);
-    Reference storageRef = FirebaseStorage.instance.ref().child('TutorExperience/$fileName');
+    for (var file in _selectedDocuments) {
+      String fileName = basename(file.path);
+      Reference storageRef =
+          FirebaseStorage.instance.ref().child('TutorExperience/$fileName');
 
-    // Upload the file to Firebase Storage
-    UploadTask uploadTask = storageRef.putFile(file);
+      // Upload the file to Firebase Storage
+      UploadTask uploadTask = storageRef.putFile(file);
 
-    // Retrieve download URL
-    String downloadUrl = await (await uploadTask).ref.getDownloadURL();
-    downloadUrls.add(downloadUrl);
+      // Retrieve download URL
+      String downloadUrl = await (await uploadTask).ref.getDownloadURL();
+      downloadUrls.add(downloadUrl);
+    }
+
+    return downloadUrls;
   }
-
-  return downloadUrls;
-}
-
 
   void _submit() async {
     if (!_formKey.currentState!.validate()) {
@@ -111,15 +113,14 @@ class _TutorAddPostState extends State<TutorAddPost> {
         _isLoading = true;
       });
 
-      
-
       List<String> fileUrls = await _uploadFiles();
 
       Map<String, dynamic> TutorPostData = {
         'SubjectsToTeach': _subject,
         'LevelofTeaching': _level,
         'RatePerHour': _ratePerHour,
-        'Experience': fileUrls, 
+        'Mode': _mode,
+        'Experience': fileUrls,
       };
 
       try {
@@ -147,15 +148,17 @@ class _TutorAddPostState extends State<TutorAddPost> {
   }
 
   Future<void> _pickDocument() async {
-  FilePickerResult? result = await FilePicker.platform.pickFiles(allowMultiple: true);
+    FilePickerResult? result =
+        await FilePicker.platform.pickFiles(allowMultiple: true);
 
-  if (result != null) {
-    List<File> files = result.paths.map((path) => File(path!)).toList();
-    setState(() {
-      _selectedDocuments.addAll(files); // This adds the newly picked files to the existing list.
-    });
+    if (result != null) {
+      List<File> files = result.paths.map((path) => File(path!)).toList();
+      setState(() {
+        _selectedDocuments.addAll(
+            files); // This adds the newly picked files to the existing list.
+      });
+    }
   }
-}
 
   @override
   Widget build(BuildContext context) {
@@ -248,38 +251,63 @@ class _TutorAddPostState extends State<TutorAddPost> {
                         const SizedBox(
                           height: 10,
                         ),
+                        DropdownButtonFormField<String>(
+                          value: _mode,
+                          decoration: InputDecoration(
+                            labelText: 'Teaching Mode',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(20),
+                              borderSide: BorderSide.none,
+                            ),
+                            filled: true,
+                          ),
+                          items: _TeachingMode.map((String value) {
+                            return DropdownMenuItem<String>(
+                              value: value,
+                              child: Text(value),
+                            );
+                          }).toList(),
+                          onChanged: (newValue) {
+                            setState(() {
+                              _mode = newValue!;
+                            });
+                          },
+                        ),
+                        const SizedBox(
+                          height: 10,
+                        ),
                         const Text("Experience",
                             style: TextStyle(fontSize: 20)),
                         const SizedBox(
                           height: 10,
                         ),
                         // Section for displaying picked document names
-                for (var file in _selectedDocuments)
-                  ListTile(
-                    title: Text(
-                      basename(file.path),
-                      style: const TextStyle(fontSize: 16),
-                    ),
-                    trailing: IconButton(
-                      icon: const Icon(Icons.delete, color: Colors.red),
-                      onPressed: () {
-                        setState(() {
-                          _selectedDocuments.remove(file);
-                        });
-                      },
-                    ),
-                  ),
+                        for (var file in _selectedDocuments)
+                          ListTile(
+                            title: Text(
+                              basename(file.path),
+                              style: const TextStyle(fontSize: 16),
+                            ),
+                            trailing: IconButton(
+                              icon: const Icon(Icons.delete, color: Colors.red),
+                              onPressed: () {
+                                setState(() {
+                                  _selectedDocuments.remove(file);
+                                });
+                              },
+                            ),
+                          ),
 
-                // Button to pick documents
-                TextButton(
-                  onPressed: _pickDocument,
-                  style: TextButton.styleFrom(
-                    backgroundColor: Colors.orange,
-                    primary: Colors.white,
-                  ),
-                  child: const Text('Upload Document'),
-                ),
-                        
+                        // Button to pick documents
+                        TextButton(
+                          onPressed: _pickDocument,
+                          style: TextButton.styleFrom(
+                            backgroundColor: Colors.orange,
+                            primary: Colors.white,
+                          ),
+                          child: const Text('Upload Document'),
+                        ),
+
                         const SizedBox(
                           height: 10,
                         ),
@@ -307,10 +335,10 @@ class _TutorAddPostState extends State<TutorAddPost> {
                             _ratePerHour = value!;
                           },
                         ),
+                        
                         const SizedBox(
                           height: 10,
                         ),
-                        
                       ],
                     ),
                   ),
