@@ -1,7 +1,9 @@
+import 'package:edumateapp/TutorSeekerScreen/Favorite.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:edumateapp/TutorSeekerScreen/TutorCard.dart';
 import 'package:edumateapp/Widgets/PageHeader.dart';
+import 'package:provider/provider.dart';
 
 //SHOULD HAVE SEARCH HISTORY
 
@@ -114,7 +116,6 @@ class _TutorSeekerFindTutorState extends State<TutorSeekerFindTutor> {
                         }
                         var tutorPosts = tutorPostSnapshot.data!.docs;
 
-                       
                         List<Widget> tutorCards = [];
                         for (var tutorPostDoc in tutorPosts) {
                           String subject =
@@ -126,37 +127,49 @@ class _TutorSeekerFindTutorState extends State<TutorSeekerFindTutor> {
 
                           tutorCards.add(
                             FutureBuilder<DocumentSnapshot>(
-                              future: document.reference
-                                  .collection('UserProfile')
-                                  .doc(document.id)
-                                  .get(),
-                              builder: (context,
-                                  AsyncSnapshot<DocumentSnapshot>
-                                      userProfileSnapshot) {
-                                if (!userProfileSnapshot.hasData) {
-                                  return const Card(
-                                    child: ListTile(
-                                      leading: CircularProgressIndicator(),
+                                future: document.reference
+                                    .collection('UserProfile')
+                                    .doc(document.id)
+                                    .get(),
+                                builder: (context,
+                                    AsyncSnapshot<DocumentSnapshot>
+                                        userProfileSnapshot) {
+                                  if (!userProfileSnapshot.hasData) {
+                                    return const Card(
+                                      child: ListTile(
+                                        leading: CircularProgressIndicator(),
+                                      ),
+                                    );
+                                  }
+                                  String imageUrl =
+                                      userProfileSnapshot.data!.exists
+                                          ? userProfileSnapshot.data!
+                                              .get('ImageUrl')
+                                          : 'tutor_seeker_profile.png';
+
+                                  return ChangeNotifierProvider(
+                                    create: (context) => FavoriteModel(),
+                                    child: Consumer<FavoriteModel>(
+                                      builder: (context, model, child) {
+                                        bool isFavorite =
+                                            model.isFavorite(document.id);
+                                        return TutorCard(
+                                          tutorId: document.id,
+                                          tutorPostId: tutorPostId,
+                                          name: document['Name'],
+                                          subject: subject,
+                                          imageURL: imageUrl,
+                                          rating: 4.0,
+                                          fees: fees,
+                                          isFavorite: isFavorite,
+                                          onFavoriteToggle: () {
+                                            model.toggleFavorite(document.id);
+                                          },
+                                        );
+                                      },
                                     ),
                                   );
-                                }
-                                String imageUrl = userProfileSnapshot
-                                        .data!.exists
-                                    ? userProfileSnapshot.data!.get('ImageUrl')
-                                    : 'tutor_seeker_profile.png';
-
-                                return TutorCard(
-                                  tutorId: document.id,
-                                  tutorPostId: tutorPostId,
-                                  name: document['Name'],
-                                  subject: subject,
-                                  imageURL: imageUrl,
-                                  rating:
-                                      4.0, 
-                                  fees: fees,
-                                );
-                              },
-                            ),
+                                }),
                           );
                         }
                         return Column(children: tutorCards);

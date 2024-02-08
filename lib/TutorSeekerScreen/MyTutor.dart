@@ -1,7 +1,9 @@
+import 'package:edumateapp/TutorSeekerScreen/Favorite.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:edumateapp/TutorSeekerScreen/TutorCard.dart';
 import 'package:edumateapp/Widgets/PageHeader.dart';
+import 'package:provider/provider.dart';
 
 class MyTutor extends StatefulWidget {
   const MyTutor({Key? key}) : super(key: key);
@@ -33,7 +35,7 @@ class _MyTutorState extends State<MyTutor> {
         children: [
           const PageHeader(
             backgroundColor: Color.fromARGB(255, 255, 255, 115),
-            headerTitle: 'Find a Tutor',
+            headerTitle: 'My Tutor',
           ),
           Padding(
             padding: const EdgeInsets.all(8.0),
@@ -97,8 +99,10 @@ class _MyTutorState extends State<MyTutor> {
                     : snapshot.data!.docs;
                 return ListView(
                   children: filteredDocs.map((document) {
-                    return FutureBuilder<QuerySnapshot>(
-                      future: document.reference.collection('TutorPost').get(),
+                    return StreamBuilder<QuerySnapshot>(
+                      stream: document.reference
+                          .collection('TutorPost')
+                          .snapshots(),
                       builder: (context,
                           AsyncSnapshot<QuerySnapshot> tutorPostSnapshot) {
                         if (!tutorPostSnapshot.hasData) {
@@ -108,47 +112,65 @@ class _MyTutorState extends State<MyTutor> {
                             ),
                           );
                         }
+                        var tutorPosts = tutorPostSnapshot.data!.docs;
 
-                        String subject = tutorPostSnapshot.data!.docs.isNotEmpty
-                            ? tutorPostSnapshot.data!.docs.first
-                                .get('SubjectsToTeach')
-                            : 'Subject not specified';
-                        String fees = tutorPostSnapshot.data!.docs.isNotEmpty
-                            ? tutorPostSnapshot.data!.docs.first
-                                .get('RatePerHour')
-                            : 'Rate not specified';
+                        List<Widget> tutorCards = [];
+                        for (var tutorPostDoc in tutorPosts) {
+                          String subject =
+                              tutorPostDoc.get('SubjectsToTeach') ??
+                                  'Subject not specified';
+                          String fees = tutorPostDoc.get('RatePerHour') ??
+                              'Rate not specified';
+                          String tutorPostId = tutorPostDoc.id;
 
-                        return FutureBuilder<DocumentSnapshot>(
-                          future: document.reference
-                              .collection('UserProfile')
-                              .doc(document.id)
-                              .get(),
-                          builder: (context,
-                              AsyncSnapshot<DocumentSnapshot>
-                                  userProfileSnapshot) {
-                            if (!userProfileSnapshot.hasData) {
-                              return const Card(
-                                child: ListTile(
-                                  leading: CircularProgressIndicator(),
-                                ),
-                              );
-                            }
+                          tutorCards.add(
+                            FutureBuilder<DocumentSnapshot>(
+                                future: document.reference
+                                    .collection('UserProfile')
+                                    .doc(document.id)
+                                    .get(),
+                                builder: (context,
+                                    AsyncSnapshot<DocumentSnapshot>
+                                        userProfileSnapshot) {
+                                  if (!userProfileSnapshot.hasData) {
+                                    return const Card(
+                                      child: ListTile(
+                                        leading: CircularProgressIndicator(),
+                                      ),
+                                    );
+                                  }
+                                  String imageUrl =
+                                      userProfileSnapshot.data!.exists
+                                          ? userProfileSnapshot.data!
+                                              .get('ImageUrl')
+                                          : 'tutor_seeker_profile.png';
 
-                            String imageUrl = userProfileSnapshot.data!.exists
-                                ? userProfileSnapshot.data!.get('ImageUrl')
-                                : 'tutor_seeker_profile.png';
-
-                            return TutorCard(
-                              tutorId: document.id,
-                              tutorPostId: "",
-                              name: document['Name'],
-                              subject: subject,
-                              imageURL: imageUrl,
-                              rating: 4.0, 
-                              fees: fees,
-                            );
-                          },
-                        );
+                                  return ChangeNotifierProvider(
+                                    create: (context) => FavoriteModel(),
+                                    child: Consumer<FavoriteModel>(
+                                      builder: (context, model, child) {
+                                        bool isFavorite =
+                                            model.isFavorite(document.id);
+                                        return TutorCard(
+                                          tutorId: document.id,
+                                          tutorPostId: tutorPostId,
+                                          name: document['Name'],
+                                          subject: subject,
+                                          imageURL: imageUrl,
+                                          rating: 4.0,
+                                          fees: fees,
+                                          isFavorite: isFavorite,
+                                          onFavoriteToggle: () {
+                                            model.toggleFavorite(document.id);
+                                          },
+                                        );
+                                      },
+                                    ),
+                                  );
+                                }),
+                          );
+                        }
+                        return Column(children: tutorCards);
                       },
                     );
                   }).toList(),
