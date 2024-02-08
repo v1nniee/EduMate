@@ -1,4 +1,6 @@
 
+import 'package:edumateapp/TutorSeekerScreen/Favorite.dart';
+import 'package:edumateapp/TutorSeekerScreen/MyTutor.dart';
 import 'package:edumateapp/TutorSeekerScreen/TutorSeekerFindTutor.dart';
 import 'package:edumateapp/TutorSeekerScreen/TutorSeekerHome.dart';
 import 'package:edumateapp/TutorSeekerScreen/TutorSeekerTabScreen.dart';
@@ -22,14 +24,14 @@ const TutorSeekerFunctionCategories = [
     title: 'My Tutor',
     color: Colors.white,
     icon:Icons.person,
-    nextPage: TutorSeekerHome(),
+    nextPage: MyTutor(),
   ),
   Category(
     id: 'ts3',
     title: 'Favorite',
     color: Colors.white,
     icon:Icons.star,
-    nextPage: TutorSeekerHome(),
+    nextPage: Favorite(),
   ),
   Category(
     id: 'ts4',

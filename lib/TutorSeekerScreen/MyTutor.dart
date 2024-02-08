@@ -3,16 +3,14 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:edumateapp/TutorSeekerScreen/TutorCard.dart';
 import 'package:edumateapp/Widgets/PageHeader.dart';
 
-//SHOULD HAVE SEARCH HISTORY
-
-class TutorSeekerFindTutor extends StatefulWidget {
-  const TutorSeekerFindTutor({Key? key}) : super(key: key);
+class MyTutor extends StatefulWidget {
+  const MyTutor({Key? key}) : super(key: key);
 
   @override
-  State<TutorSeekerFindTutor> createState() => _TutorSeekerFindTutorState();
+  State<MyTutor> createState() => _MyTutorState();
 }
 
-class _TutorSeekerFindTutorState extends State<TutorSeekerFindTutor> {
+class _MyTutorState extends State<MyTutor> {
   final TextEditingController _searchController = TextEditingController();
   bool _isSearching = false;
   String _searchTerm = '';
