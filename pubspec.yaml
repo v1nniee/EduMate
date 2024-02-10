@@ -43,19 +43,14 @@ dependencies:
   image_picker: ^1.0.6
   shared_preferences: ^2.2.2
   firebase_messaging: ^14.7.10
-  emoji_picker_flutter: ^1.6.3
   flutter_sound: ^9.2.13
   file_picker: ^6.1.1
-  intl: ^0.19.0
+  intl: ^0.18.1
   provider: ^6.1.1
   flutter_local_notifications: ^16.3.2
   overlay_support: ^2.1.0
   firebase_analytics: ^10.8.1
-  pay: ^1.1.2
-  flutter_stripe: ^10.0.0
   
-
-
 
 dev_dependencies:
   flutter_test:

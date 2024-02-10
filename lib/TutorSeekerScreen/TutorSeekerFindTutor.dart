@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:edumateapp/TutorSeekerScreen/TutorCard.dart';
 import 'package:edumateapp/Widgets/PageHeader.dart';
-import 'package:provider/provider.dart';
+
 
 //SHOULD HAVE SEARCH HISTORY
 
@@ -37,7 +37,7 @@ class _TutorSeekerFindTutorState extends State<TutorSeekerFindTutor> {
         children: [
           const PageHeader(
             backgroundColor: Color.fromARGB(255, 255, 255, 115),
-            headerTitle: 'Find a Tutor',
+            headerTitle: 'Find My Tutor',
           ),
           Padding(
             padding: const EdgeInsets.all(8.0),
@@ -84,8 +84,7 @@ class _TutorSeekerFindTutorState extends State<TutorSeekerFindTutor> {
           ),
           Expanded(
             child: StreamBuilder(
-              stream:
-                  FirebaseFirestore.instance.collection('Tutor').snapshots(),
+              stream: FirebaseFirestore.instance.collection('Tutor').snapshots(),
               builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
                 if (!snapshot.hasData) {
                   return const CircularProgressIndicator();
@@ -99,14 +98,12 @@ class _TutorSeekerFindTutorState extends State<TutorSeekerFindTutor> {
                         return tutorName.contains(_searchTerm);
                       }).toList()
                     : snapshot.data!.docs;
+
                 return ListView(
                   children: filteredDocs.map((document) {
                     return StreamBuilder<QuerySnapshot>(
-                      stream: document.reference
-                          .collection('TutorPost')
-                          .snapshots(),
-                      builder: (context,
-                          AsyncSnapshot<QuerySnapshot> tutorPostSnapshot) {
+                      stream: document.reference.collection('TutorPost').snapshots(),
+                      builder: (context, AsyncSnapshot<QuerySnapshot> tutorPostSnapshot) {
                         if (!tutorPostSnapshot.hasData) {
                           return const Card(
                             child: ListTile(
@@ -114,64 +111,45 @@ class _TutorSeekerFindTutorState extends State<TutorSeekerFindTutor> {
                             ),
                           );
                         }
-                        var tutorPosts = tutorPostSnapshot.data!.docs;
 
+                        var tutorPosts = tutorPostSnapshot.data!.docs;
                         List<Widget> tutorCards = [];
+
                         for (var tutorPostDoc in tutorPosts) {
-                          String subject =
-                              tutorPostDoc.get('SubjectsToTeach') ??
-                                  'Subject not specified';
-                          String fees = tutorPostDoc.get('RatePerHour') ??
-                              'Rate not specified';
+                          String subject = tutorPostDoc.get('SubjectsToTeach') ?? 'Subject not specified';
+                          String fees = tutorPostDoc.get('RatePerHour') ?? 'Rate not specified';
                           String tutorPostId = tutorPostDoc.id;
 
                           tutorCards.add(
                             FutureBuilder<DocumentSnapshot>(
-                                future: document.reference
-                                    .collection('UserProfile')
-                                    .doc(document.id)
-                                    .get(),
-                                builder: (context,
-                                    AsyncSnapshot<DocumentSnapshot>
-                                        userProfileSnapshot) {
-                                  if (!userProfileSnapshot.hasData) {
-                                    return const Card(
-                                      child: ListTile(
-                                        leading: CircularProgressIndicator(),
-                                      ),
-                                    );
-                                  }
-                                  String imageUrl =
-                                      userProfileSnapshot.data!.exists
-                                          ? userProfileSnapshot.data!
-                                              .get('ImageUrl')
-                                          : 'tutor_seeker_profile.png';
-
-                                  return ChangeNotifierProvider(
-                                    create: (context) => FavoriteModel(),
-                                    child: Consumer<FavoriteModel>(
-                                      builder: (context, model, child) {
-                                        bool isFavorite =
-                                            model.isFavorite(document.id);
-                                        return TutorCard(
-                                          tutorId: document.id,
-                                          tutorPostId: tutorPostId,
-                                          name: document['Name'],
-                                          subject: subject,
-                                          imageURL: imageUrl,
-                                          rating: 4.0,
-                                          fees: fees,
-                                          isFavorite: isFavorite,
-                                          onFavoriteToggle: () {
-                                            model.toggleFavorite(document.id);
-                                          },
-                                        );
-                                      },
+                              future: document.reference.collection('UserProfile').doc(document.id).get(),
+                              builder: (context, AsyncSnapshot<DocumentSnapshot> userProfileSnapshot) {
+                                if (!userProfileSnapshot.hasData) {
+                                  return const Card(
+                                    child: ListTile(
+                                      leading: CircularProgressIndicator(),
                                     ),
                                   );
-                                }),
+                                }
+
+                                String imageUrl = userProfileSnapshot.data!.exists
+                                    ? userProfileSnapshot.data!.get('ImageUrl')
+                                    : 'tutor_seeker_profile.png';
+
+                                return TutorCard(
+                                  tutorId: document.id,
+                                  tutorPostId: tutorPostId,
+                                  name: document['Name'],
+                                  subject: subject,
+                                  imageURL: imageUrl,
+                                  rating: 4.0,
+                                  fees: fees,
+                                );
+                              },
+                            ),
                           );
                         }
+
                         return Column(children: tutorCards);
                       },
                     );

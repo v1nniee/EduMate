@@ -4,7 +4,6 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:edumateapp/AdminScreen/AdminTabScreen.dart';
 import 'package:edumateapp/FCM/FCMSetUp.dart';
-import 'package:edumateapp/Provider/FavoriteTutorsProvider.dart';
 import 'package:edumateapp/Provider/TokenNotifier.dart';
 import 'package:edumateapp/Provider/UserTypeNotifier.dart';
 import 'package:edumateapp/TutorScreen/TutorTabScreen.dart';
@@ -71,7 +70,7 @@ void main() async {
           create: (context) => UserTypeNotifier()),
       ChangeNotifierProvider<UserTokenNotifier>(
           create: (context) => UserTokenNotifier()),
-      ChangeNotifierProvider(create: (context) => FavoriteTutorsProvider()),
+      
     ],
     child: const OverlaySupport.global(child: MyApp()),
   ));

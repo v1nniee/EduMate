@@ -31,7 +31,7 @@ const TutorSeekerFunctionCategories = [
     title: 'Favorite',
     color: Colors.white,
     icon:Icons.star,
-    nextPage: Favorite(),
+    nextPage: FavoriteTutor(),
   ),
   Category(
     id: 'ts4',
