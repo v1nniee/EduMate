@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:edumateapp/TutorSeekerScreen/TutorDetailPage.dart';
-import 'package:provider/provider.dart';
 
 class ApplicationStatusTutorCard extends StatefulWidget {
   final String tutorId;
@@ -24,10 +23,12 @@ class ApplicationStatusTutorCard extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _ApplicationStatusTutorCardState createState() => _ApplicationStatusTutorCardState();
+  _ApplicationStatusTutorCardState createState() =>
+      _ApplicationStatusTutorCardState();
 }
 
-class _ApplicationStatusTutorCardState extends State<ApplicationStatusTutorCard> {
+class _ApplicationStatusTutorCardState
+    extends State<ApplicationStatusTutorCard> {
   bool isFavorite = false;
 
   @override
@@ -35,9 +36,87 @@ class _ApplicationStatusTutorCardState extends State<ApplicationStatusTutorCard>
     super.initState();
   }
 
-  
+  Future<void> _cancelApplication() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      // Reference to the TutorApplication document
+      DocumentReference tutorApplicationDocRef = FirebaseFirestore.instance
+          .collection('Tutor Seeker')
+          .doc(user.uid)
+          .collection('TutorApplication')
+          .doc(widget.tutorId);
+
+      // Reference to the TutorPostApplication document
+      DocumentReference tutorPostApplicationDocRef = tutorApplicationDocRef
+          .collection('TutorPostApplication')
+          .doc(widget.tutorPostId);
+
+      DocumentReference tutorApplicationfromTSDocRef = FirebaseFirestore.instance
+          .collection('Tutor')
+          .doc(widget.tutorId)
+          .collection('TutorApplication')
+          .doc(user.uid);
+
+      // Reference to the TutorPostApplication document
+      DocumentReference tutorPostApplicationfromTSDocRef = tutorApplicationfromTSDocRef
+          .collection('TutorPostApplication')
+          .doc(widget.tutorPostId);
+
+      try {
+        // Delete the TutorPostApplication document
+        await tutorPostApplicationDocRef.delete();
+        await tutorPostApplicationfromTSDocRef.delete();
+
+        // Check if there are any other documents in TutorPostApplication collection
+        QuerySnapshot tutorPostApplications = await tutorApplicationDocRef
+            .collection('TutorPostApplication')
+            .get();
+
+        if (tutorPostApplications.docs.isEmpty) {
+          // If the TutorPostApplication collection is empty, delete the TutorApplication document
+          await tutorApplicationDocRef.delete();
+        }
+
+        QuerySnapshot tutorPostApplicationsfromTutor = await tutorApplicationfromTSDocRef
+            .collection('TutorPostApplication')
+            .get();
+        if (tutorPostApplicationsfromTutor.docs.isEmpty) {
+          // If the TutorPostApplication collection is empty, delete the TutorApplication document
+          await tutorApplicationfromTSDocRef.delete();
+        }
+
+        _showDialog('Cancelled', 'Application cancelled successfully');
+      } catch (e) {
+        _showDialog('Error', 'Error cancelling application: $e');
+      }
+    } else {
+      _showDialog('Error', 'You are not logged in');
+    }
+  }
+
+  void _showDialog(String title, String content) {
+    showDialog(
+      context: context,
+      builder: (BuildContext dialogContext) {
+        return AlertDialog(
+          title: Text(title),
+          content: Text(content),
+          actions: <Widget>[
+            TextButton(
+              child: Text('OK'),
+              onPressed: () {
+                Navigator.of(dialogContext).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    
     return Card(
       margin: EdgeInsets.all(8.0),
       child: Column(
@@ -48,7 +127,6 @@ class _ApplicationStatusTutorCardState extends State<ApplicationStatusTutorCard>
             ),
             title: Text(widget.name),
             subtitle: Text(widget.subject),
-            
           ),
           Padding(
             padding: EdgeInsets.symmetric(vertical: 8.0),
@@ -78,9 +156,7 @@ class _ApplicationStatusTutorCardState extends State<ApplicationStatusTutorCard>
                 child: Text('Details'),
               ),
               ElevatedButton(
-                onPressed: () {
-                  // Implement apply functionality
-                },
+                onPressed:  _cancelApplication, 
                 child: Text('Cancel'),
               ),
             ],

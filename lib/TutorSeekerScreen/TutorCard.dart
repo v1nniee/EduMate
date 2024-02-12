@@ -86,6 +86,24 @@ class _TutorCardState extends State<TutorCard> {
             .doc(widget.tutorId)
             .update({
           'tutorPostIds': FieldValue.arrayRemove([widget.tutorPostId]),
+        }).then((_) {
+          FirebaseFirestore.instance
+              .collection('Tutor Seeker')
+              .doc(user.uid)
+              .collection('FavoriteTutors')
+              .doc(widget.tutorId)
+              .get()
+              .then((docSnapshot) {
+            if (docSnapshot.exists &&
+                docSnapshot.data()?['tutorPostIds'].isEmpty == true) {
+              FirebaseFirestore.instance
+                  .collection('Tutor Seeker')
+                  .doc(user.uid)
+                  .collection('FavoriteTutors')
+                  .doc(widget.tutorId)
+                  .delete();
+            }
+          });
         });
       }
     }
@@ -221,7 +239,8 @@ class _TutorCardState extends State<TutorCard> {
                                       .collection('TutorApplication')
                                       .doc(user.uid);
 
-                              DocumentReference tutorPostApplicationFromTsDocRef =
+                              DocumentReference
+                                  tutorPostApplicationFromTsDocRef =
                                   tutorApplicationFromTsDocRef
                                       .collection('TutorPostApplication')
                                       .doc(widget.tutorPostId);
@@ -250,9 +269,23 @@ class _TutorCardState extends State<TutorCard> {
                                 transaction.set(tutorPostApplicationDocRef,
                                     tutorPostApplicationData);
 
-                                transaction.set(tutorPostApplicationFromTsDocRef,
+                                transaction.set(
+                                    tutorPostApplicationFromTsDocRef,
                                     tutorApplicationFromTsData);
                               });
+
+                              FirebaseFirestore.instance
+                                  .collection('Tutor Seeker')
+                                  .doc(user.uid)
+                                  .collection('TutorApplication')
+                                  .doc(widget.tutorId)
+                                  .set({'TutorId': widget.tutorId});
+                              FirebaseFirestore.instance
+                                  .collection('Tutor')
+                                  .doc(widget.tutorId)
+                                  .collection('TutorApplication')
+                                  .doc(user.uid)
+                                  .set({'TutorSeekerId': user.uid});
 
                               print(
                                   'Tutor post application saved successfully');

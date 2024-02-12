@@ -76,7 +76,7 @@ class _FavoriteTutorState extends State<FavoriteTutor> {
         children: [
           const PageHeader(
             backgroundColor: Color.fromARGB(255, 255, 255, 115),
-            headerTitle: 'Find My Tutor',
+            headerTitle: 'Favorite',
           ),
           Padding(
             padding: const EdgeInsets.all(8.0),
@@ -147,6 +147,14 @@ class _FavoriteTutorState extends State<FavoriteTutor> {
                       return CircularProgressIndicator();
                     } else if (favoriteTutorIdsSnapshot.hasError) {
                       return Text('Error: ${favoriteTutorIdsSnapshot.error}');
+                    } else if (favoriteTutorIdsSnapshot.data!.isEmpty) {
+                      return const Center(
+                        child: Text(
+                          'There are no favorite tutors now.',
+                          style: TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
+                      );
                     } else {
                       return FutureBuilder<List<String>>(
                         future: getTutorPostIdsFromFavoriteTutors(
@@ -157,6 +165,14 @@ class _FavoriteTutorState extends State<FavoriteTutor> {
                             return CircularProgressIndicator();
                           } else if (tutorPostIdsSnapshot.hasError) {
                             return Text('Error: ${tutorPostIdsSnapshot.error}');
+                          } else if (favoriteTutorIdsSnapshot.data!.isEmpty) {
+                            return const Center(
+                              child: Text(
+                                'There are no favorite tutors now.',
+                                style: TextStyle(
+                                    fontSize: 18, fontWeight: FontWeight.bold),
+                              ),
+                            );
                           } else {
                             return ListView.builder(
                               itemCount: filteredDocs.length,

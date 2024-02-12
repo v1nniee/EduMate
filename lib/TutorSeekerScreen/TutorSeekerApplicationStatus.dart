@@ -1,19 +1,19 @@
 import 'package:edumateapp/TutorSeekerScreen/ApplicationStatusTutorCard.dart';
-import 'package:edumateapp/TutorSeekerScreen/Favorite.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:edumateapp/TutorSeekerScreen/TutorCard.dart';
 import 'package:edumateapp/Widgets/PageHeader.dart';
-
 
 class TutorSeekerApplicationStatus extends StatefulWidget {
   const TutorSeekerApplicationStatus({Key? key}) : super(key: key);
 
   @override
-  State<TutorSeekerApplicationStatus> createState() => _TutorSeekerApplicationStatusState();
+  State<TutorSeekerApplicationStatus> createState() =>
+      _TutorSeekerApplicationStatusState();
 }
 
-class _TutorSeekerApplicationStatusState extends State<TutorSeekerApplicationStatus> {
+class _TutorSeekerApplicationStatusState
+    extends State<TutorSeekerApplicationStatus> {
   final TextEditingController _searchController = TextEditingController();
   bool _isSearching = false;
   String _searchTerm = '';
@@ -25,8 +25,45 @@ class _TutorSeekerApplicationStatusState extends State<TutorSeekerApplicationSta
     super.dispose();
   }
 
+  Future<List<String>> getAppliedTutorIds(String userId) async {
+    QuerySnapshot favoriteTutorsSnapshot = await FirebaseFirestore.instance
+        .collection('Tutor Seeker')
+        .doc(userId)
+        .collection('TutorApplication')
+        .get();
+
+    List<String> documentIds = [];
+    favoriteTutorsSnapshot.docs.forEach((doc) {
+      documentIds.add(doc.id);
+    });
+
+    return documentIds;
+  }
+
+  Future<List<String>> getTutorPostIdsFromAppliedTutors(
+      String userId, List<String> appliedTutorIds) async {
+    print(appliedTutorIds);
+    List<String> documentIds = [];
+
+    for (String tutorId in appliedTutorIds) {
+      QuerySnapshot tutorDoc = await FirebaseFirestore.instance
+          .collection('Tutor Seeker')
+          .doc(userId)
+          .collection('TutorApplication')
+          .doc(tutorId)
+          .collection('TutorPostApplication')
+          .get();
+
+      tutorDoc.docs.forEach((doc) {
+        documentIds.add(doc.id);
+      });
+    }
+    return documentIds;
+  }
+
   @override
   Widget build(BuildContext context) {
+    final currentUser = FirebaseAuth.instance.currentUser!;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 255, 255, 115),
@@ -36,7 +73,7 @@ class _TutorSeekerApplicationStatusState extends State<TutorSeekerApplicationSta
         children: [
           const PageHeader(
             backgroundColor: Color.fromARGB(255, 255, 255, 115),
-            headerTitle: 'My Tutor',
+            headerTitle: 'Application Status',
           ),
           Padding(
             padding: const EdgeInsets.all(8.0),
@@ -83,7 +120,8 @@ class _TutorSeekerApplicationStatusState extends State<TutorSeekerApplicationSta
           ),
           Expanded(
             child: StreamBuilder(
-              stream: FirebaseFirestore.instance.collection('Tutor').snapshots(),
+              stream:
+                  FirebaseFirestore.instance.collection('Tutor').snapshots(),
               builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
                 if (!snapshot.hasData) {
                   return const CircularProgressIndicator();
@@ -97,62 +135,125 @@ class _TutorSeekerApplicationStatusState extends State<TutorSeekerApplicationSta
                         return tutorName.contains(_searchTerm);
                       }).toList()
                     : snapshot.data!.docs;
+                print(currentUser.uid);
+                return FutureBuilder<List<String>>(
+                  future: getAppliedTutorIds(currentUser.uid),
+                  builder: (context, appliedTutorIdsSnapshot) {
+                    if (appliedTutorIdsSnapshot.connectionState ==
+                        ConnectionState.waiting) {
+                      return CircularProgressIndicator();
+                    } else if (appliedTutorIdsSnapshot.hasError) {
+                      return Text('Error: ${appliedTutorIdsSnapshot.error}');
+                    } else if (appliedTutorIdsSnapshot.data!.isEmpty) {
+                      return const Center(
+                        child: Text(
+                          'There are no tutors applied now.',
+                          style: TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
+                      );
+                    } else {
+                      return FutureBuilder<List<String>>(
+                        future: getTutorPostIdsFromAppliedTutors(
+                            currentUser.uid, appliedTutorIdsSnapshot.data!),
+                        builder: (context, tutorPostIdsSnapshot) {
+                          if (tutorPostIdsSnapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return CircularProgressIndicator();
+                          } else if (tutorPostIdsSnapshot.hasError) {
+                            return Text('Error: ${tutorPostIdsSnapshot.error}');
+                          } else if (appliedTutorIdsSnapshot.data!.isEmpty) {
+                            return const Center(
+                              child: Text(
+                                'There are no tutors applied now.',
+                                style: TextStyle(
+                                    fontSize: 18, fontWeight: FontWeight.bold),
+                              ),
+                            );
+                          } else {
+                            return ListView.builder(
+                              itemCount: filteredDocs.length,
+                              itemBuilder: (context, index) {
+                                final document = filteredDocs[index];
+                                final tutorPostIds = tutorPostIdsSnapshot.data!;
+                                return StreamBuilder<QuerySnapshot>(
+                                  stream: document.reference
+                                      .collection('TutorPost')
+                                      .where(FieldPath.documentId,
+                                          whereIn: tutorPostIds)
+                                      .snapshots(),
+                                  builder: (context,
+                                      AsyncSnapshot<QuerySnapshot>
+                                          tutorPostSnapshot) {
+                                    if (!tutorPostSnapshot.hasData) {
+                                      return const Card(
+                                        child: ListTile(
+                                          leading: CircularProgressIndicator(),
+                                        ),
+                                      );
+                                    }
 
-                return ListView(
-                  children: filteredDocs.map((document) {
-                    return StreamBuilder<QuerySnapshot>(
-                      stream: document.reference.collection('TutorPost').snapshots(),
-                      builder: (context, AsyncSnapshot<QuerySnapshot> tutorPostSnapshot) {
-                        if (!tutorPostSnapshot.hasData) {
-                          return const Card(
-                            child: ListTile(
-                              leading: CircularProgressIndicator(),
-                            ),
-                          );
-                        }
+                                    var tutorPosts =
+                                        tutorPostSnapshot.data!.docs;
+                                    List<Widget> tutorCards = [];
 
-                        var tutorPosts = tutorPostSnapshot.data!.docs;
-                        List<Widget> tutorCards = [];
+                                    for (var tutorPostDoc in tutorPosts) {
+                                      String subject =
+                                          tutorPostDoc.get('SubjectsToTeach') ??
+                                              'Subject not specified';
+                                      String fees =
+                                          tutorPostDoc.get('RatePerHour') ??
+                                              'Rate not specified';
+                                      String tutorPostId = tutorPostDoc.id;
 
-                        for (var tutorPostDoc in tutorPosts) {
-                          String subject = tutorPostDoc.get('SubjectsToTeach') ?? 'Subject not specified';
-                          String fees = tutorPostDoc.get('RatePerHour') ?? 'Rate not specified';
-                          String tutorPostId = tutorPostDoc.id;
+                                      tutorCards.add(
+                                        FutureBuilder<DocumentSnapshot>(
+                                          future: document.reference
+                                              .collection('UserProfile')
+                                              .doc(document.id)
+                                              .get(),
+                                          builder: (context,
+                                              AsyncSnapshot<DocumentSnapshot>
+                                                  userProfileSnapshot) {
+                                            if (!userProfileSnapshot.hasData) {
+                                              return const Card(
+                                                child: ListTile(
+                                                  leading:
+                                                      CircularProgressIndicator(),
+                                                ),
+                                              );
+                                            }
 
-                          tutorCards.add(
-                            FutureBuilder<DocumentSnapshot>(
-                              future: document.reference.collection('UserProfile').doc(document.id).get(),
-                              builder: (context, AsyncSnapshot<DocumentSnapshot> userProfileSnapshot) {
-                                if (!userProfileSnapshot.hasData) {
-                                  return const Card(
-                                    child: ListTile(
-                                      leading: CircularProgressIndicator(),
-                                    ),
-                                  );
-                                }
+                                            String imageUrl =
+                                                userProfileSnapshot.data!.exists
+                                                    ? userProfileSnapshot.data!
+                                                        .get('ImageUrl')
+                                                    : 'tutor_seeker_profile.png';
 
-                                String imageUrl = userProfileSnapshot.data!.exists
-                                    ? userProfileSnapshot.data!.get('ImageUrl')
-                                    : 'tutor_seeker_profile.png';
+                                            return ApplicationStatusTutorCard(
+                                              tutorId: document.id,
+                                              tutorPostId: tutorPostId,
+                                              name: document['Name'],
+                                              subject: subject,
+                                              imageURL: imageUrl,
+                                              rating: 4.0,
+                                              fees: fees,
+                                            );
+                                          },
+                                        ),
+                                      );
+                                    }
 
-                                return ApplicationStatusTutorCard(
-                                  tutorId: document.id,
-                                  tutorPostId: tutorPostId,
-                                  name: document['Name'],
-                                  subject: subject,
-                                  imageURL: imageUrl,
-                                  rating: 4.0,
-                                  fees: fees,
+                                    return Column(children: tutorCards);
+                                  },
                                 );
                               },
-                            ),
-                          );
-                        }
-
-                        return Column(children: tutorCards);
-                      },
-                    );
-                  }).toList(),
+                            );
+                          }
+                        },
+                      );
+                    }
+                  },
                 );
               },
             ),
