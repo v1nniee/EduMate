@@ -115,7 +115,6 @@ class _TutorSeekerProfileState extends State<TutorSeekerProfile> {
         Provider.of<UserTypeNotifier>(context, listen: false);
     final userType = userTypeNotifier.userType;
 
-
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -146,7 +145,7 @@ class _TutorSeekerProfileState extends State<TutorSeekerProfile> {
                     right: 0,
                     child: Card(
                       color: const Color.fromARGB(255, 255, 255,
-                          230), // Yellow background for the profile card
+                          230), 
                       margin: const EdgeInsets.symmetric(horizontal: 16),
                       child: Padding(
                         padding: const EdgeInsets.all(16.0),

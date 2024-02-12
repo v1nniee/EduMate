@@ -2,15 +2,12 @@
 import 'package:edumateapp/TutorSeekerScreen/Favorite.dart';
 import 'package:edumateapp/TutorSeekerScreen/MyTutor.dart';
 import 'package:edumateapp/TutorSeekerScreen/TutorSeekerFindTutor.dart';
-import 'package:edumateapp/TutorSeekerScreen/TutorSeekerHome.dart';
 import 'package:edumateapp/TutorSeekerScreen/TutorSeekerTabScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:edumateapp/Models/Category.dart';
-import 'package:edumateapp/TutorScreen/TutorTabScreen.dart';
 
 //all the value of category is created here - no need to create the same category multiple time
 
-// ignore: constant_identifier_names
 const TutorSeekerFunctionCategories = [
   Category(
     id: 'ts1',
@@ -38,20 +35,20 @@ const TutorSeekerFunctionCategories = [
     title: 'Application Status',
     color: Colors.white,
     icon:Icons.info,
-    nextPage: TutorSeekerHome(),
+    nextPage: TutorSeekerTabScreen(initialPageIndex: 0,),
   ),
   Category(
     id: 'ts5',
     title: 'Payment',
     color: Colors.white, 
     icon:Icons.payment,
-    nextPage: TutorSeekerHome(),
+    nextPage: TutorSeekerTabScreen(initialPageIndex: 0,),
   ),
   Category(
     id: 'ts6',
     title: 'Payment History',
     color: Colors.white,
     icon:Icons.history,
-    nextPage: TutorSeekerHome(),
+    nextPage: TutorSeekerTabScreen(initialPageIndex: 0,),
   ),
 ];

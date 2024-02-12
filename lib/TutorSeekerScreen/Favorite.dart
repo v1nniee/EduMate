@@ -5,6 +5,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:edumateapp/TutorSeekerScreen/TutorCard.dart';
 import 'package:edumateapp/Widgets/PageHeader.dart';
 
+//cannot remove favorite directly from the screen yet
+
 class FavoriteTutor extends StatefulWidget {
   const FavoriteTutor({Key? key}) : super(key: key);
 
@@ -121,9 +123,8 @@ class _FavoriteTutorState extends State<FavoriteTutor> {
           ),
           Expanded(
             child: StreamBuilder(
-              stream: FirebaseFirestore.instance
-                  .collection('Tutor')
-                  .snapshots(),
+              stream:
+                  FirebaseFirestore.instance.collection('Tutor').snapshots(),
               builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
                 if (!snapshot.hasData) {
                   return const CircularProgressIndicator();
