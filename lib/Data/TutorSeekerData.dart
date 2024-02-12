@@ -1,6 +1,7 @@
 
 import 'package:edumateapp/TutorSeekerScreen/Favorite.dart';
 import 'package:edumateapp/TutorSeekerScreen/MyTutor.dart';
+import 'package:edumateapp/TutorSeekerScreen/TutorSeekerApplicationStatus.dart';
 import 'package:edumateapp/TutorSeekerScreen/TutorSeekerFindTutor.dart';
 import 'package:edumateapp/TutorSeekerScreen/TutorSeekerTabScreen.dart';
 import 'package:flutter/material.dart';
@@ -35,7 +36,7 @@ const TutorSeekerFunctionCategories = [
     title: 'Application Status',
     color: Colors.white,
     icon:Icons.info,
-    nextPage: TutorSeekerTabScreen(initialPageIndex: 0,),
+    nextPage: TutorSeekerApplicationStatus(),
   ),
   Category(
     id: 'ts5',

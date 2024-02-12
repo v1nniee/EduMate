@@ -3,12 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:edumateapp/TutorSeekerScreen/TutorCard.dart';
 import 'package:edumateapp/Widgets/PageHeader.dart';
-import 'package:provider/provider.dart';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
-import 'package:edumateapp/TutorSeekerScreen/TutorCard.dart';
-import 'package:edumateapp/Widgets/PageHeader.dart';
 
 class MyTutor extends StatefulWidget {
   const MyTutor({Key? key}) : super(key: key);

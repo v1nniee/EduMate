@@ -44,6 +44,7 @@ class _TutorSeekerRegistrationState extends State<TutorSeekerRegistration> {
   final _stateController = TextEditingController();
   final _cityController = TextEditingController();
   final _requirementController = TextEditingController();
+  
 
   var _isLoading = false;
   File? _selectedImageFile;

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:edumateapp/TutorSeekerScreen/TutorDetailPage.dart';
 import 'package:provider/provider.dart';
 
-class FavoriteTutorCard extends StatefulWidget {
+class ApplicationStatusTutorCard extends StatefulWidget {
   final String tutorId;
   final String tutorPostId;
   final String name;
@@ -12,7 +12,7 @@ class FavoriteTutorCard extends StatefulWidget {
   final String imageURL;
   final double rating;
   final String fees;
-  const FavoriteTutorCard({
+  const ApplicationStatusTutorCard({
     Key? key,
     required this.tutorId,
     required this.name,
@@ -24,64 +24,18 @@ class FavoriteTutorCard extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _FavoriteTutorCardState createState() => _FavoriteTutorCardState();
+  _ApplicationStatusTutorCardState createState() => _ApplicationStatusTutorCardState();
 }
 
-class _FavoriteTutorCardState extends State<FavoriteTutorCard> {
+class _ApplicationStatusTutorCardState extends State<ApplicationStatusTutorCard> {
   bool isFavorite = false;
 
   @override
   void initState() {
     super.initState();
-    checkFavorite();
   }
 
-  Future<void> checkFavorite() async {
-    User? user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      DocumentSnapshot<Map<String, dynamic>> doc = await FirebaseFirestore.instance
-          .collection('Tutor Seeker')
-          .doc(user.uid)
-          .collection('FavoriteTutors')
-          .doc(widget.tutorId)
-          .get();
-
-      if (doc.exists) {
-        setState(() {
-          isFavorite = doc.data()?['tutorPostIds'].contains(widget.tutorPostId) ?? false;
-        });
-      }
-    }
-  }
-
-  void _toggleFavorite() {
-    setState(() {
-      isFavorite = !isFavorite;
-    });
-    User? user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      if (isFavorite) {
-        FirebaseFirestore.instance
-            .collection('Tutor Seeker')
-            .doc(user.uid)
-            .collection('FavoriteTutors')
-            .doc(widget.tutorId)
-            .set({
-          'tutorPostIds': FieldValue.arrayUnion([widget.tutorPostId]),
-        }, SetOptions(merge: true));
-      } else {
-        FirebaseFirestore.instance
-            .collection('Tutor Seeker')
-            .doc(user.uid)
-            .collection('FavoriteTutors')
-            .doc(widget.tutorId)
-            .update({
-          'tutorPostIds': FieldValue.arrayRemove([widget.tutorPostId]),
-        });
-      }
-    }
-  }
-
+  
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -94,13 +48,7 @@ class _FavoriteTutorCardState extends State<FavoriteTutorCard> {
             ),
             title: Text(widget.name),
             subtitle: Text(widget.subject),
-            trailing: IconButton(
-              icon: Icon(
-                isFavorite ? Icons.favorite : Icons.favorite_border,
-                color: isFavorite ? Colors.red : null,
-              ),
-              onPressed: _toggleFavorite,
-            ),
+            
           ),
           Padding(
             padding: EdgeInsets.symmetric(vertical: 8.0),
@@ -133,7 +81,7 @@ class _FavoriteTutorCardState extends State<FavoriteTutorCard> {
                 onPressed: () {
                   // Implement apply functionality
                 },
-                child: Text('Apply'),
+                child: Text('Cancel'),
               ),
             ],
           ),

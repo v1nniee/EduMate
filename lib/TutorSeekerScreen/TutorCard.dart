@@ -2,12 +2,11 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:edumateapp/TutorSeekerScreen/TutorDetailPage.dart';
-import 'package:provider/provider.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
-import 'package:edumateapp/TutorSeekerScreen/TutorDetailPage.dart';
-import 'package:provider/provider.dart';
+
+//IF THE STUDENT/TUTOR TIME OVERLAP
+//IF THE TUTOR DOES NOT HAVE SLOT ANYMORE
+//IF THE STUDENT APPLY ON THE SAME POST
+//IF THE STUDENT APPLY ON THE SAME DATE
 
 class TutorCard extends StatefulWidget {
   final String tutorId;
@@ -34,6 +33,8 @@ class TutorCard extends StatefulWidget {
 
 class _TutorCardState extends State<TutorCard> {
   bool isFavorite = false;
+  Map<String, dynamic>? selectedSlot;
+  String? applicationStatus;
 
   @override
   void initState() {
@@ -129,9 +130,9 @@ class _TutorCardState extends State<TutorCard> {
   }
 
   void _handleSlotSelection(Map<String, dynamic> slot) {
-    print(
-        'Selected slot: ${slot['day']} from ${slot['startTime']} to ${slot['endTime']}');
-    Navigator.of(context).pop();
+    setState(() {
+      selectedSlot = slot;
+    });
   }
 
   Future<void> _showAvailabilityDialog(
@@ -154,16 +155,14 @@ class _TutorCardState extends State<TutorCard> {
                       margin: EdgeInsets.symmetric(vertical: 4.0),
                       decoration: BoxDecoration(
                         border: Border.all(
-                          color: isSelected
-                              ? Colors.green
-                              : Colors.grey, // Change color based on selection
+                          color: isSelected ? Colors.yellow : Colors.grey,
                           width: 2.0,
                         ),
                         borderRadius: BorderRadius.circular(5.0),
                       ),
                       child: ListTile(
                         title: Text(
-                            '${slots[index]['day']} from ${slots[index]['startTime']} to ${slots[index]['endTime']}'),
+                            '${slots[index]['day']} ${slots[index]['startTime']} - ${slots[index]['endTime']}'),
                         onTap: () {
                           setState(() {
                             selectedSlotIndex =
@@ -186,11 +185,99 @@ class _TutorCardState extends State<TutorCard> {
                 if (selectedSlotIndex != null)
                   TextButton(
                     child: Text('Confirm'),
-                    onPressed: () {
-                      // Confirm the selected slot and close the dialog
-                      Navigator.of(dialogContext).pop();
-                      // Optionally, handle the confirmed slot here or pass it back to the caller
-                    },
+                    onPressed: selectedSlotIndex != null
+                        ? () async {
+                            assert(selectedSlotIndex != null,
+                                'selectedSlotIndex must not be null');
+                            Map<String, dynamic> selectedSlot =
+                                slots[selectedSlotIndex!];
+
+                            // Extract the start time, end time, and day from the selected slot
+                            String startTime = selectedSlot['startTime'];
+                            String endTime = selectedSlot['endTime'];
+                            String day = selectedSlot['day'];
+
+                            // Rest of your logic to save the selected slot...
+                            User? user = FirebaseAuth.instance.currentUser;
+                            if (user != null) {
+                              // The path to the TutorApplication document for the specific tutor
+                              DocumentReference tutorApplicationDocRef =
+                                  FirebaseFirestore.instance
+                                      .collection('Tutor Seeker')
+                                      .doc(user.uid)
+                                      .collection('TutorApplication')
+                                      .doc(widget.tutorId);
+
+                              // The path to the TutorPostApplication document for the specific tutor post
+                              DocumentReference tutorPostApplicationDocRef =
+                                  tutorApplicationDocRef
+                                      .collection('TutorPostApplication')
+                                      .doc(widget.tutorPostId);
+
+                              DocumentReference tutorApplicationFromTsDocRef =
+                                  FirebaseFirestore.instance
+                                      .collection('Tutor')
+                                      .doc(widget.tutorId)
+                                      .collection('TutorApplication')
+                                      .doc(user.uid);
+
+                              DocumentReference tutorPostApplicationFromTsDocRef =
+                                  tutorApplicationFromTsDocRef
+                                      .collection('TutorPostApplication')
+                                      .doc(widget.tutorPostId);
+
+                              Map<String, dynamic> tutorPostApplicationData = {
+                                'Day': day,
+                                'StartTime': startTime,
+                                'EndTime': endTime,
+                                'Status': "pending",
+                                'TutorPostId': widget.tutorPostId,
+                                'TutorId': widget.tutorId,
+                              };
+
+                              Map<String, dynamic> tutorApplicationFromTsData =
+                                  {
+                                'Day': day,
+                                'StartTime': startTime,
+                                'EndTime': endTime,
+                                'Status': "pending",
+                                'TutorPostId': widget.tutorPostId,
+                                'TutorSeekerId': user.uid,
+                              };
+
+                              await FirebaseFirestore.instance
+                                  .runTransaction((transaction) async {
+                                transaction.set(tutorPostApplicationDocRef,
+                                    tutorPostApplicationData);
+
+                                transaction.set(tutorPostApplicationFromTsDocRef,
+                                    tutorApplicationFromTsData);
+                              });
+
+                              print(
+                                  'Tutor post application saved successfully');
+                            }
+                            // Close the dialog
+                            Navigator.of(dialogContext).pop();
+
+                            showDialog(
+                              context: dialogContext,
+                              builder: (BuildContext context) {
+                                return AlertDialog(
+                                  title: const Text("Applied Successfully!"),
+                                  actions: <Widget>[
+                                    TextButton(
+                                      onPressed: () {
+                                        Navigator.of(context).pop();
+                                      },
+                                      child: const Text('OK'),
+                                    ),
+                                  ],
+                                );
+                              },
+                            );
+                          }
+                        : null,
                   ),
               ],
             );
@@ -248,7 +335,7 @@ class _TutorCardState extends State<TutorCard> {
                 child: Text('Details'),
               ),
               ElevatedButton(
-                onPressed: () => _clickApply(),
+                onPressed: _clickApply,
                 child: Text('Apply'),
               ),
             ],
