@@ -27,7 +27,7 @@ class TutorSeekerNotification extends StatelessWidget {
         children: [
           const PageHeader(
             backgroundColor: Color.fromARGB(255, 255, 255, 115),
-            headerTitle: 'Notifictaion',
+            headerTitle: 'Notification',
           ),
           ElevatedButton(
               onPressed: () {
