@@ -1,10 +1,12 @@
 // notification_setup.dart
 import 'package:edumateapp/FCM/SendNotification.dart';
+import 'package:edumateapp/Provider/TokenNotifier.dart';
 import 'package:edumateapp/main.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:edumateapp/FCM/FirebaseAPI.dart';
+import 'package:provider/provider.dart';
  // Adjust the import path as necessary
 
 class FCMSetup {
@@ -13,8 +15,12 @@ class FCMSetup {
 
     FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
     FirebaseMessaging.onMessage.listen(firebaseMessagingBackgroundHandler);
-    SendNotificationClass().sendNotification("", "",
-        'ePYXLqmbTMOd7Kq2Ph4LJx:APA91bGRsLSct1YBHaNWQs1j-5Or9MIp5xgvuHwnWlkOn14SUktHYvOD7HWvVvRsJSfNkSSorfhUYfgQgg3cAIe_c8sYQ3_AjpfTgTNLo0Y4jZHKkXE3UgKATHLdqMhKZG1Sp0hqcVUk');
+    final userTokenNotifier =
+        Provider.of<UserTokenNotifier>(context, listen: false);
+    final fcmToken = userTokenNotifier.fcmToken;
+    
+    SendNotificationClass().sendNotification("Welcome", "",
+        fcmToken);
 
     FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
         FlutterLocalNotificationsPlugin();

@@ -30,10 +30,40 @@ class ApplicationStatusTutorCard extends StatefulWidget {
 class _ApplicationStatusTutorCardState
     extends State<ApplicationStatusTutorCard> {
   bool isFavorite = false;
+  String _applicationStatus = ''; // Add this line
 
   @override
   void initState() {
     super.initState();
+    _loadApplicationStatus();
+  }
+
+  Future<void> _loadApplicationStatus() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    try {
+      // Fetch the status of the tutor post application
+      DocumentSnapshot tutorPostApplicationSnapshot = await FirebaseFirestore
+          .instance
+          .collection('Tutor Seeker')
+          .doc(user?.uid)
+          .collection('TutorApplication')
+          .doc(widget.tutorId)
+          .collection('TutorPostApplication')
+          .doc(widget.tutorPostId)
+          .get();
+
+      if (tutorPostApplicationSnapshot.exists) {
+        setState(() {
+          _applicationStatus = tutorPostApplicationSnapshot.get('Status');
+        });
+      } else {
+        setState(() {
+          _applicationStatus = 'Not found';
+        });
+      }
+    } catch (e) {
+      print('Error loading application status: $e');
+    }
   }
 
   Future<void> _cancelApplication() async {
@@ -51,16 +81,18 @@ class _ApplicationStatusTutorCardState
           .collection('TutorPostApplication')
           .doc(widget.tutorPostId);
 
-      DocumentReference tutorApplicationfromTSDocRef = FirebaseFirestore.instance
+      DocumentReference tutorApplicationfromTSDocRef = FirebaseFirestore
+          .instance
           .collection('Tutor')
           .doc(widget.tutorId)
           .collection('TutorApplication')
           .doc(user.uid);
 
       // Reference to the TutorPostApplication document
-      DocumentReference tutorPostApplicationfromTSDocRef = tutorApplicationfromTSDocRef
-          .collection('TutorPostApplication')
-          .doc(widget.tutorPostId);
+      DocumentReference tutorPostApplicationfromTSDocRef =
+          tutorApplicationfromTSDocRef
+              .collection('TutorPostApplication')
+              .doc(widget.tutorPostId);
 
       try {
         // Delete the TutorPostApplication document
@@ -77,9 +109,10 @@ class _ApplicationStatusTutorCardState
           await tutorApplicationDocRef.delete();
         }
 
-        QuerySnapshot tutorPostApplicationsfromTutor = await tutorApplicationfromTSDocRef
-            .collection('TutorPostApplication')
-            .get();
+        QuerySnapshot tutorPostApplicationsfromTutor =
+            await tutorApplicationfromTSDocRef
+                .collection('TutorPostApplication')
+                .get();
         if (tutorPostApplicationsfromTutor.docs.isEmpty) {
           // If the TutorPostApplication collection is empty, delete the TutorApplication document
           await tutorApplicationfromTSDocRef.delete();
@@ -116,11 +149,49 @@ class _ApplicationStatusTutorCardState
 
   @override
   Widget build(BuildContext context) {
-    
-    return Card(
+    Color cardColor;
+    String applicationStatusText;
+
+    switch (_applicationStatus) {
+      case 'rejected':
+        cardColor = Colors.red;
+        applicationStatusText = 'Rejected';
+        break;
+      case 'pending':
+        cardColor = Colors.orange;
+        applicationStatusText = 'Pending';
+        break;
+      case 'accepted':
+        cardColor = Colors.green;
+        applicationStatusText = 'Accepted';
+        break;
+      default:
+        cardColor = Colors.grey;
+        applicationStatusText = 'Unknown';
+    }
+
+    return Container(
+      decoration: BoxDecoration(
+        color: cardColor,
+        borderRadius: BorderRadius.circular(8.0),
+      ),
       margin: EdgeInsets.all(8.0),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Align(
+              alignment: Alignment.topRight,
+              child: Text(
+                applicationStatusText,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
           ListTile(
             leading: CircleAvatar(
               backgroundImage: NetworkImage(widget.imageURL),
@@ -156,8 +227,8 @@ class _ApplicationStatusTutorCardState
                 child: Text('Details'),
               ),
               ElevatedButton(
-                onPressed:  _cancelApplication, 
-                child: Text('Cancel'),
+                onPressed: _cancelApplication,
+                child: Text('Cancel Application'),
               ),
             ],
           ),

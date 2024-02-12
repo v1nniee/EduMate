@@ -1,6 +1,6 @@
+import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:edumateapp/TutorSeekerScreen/TutorSeekerChat.dart';
-import 'package:flutter/material.dart';
 
 class TutorSeekerTutorSearchScreen extends StatefulWidget {
   @override
@@ -10,6 +10,20 @@ class TutorSeekerTutorSearchScreen extends StatefulWidget {
 class _TutorSeekerTutorSearchScreenState extends State<TutorSeekerTutorSearchScreen> {
   List<Map<String, dynamic>> tutors = [];
   List<Map<String, dynamic>> searchResults = [];
+  late FocusNode _searchFocusNode; // Declare FocusNode
+
+  @override
+  void initState() {
+    super.initState();
+    _searchFocusNode = FocusNode(); // Initialize FocusNode
+    fetchAllTutors();
+  }
+
+  @override
+  void dispose() {
+    _searchFocusNode.dispose(); // Dispose FocusNode
+    super.dispose();
+  }
 
   void searchTutor(String query) {
     final results = tutors.where((tutor) {
@@ -24,12 +38,6 @@ class _TutorSeekerTutorSearchScreenState extends State<TutorSeekerTutorSearchScr
     });
   }
 
-  @override
-  void initState() {
-    super.initState();
-    fetchAllTutors();
-  }
-
   void fetchAllTutors() async {
     var results = await FirebaseFirestore.instance.collection('Tutor').get();
     setState(() {
@@ -39,6 +47,9 @@ class _TutorSeekerTutorSearchScreenState extends State<TutorSeekerTutorSearchScr
 
   @override
   Widget build(BuildContext context) {
+    // Request focus for the search TextField
+    FocusScope.of(context).requestFocus(_searchFocusNode);
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Search Tutors'),
@@ -48,6 +59,7 @@ class _TutorSeekerTutorSearchScreenState extends State<TutorSeekerTutorSearchScr
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: TextField(
+              focusNode: _searchFocusNode, // Assign FocusNode to TextField
               decoration: const InputDecoration(
                 labelText: 'Search for a Tutor',
                 border: OutlineInputBorder(),

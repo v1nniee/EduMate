@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:edumateapp/Provider/UserTypeNotifier.dart';
 import 'package:edumateapp/TutorSeekerScreen/TutorSeekerChat.dart';
 import 'package:edumateapp/TutorSeekerScreen/TutorSeekerTutorSearchScreen.dart';
+import 'package:edumateapp/Widgets/PageHeader.dart';
 import 'package:edumateapp/main.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -86,73 +87,103 @@ class _TutorSeekerHomeChatState extends State<TutorSeekerHomeChat> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: const Text("Chat Home Page"),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.search),
-            onPressed: () {
-              // Navigate to the search screen
-              Navigator.of(context).push(MaterialPageRoute(
-                builder: (context) => TutorSeekerTutorSearchScreen(),
-              ));
-            },
-          ),
-        ],
+        backgroundColor: const Color.fromARGB(255, 255, 255, 115),
+        elevation: 0,
       ),
-      body: StreamBuilder<List<ChatPreviewData>>(
-        stream: getChatPreviews(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          }
-          if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text("No chats found"));
-          }
-
-          final chatPreviews = snapshot.data!;
-
-          return ListView.builder(
-            itemCount: chatPreviews.length,
-            itemBuilder: (context, index) {
-              final chatPreview = chatPreviews[index];
-              return InkWell(
-                // Wrap ListTile with InkWell for tap functionality
-                onTap: () {
-                  // Navigate to the chat screen
-                  // You'll need to replace 'ChatScreen' with the actual name of your chat screen widget
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => TutorSeekerChat(
-                            ReceiverUserId: chatPreview.chatId.split('_')[0]),
-                      ));
-                },
-                child: ListTile(
-                  leading: CircleAvatar(
-                    backgroundImage: NetworkImage(chatPreview.imageUrl),
-                    backgroundColor: Colors.grey.shade200,
-                    radius: 24,
-                  ),
-                  title: Text(chatPreview.name),
-                  subtitle: Text(
-                    chatPreview.lastMessage,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  trailing: Text(
-                    _formatTimestamp(chatPreview.timestamp),
-                    style: TextStyle(
-                      color: Colors.grey.shade600,
-                      fontSize: 12,
-                    ),
+      body: Column(
+        children: [
+          const PageHeader(
+            backgroundColor: Color.fromARGB(255, 255, 255, 115),
+            headerTitle: 'Chat',
+          ),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: GestureDetector(
+              onTap: () {
+                Navigator.of(context).push(MaterialPageRoute(
+                  builder: (context) => TutorSeekerTutorSearchScreen(),
+                ));
+              },
+              child: Container(
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey), // Add border
+                  borderRadius: BorderRadius.circular(5.0), // Add border radius
+                ),
+                child: const Padding(
+                  padding: EdgeInsets.all(12.0),
+                  child: Row(
+                    children: [
+                      Icon(Icons.search), // Add search icon
+                      SizedBox(width: 8.0), // Add spacing
+                      Text(
+                        'Search for a Tutor',
+                        style: TextStyle(fontSize: 16.0),
+                      ),
+                    ],
                   ),
                 ),
-              );
-            },
-          );
-        },
+              ),
+            ),
+          ),
+          Expanded(
+            // Use Expanded to fill the remaining space with the chat list
+            child: StreamBuilder<List<ChatPreviewData>>(
+              stream: getChatPreviews(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (snapshot.hasError) {
+                  return Center(child: Text('Error: ${snapshot.error}'));
+                }
+                if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return const Center(child: Text("No chats found"));
+                }
+
+                final chatPreviews = snapshot.data!;
+
+                return ListView.builder(
+                  itemCount: chatPreviews.length,
+                  itemBuilder: (context, index) {
+                    final chatPreview = chatPreviews[index];
+                    return InkWell(
+                      onTap: () {
+                        // Navigate to the chat screen
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => TutorSeekerChat(
+                                ReceiverUserId:
+                                    chatPreview.chatId.split('_')[0]),
+                          ),
+                        );
+                      },
+                      child: ListTile(
+                        leading: CircleAvatar(
+                          backgroundImage: NetworkImage(chatPreview.imageUrl),
+                          backgroundColor: Colors.grey.shade200,
+                          radius: 24,
+                        ),
+                        title: Text(chatPreview.name),
+                        subtitle: Text(
+                          chatPreview.lastMessage,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        trailing: Text(
+                          _formatTimestamp(chatPreview.timestamp),
+                          style: TextStyle(
+                            color: Colors.grey.shade600,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }

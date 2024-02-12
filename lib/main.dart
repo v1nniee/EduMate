@@ -22,7 +22,7 @@ import 'package:flutter/material.dart';
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  print("hi");
+
   const AndroidNotificationChannel channel = AndroidNotificationChannel(
       'high_importance_channel', // id
       'High Importance Notifications', // title
@@ -72,7 +72,8 @@ void main() async {
           create: (context) => UserTokenNotifier()),
       
     ],
-    child: const OverlaySupport.global(child: MyApp()),
+    //child: const OverlaySupport.global(child: MyApp()),
+    child: MyApp(),
   ));
 }
 

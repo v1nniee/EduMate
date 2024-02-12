@@ -50,7 +50,6 @@ dependencies:
   flutter_local_notifications: ^16.3.2
   overlay_support: ^2.1.0
   firebase_analytics: ^10.8.1
-  
 
 dev_dependencies:
   flutter_test:
