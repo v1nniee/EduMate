@@ -4,22 +4,31 @@ import 'package:flutter/material.dart';
 import 'package:edumateapp/TutorSeekerScreen/TutorDetailPage.dart';
 
 class TutorSeekerCard extends StatefulWidget {
-  final String tutorId;
+  final String tutorseekerId;
   final String tutorPostId;
   final String name;
   final String subject;
+  final String grade;
   final String imageURL;
-  final double rating;
-  final String fees;
+  final String requirement;
+  final String status;
+  final String StartTime;
+  final String EndTime;
+  final String Day;
+
   const TutorSeekerCard({
     Key? key,
-    required this.tutorId,
+    required this.tutorseekerId,
     required this.name,
     required this.subject,
     required this.imageURL,
-    required this.rating,
-    required this.fees,
     required this.tutorPostId,
+    required this.grade,
+    required this.requirement,
+    required this.status,
+    required this.StartTime,
+    required this.EndTime,
+    required this.Day,
   }) : super(key: key);
 
   @override
@@ -27,102 +36,9 @@ class TutorSeekerCard extends StatefulWidget {
 }
 
 class _TutorSeekerCardState extends State<TutorSeekerCard> {
-  bool isFavorite = false;
-  String _applicationStatus = ''; // Add this line
-
   @override
   void initState() {
     super.initState();
-    _loadApplicationStatus();
-  }
-
-  Future<void> _loadApplicationStatus() async {
-    User? user = FirebaseAuth.instance.currentUser;
-    try {
-      // Fetch the status of the tutor post application
-      DocumentSnapshot tutorPostApplicationSnapshot = await FirebaseFirestore
-          .instance
-          .collection('Tutor Seeker')
-          .doc(user?.uid)
-          .collection('TutorApplication')
-          .doc(widget.tutorId)
-          .collection('TutorPostApplication')
-          .doc(widget.tutorPostId)
-          .get();
-
-      if (tutorPostApplicationSnapshot.exists) {
-        setState(() {
-          _applicationStatus = tutorPostApplicationSnapshot.get('Status');
-        });
-      } else {
-        setState(() {
-          _applicationStatus = 'Not found';
-        });
-      }
-    } catch (e) {
-      print('Error loading application status: $e');
-    }
-  }
-
-  Future<void> _cancelApplication() async {
-    User? user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      // Reference to the TutorApplication document
-      DocumentReference tutorApplicationDocRef = FirebaseFirestore.instance
-          .collection('Tutor Seeker')
-          .doc(user.uid)
-          .collection('TutorApplication')
-          .doc(widget.tutorId);
-
-      // Reference to the TutorPostApplication document
-      DocumentReference tutorPostApplicationDocRef = tutorApplicationDocRef
-          .collection('TutorPostApplication')
-          .doc(widget.tutorPostId);
-
-      DocumentReference tutorApplicationfromTSDocRef = FirebaseFirestore
-          .instance
-          .collection('Tutor')
-          .doc(widget.tutorId)
-          .collection('TutorApplication')
-          .doc(user.uid);
-
-      // Reference to the TutorPostApplication document
-      DocumentReference tutorPostApplicationfromTSDocRef =
-          tutorApplicationfromTSDocRef
-              .collection('TutorPostApplication')
-              .doc(widget.tutorPostId);
-
-      try {
-        // Delete the TutorPostApplication document
-        await tutorPostApplicationDocRef.delete();
-        await tutorPostApplicationfromTSDocRef.delete();
-
-        // Check if there are any other documents in TutorPostApplication collection
-        QuerySnapshot tutorPostApplications = await tutorApplicationDocRef
-            .collection('TutorPostApplication')
-            .get();
-
-        if (tutorPostApplications.docs.isEmpty) {
-          // If the TutorPostApplication collection is empty, delete the TutorApplication document
-          await tutorApplicationDocRef.delete();
-        }
-
-        QuerySnapshot tutorPostApplicationsfromTutor =
-            await tutorApplicationfromTSDocRef
-                .collection('TutorPostApplication')
-                .get();
-        if (tutorPostApplicationsfromTutor.docs.isEmpty) {
-          // If the TutorPostApplication collection is empty, delete the TutorApplication document
-          await tutorApplicationfromTSDocRef.delete();
-        }
-
-        _showDialog('Cancelled', 'Application cancelled successfully');
-      } catch (e) {
-        _showDialog('Error', 'Error cancelling application: $e');
-      }
-    } else {
-      _showDialog('Error', 'You are not logged in');
-    }
   }
 
   void _showDialog(String title, String content) {
@@ -147,10 +63,11 @@ class _TutorSeekerCardState extends State<TutorSeekerCard> {
 
   @override
   Widget build(BuildContext context) {
+    User currentUser = FirebaseAuth.instance.currentUser!;
     Color cardColor;
     String applicationStatusText;
 
-    switch (_applicationStatus) {
+    switch (widget.status) {
       case 'rejected':
         cardColor = Colors.red;
         applicationStatusText = 'Rejected';
@@ -168,69 +85,70 @@ class _TutorSeekerCardState extends State<TutorSeekerCard> {
         applicationStatusText = 'Unknown';
     }
 
-    return Container(
-      decoration: BoxDecoration(
-        color: cardColor,
-        borderRadius: BorderRadius.circular(8.0),
+    return Card(
+      elevation: 4.0,
+      margin: EdgeInsets.all(10.0),
+      shape: RoundedRectangleBorder(
+        borderRadius:
+            BorderRadius.circular(12.0), // Set a neutral background color
       ),
-      margin: EdgeInsets.all(8.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Align(
-              alignment: Alignment.topRight,
-              child: Text(
-                applicationStatusText,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ),
-          ListTile(
-            leading: CircleAvatar(
+      color: Colors.white,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(
+            vertical: 20.0, horizontal: 13.0), // Increase padding
+        child: Row(
+          children: <Widget>[
+            CircleAvatar(
+              radius: 40, // Increased avatar size
               backgroundImage: NetworkImage(widget.imageURL),
             ),
-            title: Text(widget.name),
-            subtitle: Text(widget.subject),
-          ),
-          Padding(
-            padding: EdgeInsets.symmetric(vertical: 8.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                Text('Rating: ${widget.rating}'),
-                Text('Price: ${widget.fees}/hr'),
+            SizedBox(width: 20), // Space between avatar and text
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Text(widget.name,
+                      style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold)), // Increase text size
+                  SizedBox(height: 8), // Space between text lines
+                  Text('Subject: ${widget.subject}',
+                      style: TextStyle(fontSize: 13)),
+                  SizedBox(height: 4),
+                  Text('Grade: ${widget.grade}',
+                      style: TextStyle(fontSize: 13)),
+                  if (widget.requirement != "N/A")
+                    Text('Requirement: ${widget.requirement}',
+                        style: TextStyle(fontSize: 13)),
+                  SizedBox(height: 4),
+                  Text(
+                      'Day: ${widget.Day} ${widget.StartTime} - ${widget.EndTime}',
+                      style: TextStyle(fontSize: 13)),
+                ],
+              ),
+            ),
+            Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                IconButton(
+                  icon: Icon(Icons.check_circle_outline,
+                      size: 40, color: Colors.green), // Increase icon size
+                  onPressed: () {
+                    // TODO: Implement accept logic
+                  },
+                ),
+                SizedBox(height: 15), // Space between buttons
+                IconButton(
+                  icon: Icon(Icons.cancel_outlined,
+                      size: 45, color: Colors.red), // Increase icon size
+                  onPressed: () {
+                    // TODO: Implement reject logic
+                  },
+                ),
               ],
             ),
-          ),
-          ButtonBar(
-            alignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => TutorDetailPage(
-                        tutorId: widget.tutorId,
-                        tutorPostId: widget.tutorPostId,
-                      ),
-                    ),
-                  );
-                },
-                child: Text('Details'),
-              ),
-              ElevatedButton(
-                onPressed: _cancelApplication,
-                child: Text('Cancel Application'),
-              ),
-            ],
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

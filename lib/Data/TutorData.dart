@@ -2,6 +2,7 @@ import 'package:edumateapp/TutorScreen/AvailibilitySlot.dart';
 import 'package:edumateapp/TutorScreen/TutorAddPost.dart';
 import 'package:edumateapp/TutorScreen/TutorEditPost.dart';
 import 'package:edumateapp/TutorScreen/TutorHome.dart';
+import 'package:edumateapp/TutorScreen/TutorSeekerApplicationRequest.dart';
 import 'package:flutter/material.dart';
 import 'package:edumateapp/Models/Category.dart';
 
@@ -41,7 +42,7 @@ const TutorFunctionCategories = [
     title: 'Tutor Seeker Application Request',
     color: Colors.white,
     icon: Icons.assignment,
-    nextPage: TutorHome(),
+    nextPage: TutorSeekerApplicationRequest(),
   ),
   Category(
     id: 't6',

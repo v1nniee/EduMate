@@ -214,6 +214,7 @@ class _TutorCardState extends State<TutorCard> {
                             String startTime = selectedSlot['startTime'];
                             String endTime = selectedSlot['endTime'];
                             String day = selectedSlot['day'];
+                            
 
                             // Rest of your logic to save the selected slot...
                             User? user = FirebaseAuth.instance.currentUser;
@@ -229,21 +230,10 @@ class _TutorCardState extends State<TutorCard> {
                               // The path to the TutorPostApplication document for the specific tutor post
                               DocumentReference tutorPostApplicationDocRef =
                                   tutorApplicationDocRef
-                                      .collection('TutorPostApplication')
+                                      .collection('ApplicationRequest')
                                       .doc(widget.tutorPostId);
 
-                              DocumentReference tutorApplicationFromTsDocRef =
-                                  FirebaseFirestore.instance
-                                      .collection('Tutor')
-                                      .doc(widget.tutorId)
-                                      .collection('TutorApplication')
-                                      .doc(user.uid);
-
-                              DocumentReference
-                                  tutorPostApplicationFromTsDocRef =
-                                  tutorApplicationFromTsDocRef
-                                      .collection('TutorPostApplication')
-                                      .doc(widget.tutorPostId);
+                  
 
                               Map<String, dynamic> tutorPostApplicationData = {
                                 'Day': day,
@@ -260,6 +250,7 @@ class _TutorCardState extends State<TutorCard> {
                                 'StartTime': startTime,
                                 'EndTime': endTime,
                                 'Status': "pending",
+                                "Subject": widget.subject,
                                 'TutorPostId': widget.tutorPostId,
                                 'TutorSeekerId': user.uid,
                               };
@@ -268,10 +259,6 @@ class _TutorCardState extends State<TutorCard> {
                                   .runTransaction((transaction) async {
                                 transaction.set(tutorPostApplicationDocRef,
                                     tutorPostApplicationData);
-
-                                transaction.set(
-                                    tutorPostApplicationFromTsDocRef,
-                                    tutorApplicationFromTsData);
                               });
 
                               FirebaseFirestore.instance
@@ -283,9 +270,8 @@ class _TutorCardState extends State<TutorCard> {
                               FirebaseFirestore.instance
                                   .collection('Tutor')
                                   .doc(widget.tutorId)
-                                  .collection('TutorApplication')
-                                  .doc(user.uid)
-                                  .set({'TutorSeekerId': user.uid});
+                                  .collection('ApplicationRequest')
+                                  .add(tutorApplicationFromTsData);
 
                               print(
                                   'Tutor post application saved successfully');
