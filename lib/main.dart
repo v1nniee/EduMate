@@ -8,7 +8,9 @@ import 'package:edumateapp/Provider/TokenNotifier.dart';
 import 'package:edumateapp/Provider/UserTypeNotifier.dart';
 import 'package:edumateapp/TutorScreen/TutorTabScreen.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:overlay_support/overlay_support.dart';
 import 'package:provider/provider.dart';
 import 'package:edumateapp/TutorSeekerScreen/TutorSeekerTabScreen.dart';
@@ -22,7 +24,6 @@ import 'package:flutter/material.dart';
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-
   const AndroidNotificationChannel channel = AndroidNotificationChannel(
       'high_importance_channel', // id
       'High Importance Notifications', // title
@@ -60,6 +61,11 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  Stripe.publishableKey =
+      'pk_test_51Ok47qAM3XDccLkC3UFBqxKzAjEYOagITqnT3eb6Ry5VI75MdhV58VQ46I9bhCFsAtKwAJVX7gROcjmfti1TbqfP00PRO7yIwc';
+  await dotenv.load(fileName: "assets/.env");
+
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
@@ -70,7 +76,6 @@ void main() async {
           create: (context) => UserTypeNotifier()),
       ChangeNotifierProvider<UserTokenNotifier>(
           create: (context) => UserTokenNotifier()),
-      
     ],
     //child: const OverlaySupport.global(child: MyApp()),
     child: MyApp(),
