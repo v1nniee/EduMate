@@ -222,8 +222,8 @@ class _TutorSeekerPaymentCardState extends State<TutorSeekerPaymentCard> {
     }
   }
 
-  void _update(
-      DateTime paymentDate, String paymentAmount, DateTime startClassDate, DateTime endclassDate) async {
+  void _update(DateTime paymentDate, String paymentAmount,
+      DateTime startClassDate, DateTime endclassDate) async {
     User? currentUser = FirebaseAuth.instance.currentUser;
     if (currentUser == null) {
       _showDialog('Error', 'User not logged in');
@@ -256,6 +256,19 @@ class _TutorSeekerPaymentCardState extends State<TutorSeekerPaymentCard> {
         .catchError((e) {
       _showDialog('Error', 'Failed to update status: $e');
     });
+
+    Map<String, dynamic> paymentData = {
+      'PaymentDate': paymentDate,
+      'PaymentAmount': paymentAmount,
+      'TutorId': widget.tutorId,
+      'TutorName': widget.name,
+    };
+
+    await FirebaseFirestore.instance
+        .collection('Tutor Seeker')
+        .doc(tutorseekerId)
+        .collection('Payment')
+        .add(paymentData);
   }
 
   @override
@@ -334,7 +347,8 @@ class _TutorSeekerPaymentCardState extends State<TutorSeekerPaymentCard> {
                       DateTime startclassDate = _getNextClassDate(
                           paymentDate, getDayOfWeekNumber(_day));
                       DateTime endclassDate = _getEndDate(startclassDate);
-                      _update(paymentDate, calculateFees(), startclassDate,endclassDate);
+                      _update(paymentDate, calculateFees(), startclassDate,
+                          endclassDate);
                       // ignore: use_build_context_synchronously
                       Navigator.push(
                         context,

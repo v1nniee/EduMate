@@ -22,6 +22,7 @@ class TutorSeekerNotification extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 255, 255, 115),
         elevation: 0,
+        automaticallyImplyLeading: false,
       ),
       body: Column(
         children: [

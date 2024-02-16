@@ -26,41 +26,40 @@ class _TutorSeekerApplicationStatusState
   }
 
   Future<List<String>> getAppliedTutorIds(String userId) async {
-  QuerySnapshot TutorsSnapshot = await FirebaseFirestore.instance
-      .collection('Tutor Seeker')
-      .doc(userId)
-      .collection('ApplicationRequest')
-      .get();
+    QuerySnapshot TutorsSnapshot = await FirebaseFirestore.instance
+        .collection('Tutor Seeker')
+        .doc(userId)
+        .collection('ApplicationRequest')
+        .where('Status', isNotEqualTo: 'paid')
+        .get();
 
-  List<String> documentIds = TutorsSnapshot.docs
-      .map((doc) => doc.id.split('_')[0]) // Correctly splitting the ID.
-      .toList();
+    List<String> documentIds = TutorsSnapshot.docs
+        .map((doc) => doc.id.split('_')[0]) // Correctly splitting the ID.
+        .toList();
 
-  return documentIds;
-}
-
+    return documentIds;
+  }
 
   Future<List<String>> getTutorPostIdsFromAppliedTutors(
-    String userId, List<String> appliedTutorIds) async {
-  List<String> documentIds = [];
+      String userId, List<String> appliedTutorIds) async {
+    List<String> documentIds = [];
 
-  QuerySnapshot tutorDoc = await FirebaseFirestore.instance
-      .collection('Tutor Seeker')
-      .doc(userId)
-      .collection('ApplicationRequest')
-      .get();
+    QuerySnapshot tutorDoc = await FirebaseFirestore.instance
+        .collection('Tutor Seeker')
+        .doc(userId)
+        .collection('ApplicationRequest')
+        .where('Status', isNotEqualTo: 'paid')
+        .get();
 
-  tutorDoc.docs.forEach((doc) {
-    var parts = doc.id.split('_'); // Correct splitting
-    if (appliedTutorIds.contains(parts[0])) {
-      documentIds.add(parts[1]); // Assuming the format is [tutorId]_[postId]
-    }
-  });
+    tutorDoc.docs.forEach((doc) {
+      var parts = doc.id.split('_'); // Correct splitting
+      if (appliedTutorIds.contains(parts[0])) {
+        documentIds.add(parts[1]); // Assuming the format is [tutorId]_[postId]
+      }
+    });
 
-  return documentIds;
-  
-}
-
+    return documentIds;
+  }
 
   @override
   Widget build(BuildContext context) {

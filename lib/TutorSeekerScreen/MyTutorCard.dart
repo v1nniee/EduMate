@@ -158,11 +158,11 @@ class _MyTutorCardState extends State<MyTutorCard> {
   @override
   Widget build(BuildContext context) {
     // Check if the application status is 'accepted' before building the card
-    if (_applicationStatus == 'accepted') {
+    if (_applicationStatus == 'paid') {
       _loadDate();
       Color cardColor =
           Colors.green; // Since it's accepted, we'll use green color
-      String applicationStatusText = 'Accepted';
+      String applicationStatusText = 'Paid';
 
       return Container(
         decoration: BoxDecoration(
