@@ -61,6 +61,45 @@ class _TutorSeekerCardState extends State<TutorSeekerCard> {
     );
   }
 
+  void _updateStatus(String newStatus) async {
+    User? currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser == null) {
+      _showDialog('Error', 'User not logged in');
+      return;
+    }
+    String tutorId = currentUser.uid;
+    // Get the current date/time as the accepted date
+    DateTime now = DateTime.now();
+
+    Map<String, dynamic> updateData = {
+      'Status': newStatus,
+      'LastPayment': null, // Assuming you want to set this to null initially
+    };
+
+    // Only add the AcceptedDate field if the new status is 'accepted'
+    if (newStatus == 'accepted') {
+      updateData['AcceptedDate'] = now;
+    }
+
+    // Update in Tutor Seeker's collection
+    await FirebaseFirestore.instance
+        .doc(
+            'Tutor Seeker/${widget.tutorseekerId}/ApplicationRequest/${tutorId}_${widget.tutorPostId}')
+        .update(updateData)
+        .catchError((e) {
+      _showDialog('Error', 'Failed to update tutor seeker status: $e');
+    });
+
+    // Update in Tutor's collection
+    await FirebaseFirestore.instance
+        .doc(
+            'Tutor/$tutorId/ApplicationRequest/${widget.tutorseekerId}_${widget.tutorPostId}')
+        .update(updateData)
+        .catchError((e) {
+      _showDialog('Error', 'Failed to update status: $e');
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     User currentUser = FirebaseAuth.instance.currentUser!;
@@ -89,63 +128,86 @@ class _TutorSeekerCardState extends State<TutorSeekerCard> {
       elevation: 4.0,
       margin: EdgeInsets.all(10.0),
       shape: RoundedRectangleBorder(
-        borderRadius:
-            BorderRadius.circular(12.0), // Set a neutral background color
+        borderRadius: BorderRadius.circular(12.0),
       ),
       color: Colors.white,
       child: Padding(
-        padding: const EdgeInsets.symmetric(
-            vertical: 20.0, horizontal: 13.0), // Increase padding
-        child: Row(
+        padding: const EdgeInsets.all(10.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            CircleAvatar(
-              radius: 40, // Increased avatar size
-              backgroundImage: NetworkImage(widget.imageURL),
-            ),
-            SizedBox(width: 20), // Space between avatar and text
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: <Widget>[
-                  Text(widget.name,
-                      style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold)), // Increase text size
-                  SizedBox(height: 8), // Space between text lines
-                  Text('Subject: ${widget.subject}',
-                      style: TextStyle(fontSize: 13)),
-                  SizedBox(height: 4),
-                  Text('Grade: ${widget.grade}',
-                      style: TextStyle(fontSize: 13)),
-                  if (widget.requirement != "N/A")
-                    Text('Requirement: ${widget.requirement}',
-                        style: TextStyle(fontSize: 13)),
-                  SizedBox(height: 4),
-                  Text(
-                      'Day: ${widget.Day} ${widget.StartTime} - ${widget.EndTime}',
-                      style: TextStyle(fontSize: 13)),
-                ],
-              ),
-            ),
-            Column(
-              mainAxisSize: MainAxisSize.min,
+            // First Row: Avatar and Text
+            Row(
               children: <Widget>[
-                IconButton(
-                  icon: Icon(Icons.check_circle_outline,
-                      size: 40, color: Colors.green), // Increase icon size
-                  onPressed: () {
-                    // TODO: Implement accept logic
-                  },
+                CircleAvatar(
+                  radius: 35,
+                  backgroundImage: NetworkImage(widget.imageURL),
                 ),
-                SizedBox(height: 15), // Space between buttons
-                IconButton(
-                  icon: Icon(Icons.cancel_outlined,
-                      size: 45, color: Colors.red), // Increase icon size
-                  onPressed: () {
-                    // TODO: Implement reject logic
-                  },
+                SizedBox(width: 30), // Space between avatar and text
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Text(
+                        widget.name,
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(height: 8), // Space between text lines
+                      Text('Subject: ${widget.subject}',
+                          style: TextStyle(fontSize: 13)),
+                      Text('Grade: ${widget.grade}',
+                          style: TextStyle(fontSize: 13)),
+                      if (widget.requirement != "N/A")
+                        Text('Requirement: ${widget.requirement}',
+                            style: TextStyle(fontSize: 13)),
+                      Text(
+                          'Day: ${widget.Day} ${widget.StartTime} - ${widget.EndTime}',
+                          style: TextStyle(fontSize: 13)),
+                    ],
+                  ),
                 ),
               ],
+            ),
+            // Second Row: Buttons
+            Padding(
+              padding:
+                  const EdgeInsets.only(top: 8.0), // Add padding at the top
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment
+                    .center, // Align buttons to the start of the row
+                children: <Widget>[
+                  ElevatedButton(
+                    onPressed: () {
+                      _updateStatus('rejected');
+                    },
+                    style: ElevatedButton.styleFrom(
+                      primary: Colors.red, // Background color for Reject
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                    child: const Text('Reject',
+                        style: TextStyle(color: Colors.white)),
+                  ),
+                  const SizedBox(width: 20),
+                  ElevatedButton(
+                    onPressed: () {
+                      _updateStatus('accepted');
+                    },
+                    style: ElevatedButton.styleFrom(
+                      primary: Colors.green, // Background color for Accept
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                    child:
+                        Text('Accept', style: TextStyle(color: Colors.white)),
+                  ),
+                ],
+              ),
             ),
           ],
         ),

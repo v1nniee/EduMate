@@ -48,6 +48,7 @@ class _TutorSeekerApplicationRequestState
       String start = applicationRequest['StartTime'];
       String end = applicationRequest['EndTime'];
       String day = applicationRequest['Day'];
+      String tutorPostId = applicationRequest['TutorPostId'];
 
       // Get the Tutor Seeker's User Profile
       var userProfile = await FirebaseFirestore.instance
@@ -66,7 +67,7 @@ class _TutorSeekerApplicationRequestState
         // Create a TutorSeekerCard for each application
         TutorSeekerCard card = TutorSeekerCard(
           tutorseekerId: seekerId,
-          tutorPostId: applicationRequest.id,
+          tutorPostId: tutorPostId,
           name: name,
           imageURL: imageURL,
           subject: subject,

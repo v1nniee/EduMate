@@ -26,40 +26,41 @@ class _TutorSeekerApplicationStatusState
   }
 
   Future<List<String>> getAppliedTutorIds(String userId) async {
-    QuerySnapshot favoriteTutorsSnapshot = await FirebaseFirestore.instance
-        .collection('Tutor Seeker')
-        .doc(userId)
-        .collection('TutorApplication')
-        .get();
+  QuerySnapshot TutorsSnapshot = await FirebaseFirestore.instance
+      .collection('Tutor Seeker')
+      .doc(userId)
+      .collection('ApplicationRequest')
+      .get();
 
-    List<String> documentIds = [];
-    favoriteTutorsSnapshot.docs.forEach((doc) {
-      documentIds.add(doc.id);
-    });
+  List<String> documentIds = TutorsSnapshot.docs
+      .map((doc) => doc.id.split('_')[0]) // Correctly splitting the ID.
+      .toList();
 
-    return documentIds;
-  }
+  return documentIds;
+}
+
 
   Future<List<String>> getTutorPostIdsFromAppliedTutors(
-      String userId, List<String> appliedTutorIds) async {
-    print(appliedTutorIds);
-    List<String> documentIds = [];
+    String userId, List<String> appliedTutorIds) async {
+  List<String> documentIds = [];
 
-    for (String tutorId in appliedTutorIds) {
-      QuerySnapshot tutorDoc = await FirebaseFirestore.instance
-          .collection('Tutor Seeker')
-          .doc(userId)
-          .collection('TutorApplication')
-          .doc(tutorId)
-          .collection('TutorPostApplication')
-          .get();
+  QuerySnapshot tutorDoc = await FirebaseFirestore.instance
+      .collection('Tutor Seeker')
+      .doc(userId)
+      .collection('ApplicationRequest')
+      .get();
 
-      tutorDoc.docs.forEach((doc) {
-        documentIds.add(doc.id);
-      });
+  tutorDoc.docs.forEach((doc) {
+    var parts = doc.id.split('_'); // Correct splitting
+    if (appliedTutorIds.contains(parts[0])) {
+      documentIds.add(parts[1]); // Assuming the format is [tutorId]_[postId]
     }
-    return documentIds;
-  }
+  });
+
+  return documentIds;
+  
+}
+
 
   @override
   Widget build(BuildContext context) {

@@ -1,16 +1,24 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 
 class StripePaymentHandle {
   Map<String, dynamic>? paymentIntent;
+  bool paymentSuccessful = false;
 
-  Future<void> stripeMakePayment() async {
+  Future<bool> stripeMakePayment(String amount) async {
+    
     try {
-      paymentIntent = await createPaymentIntent('100', 'INR');
+      paymentIntent = await createPaymentIntent(amount, 'MYR');
       await Stripe.instance
           .initPaymentSheet(
               paymentSheetParameters: SetupPaymentSheetParameters(
@@ -32,28 +40,35 @@ class StripePaymentHandle {
           .then((value) {});
 
       //STEP 3: Display Payment sheet
-      displayPaymentSheet();
+      paymentSuccessful = await displayPaymentSheet();
+      
     } catch (e) {
       print(e.toString());
       Fluttertoast.showToast(msg: e.toString());
     }
+    return paymentSuccessful;
   }
 
-  displayPaymentSheet() async {
-    try {
-      // 3. display the payment sheet.
-      await Stripe.instance.presentPaymentSheet();
+  Future<bool> displayPaymentSheet() async {
+  bool paymentSuccessful = false; // Local variable to track the payment status
 
-      Fluttertoast.showToast(msg: 'Payment succesfully completed');
-    } on Exception catch (e) {
-      if (e is StripeException) {
-        Fluttertoast.showToast(
-            msg: 'Error from Stripe: ${e.error.localizedMessage}');
-      } else {
-        Fluttertoast.showToast(msg: 'Unforeseen error: ${e}');
-      }
-    }
+  try {
+    // Display the payment sheet.
+    await Stripe.instance.presentPaymentSheet();
+    Fluttertoast.showToast(msg: 'Payment successfully completed');
+    paymentSuccessful = true; // Set to true on successful payment
+  } on StripeException catch (e) {
+    // Handle the specific Stripe exception
+    Fluttertoast.showToast(
+        msg: 'Error from Stripe: ${e.error.localizedMessage}');
+  } catch (e) {
+    // Handle other exceptions
+    Fluttertoast.showToast(msg: 'Unforeseen error: $e');
   }
+
+  return paymentSuccessful; // Return the status of the payment
+}
+
 
 //create Payment
   createPaymentIntent(String amount, String currency) async {
@@ -84,4 +99,5 @@ class StripePaymentHandle {
     final calculatedAmount = (int.parse(amount)) * 100;
     return calculatedAmount.toString();
   }
+
 }

@@ -214,32 +214,17 @@ class _TutorCardState extends State<TutorCard> {
                             String startTime = selectedSlot['startTime'];
                             String endTime = selectedSlot['endTime'];
                             String day = selectedSlot['day'];
-                            
 
                             // Rest of your logic to save the selected slot...
                             User? user = FirebaseAuth.instance.currentUser;
                             if (user != null) {
-                              // The path to the TutorApplication document for the specific tutor
-                              DocumentReference tutorApplicationDocRef =
-                                  FirebaseFirestore.instance
-                                      .collection('Tutor Seeker')
-                                      .doc(user.uid)
-                                      .collection('TutorApplication')
-                                      .doc(widget.tutorId);
-
-                              // The path to the TutorPostApplication document for the specific tutor post
-                              DocumentReference tutorPostApplicationDocRef =
-                                  tutorApplicationDocRef
-                                      .collection('ApplicationRequest')
-                                      .doc(widget.tutorPostId);
-
-                  
 
                               Map<String, dynamic> tutorPostApplicationData = {
                                 'Day': day,
                                 'StartTime': startTime,
                                 'EndTime': endTime,
                                 'Status': "pending",
+                                "Subject": widget.subject,
                                 'TutorPostId': widget.tutorPostId,
                                 'TutorId': widget.tutorId,
                               };
@@ -255,30 +240,30 @@ class _TutorCardState extends State<TutorCard> {
                                 'TutorSeekerId': user.uid,
                               };
 
-                              await FirebaseFirestore.instance
-                                  .runTransaction((transaction) async {
-                                transaction.set(tutorPostApplicationDocRef,
-                                    tutorPostApplicationData);
-                              });
+                              String TSdocumentId =
+                                  '${widget.tutorId}_${widget.tutorPostId}';
 
                               FirebaseFirestore.instance
                                   .collection('Tutor Seeker')
                                   .doc(user.uid)
-                                  .collection('TutorApplication')
-                                  .doc(widget.tutorId)
-                                  .set({'TutorId': widget.tutorId});
+                                  .collection('ApplicationRequest')
+                                  .doc(TSdocumentId)
+                                  .set(tutorPostApplicationData);
+
+                              String documentId =
+                                  '${user.uid}_${widget.tutorPostId}';
+
                               FirebaseFirestore.instance
                                   .collection('Tutor')
                                   .doc(widget.tutorId)
                                   .collection('ApplicationRequest')
-                                  .add(tutorApplicationFromTsData);
-
-                              print(
-                                  'Tutor post application saved successfully');
+                                  .doc(documentId)
+                                  .set(tutorApplicationFromTsData);
                             }
                             // Close the dialog
                             Navigator.of(dialogContext).pop();
 
+                            // ignore: use_build_context_synchronously
                             showDialog(
                               context: dialogContext,
                               builder: (BuildContext context) {

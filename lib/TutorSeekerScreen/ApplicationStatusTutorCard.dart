@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:edumateapp/TutorSeekerScreen/TutorSeekerPayment.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:edumateapp/TutorSeekerScreen/TutorDetailPage.dart';
@@ -46,10 +47,8 @@ class _ApplicationStatusTutorCardState
           .instance
           .collection('Tutor Seeker')
           .doc(user?.uid)
-          .collection('TutorApplication')
-          .doc(widget.tutorId)
-          .collection('TutorPostApplication')
-          .doc(widget.tutorPostId)
+          .collection('ApplicationRequest')
+          .doc('${widget.tutorId}_${widget.tutorPostId}')
           .get();
 
       if (tutorPostApplicationSnapshot.exists) {
@@ -73,48 +72,27 @@ class _ApplicationStatusTutorCardState
       DocumentReference tutorApplicationDocRef = FirebaseFirestore.instance
           .collection('Tutor Seeker')
           .doc(user.uid)
-          .collection('TutorApplication')
-          .doc(widget.tutorId);
-
-      // Reference to the TutorPostApplication document
-      DocumentReference tutorPostApplicationDocRef = tutorApplicationDocRef
-          .collection('TutorPostApplication')
-          .doc(widget.tutorPostId);
+          .collection('ApplicationRequest')
+          .doc('${widget.tutorId}_${widget.tutorPostId}');
 
       DocumentReference tutorApplicationfromTSDocRef = FirebaseFirestore
           .instance
           .collection('Tutor')
           .doc(widget.tutorId)
-          .collection('TutorApplication')
-          .doc(user.uid);
-
-      // Reference to the TutorPostApplication document
-      DocumentReference tutorPostApplicationfromTSDocRef =
-          tutorApplicationfromTSDocRef
-              .collection('TutorPostApplication')
-              .doc(widget.tutorPostId);
+          .collection('ApplicationRequest')
+          .doc('${user.uid}_${widget.tutorPostId}');
 
       try {
-        // Delete the TutorPostApplication document
-        await tutorPostApplicationDocRef.delete();
-        await tutorPostApplicationfromTSDocRef.delete();
-
-        // Check if there are any other documents in TutorPostApplication collection
-        QuerySnapshot tutorPostApplications = await tutorApplicationDocRef
-            .collection('TutorPostApplication')
-            .get();
-
-        if (tutorPostApplications.docs.isEmpty) {
-          // If the TutorPostApplication collection is empty, delete the TutorApplication document
+        // Check if the specific TutorApplication document exists and delete if it does
+        DocumentSnapshot tutorApplicationSnapshot =
+            await tutorApplicationDocRef.get();
+        if (tutorApplicationSnapshot.exists) {
           await tutorApplicationDocRef.delete();
         }
 
-        QuerySnapshot tutorPostApplicationsfromTutor =
-            await tutorApplicationfromTSDocRef
-                .collection('TutorPostApplication')
-                .get();
-        if (tutorPostApplicationsfromTutor.docs.isEmpty) {
-          // If the TutorPostApplication collection is empty, delete the TutorApplication document
+        DocumentSnapshot tutorApplicationfromTSSnapshot =
+            await tutorApplicationfromTSDocRef.get();
+        if (tutorApplicationfromTSSnapshot.exists) {
           await tutorApplicationfromTSDocRef.delete();
         }
 
@@ -226,10 +204,21 @@ class _ApplicationStatusTutorCardState
                 },
                 child: Text('Details'),
               ),
-              ElevatedButton(
-                onPressed: _cancelApplication,
-                child: Text('Cancel Application'),
-              ),
+              _applicationStatus == "accepted"
+                  ? ElevatedButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => TutorSeekerPayment()),
+                        );
+                      },
+                      child: Text('Pay Now'),
+                    )
+                  : ElevatedButton(
+                      onPressed: _cancelApplication,
+                      child: Text('Cancel Application'),
+                    ),
             ],
           ),
         ],

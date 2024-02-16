@@ -1,4 +1,5 @@
 import 'package:edumateapp/TutorSeekerScreen/Favorite.dart';
+import 'package:edumateapp/TutorSeekerScreen/MyTutorCard.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:edumateapp/TutorSeekerScreen/TutorCard.dart';
@@ -134,7 +135,7 @@ class _MyTutorState extends State<MyTutor> {
                                     ? userProfileSnapshot.data!.get('ImageUrl')
                                     : 'tutor_seeker_profile.png';
 
-                                return TutorCard(
+                                return MyTutorCard(
                                   tutorId: document.id,
                                   tutorPostId: tutorPostId,
                                   name: document['Name'],
