@@ -2,23 +2,38 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:edumateapp/Widgets/PageHeader.dart';
 import 'package:flutter/material.dart';
 
-
-
 class TutorDetailPage extends StatelessWidget {
   final String tutorId;
   final String tutorPostId;
+  final String imageURL;
 
   const TutorDetailPage(
-      {Key? key, required this.tutorId, required this.tutorPostId})
+      {Key? key,
+      required this.tutorId,
+      required this.tutorPostId,
+      required this.imageURL})
       : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    Widget buildInfoCard(String title, String value, IconData icon) {
+      return ListTile(
+        leading: Icon(icon, color: Theme.of(context).primaryColor),
+        title: Text(title, style: TextStyle(fontWeight: FontWeight.bold)),
+        subtitle: Text(value),
+      );
+    }
+
     String tutorName;
     var rate;
     var mode;
     var subject;
     var aboutMe;
+    var address;
+    var city;
+    var state;
+    var zipcode;
+    var gender;
 
     FirebaseFirestore firestore = FirebaseFirestore.instance;
 
@@ -49,8 +64,8 @@ class TutorDetailPage extends StatelessWidget {
                   .collection('TutorPost')
                   .doc(tutorPostId)
                   .get(),
-              builder: (context,
-                  AsyncSnapshot<DocumentSnapshot> tutorPostSnapshot) {
+              builder:
+                  (context, AsyncSnapshot<DocumentSnapshot> tutorPostSnapshot) {
                 if (tutorPostSnapshot.connectionState ==
                     ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
@@ -82,11 +97,17 @@ class TutorDetailPage extends StatelessWidget {
 
                     if (!userProfileSnapshot.hasData ||
                         !userProfileSnapshot.data!.exists) {
-                      return const Center(child: Text("User profile not found."));
+                      return const Center(
+                          child: Text("User profile not found."));
                     }
 
                     var userProfileData = userProfileSnapshot.data!;
                     aboutMe = userProfileData.get('AboutMe') ?? 'Unavailable';
+                    address = userProfileData.get('Address') ?? 'Unavailable';
+                    city = userProfileData.get('City') ?? 'Unavailable';
+                    state = userProfileData.get('State') ?? 'Unavailable';
+                    zipcode = userProfileData.get('ZipCode') ?? 'Unavailable';
+                    gender = userProfileData.get('Gender') ?? 'Unavailable';
 
                     return Column(
                       children: [
@@ -96,17 +117,40 @@ class TutorDetailPage extends StatelessWidget {
                         ),
                         SizedBox(height: 20),
                         Card(
-                          child: ListTile(
-                            title: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text('Name: $tutorName'),
-                                Text('Rate/hour: RM$rate'),
-                                Text('Mode: $mode'),
-                                Text('Subject: $subject'),
-                                Text('About Me: $aboutMe'),
-                              ],
-                            ),
+                          elevation: 4.0,
+                          margin: const EdgeInsets.all(8.0),
+                          child: Column(
+                            children: [
+                              CircleAvatar(
+                                radius: 50,
+                                backgroundImage: NetworkImage(imageURL),
+                              ),
+                              SizedBox(height: 10),
+                              buildInfoCard('Name', tutorName, Icons.person),
+                              buildInfoCard(
+                                  'Gender', gender, Icons.transgender),
+                              buildInfoCard(
+                                  'Fees/class', 'RM$rate', Icons.money),
+                              buildInfoCard('Mode', mode, Icons.computer),
+                              buildInfoCard('Subject', subject, Icons.book),
+                              buildInfoCard('About Me', aboutMe, Icons.info),
+                              if (mode != "Online")
+                                Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 8.0),
+                                  child: Column(
+                                    children: [
+                                      buildInfoCard(
+                                          'Address', address, Icons.home),
+                                      buildInfoCard(
+                                          'City', city, Icons.location_city),
+                                      buildInfoCard('State', state, Icons.map),
+                                      buildInfoCard(
+                                          'Zip Code', zipcode, Icons.pin_drop),
+                                    ],
+                                  ),
+                                ),
+                            ],
                           ),
                         ),
                       ],

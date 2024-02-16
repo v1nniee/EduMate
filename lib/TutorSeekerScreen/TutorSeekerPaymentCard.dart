@@ -269,6 +269,19 @@ class _TutorSeekerPaymentCardState extends State<TutorSeekerPaymentCard> {
         .doc(tutorseekerId)
         .collection('Payment')
         .add(paymentData);
+    
+    Map<String, dynamic> studentPaymentData = {
+      'PaymentDate': paymentDate,
+      'PaymentAmount': paymentAmount,
+      'TutorSeekerId': tutorseekerId,
+      'TutorSeekerName': _tutorseekerName,
+    };
+
+    await FirebaseFirestore.instance
+        .collection('Tutor')
+        .doc(widget.tutorId)
+        .collection('StudentPayment')
+        .add(studentPaymentData);
   }
 
   @override
@@ -282,95 +295,120 @@ class _TutorSeekerPaymentCardState extends State<TutorSeekerPaymentCard> {
           Colors.green; // Since it's accepted, we'll use green color
       String applicationStatusText = 'Accepted';
 
-      return Container(
-        decoration: BoxDecoration(
-          color: cardColor,
-          borderRadius: BorderRadius.circular(8.0),
-        ),
+      return Card(
         margin: EdgeInsets.all(8.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Align(
-                alignment: Alignment.topRight,
-                child: Text(
-                  applicationStatusText,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                  ),
+        elevation: 2.0,
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(8.0),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              ListTile(
+                leading: CircleAvatar(
+                  backgroundImage: NetworkImage(widget.imageURL),
                 ),
-              ),
-            ),
-            ListTile(
-              leading: CircleAvatar(
-                backgroundImage: NetworkImage(widget.imageURL),
-              ),
-              title: Text(widget.name),
-              subtitle: Text(widget.subject),
-            ),
-            Padding(
-              padding: EdgeInsets.symmetric(vertical: 8.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  Text('Rating: ${widget.rating}'),
-                  Text('Price: ${widget.fees}/hr'),
-                ],
-              ),
-            ),
-            ButtonBar(
-              alignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => TutorDetailPage(
-                          tutorId: widget.tutorId,
-                          tutorPostId: widget.tutorPostId,
-                        ),
+                title: Row(
+                  children: [
+                    Expanded(child: Text(widget.name)),
+                    Text(
+                      _applicationStatus, // The application status text
+                      style: TextStyle(
+                        color: _applicationStatus == 'accepted'
+                            ? Colors.green
+                            : _applicationStatus == 'rejected'
+                                ? Colors.red
+                                : Colors.orange,
+                        fontWeight: FontWeight.bold,
                       ),
-                    );
-                  },
-                  child: Text('Details'),
+                    ),
+                  ],
                 ),
-                ElevatedButton(
-                  onPressed: () async {
-                    bool result = await stripePaymentHandle
-                        .stripeMakePayment(calculateFees());
-                    if (result) {
-                      DateTime paymentDate = DateTime.now();
-                      DateTime startclassDate = _getNextClassDate(
-                          paymentDate, getDayOfWeekNumber(_day));
-                      DateTime endclassDate = _getEndDate(startclassDate);
-                      _update(paymentDate, calculateFees(), startclassDate,
-                          endclassDate);
-                      // ignore: use_build_context_synchronously
+                subtitle: Text(widget.subject),
+              ),
+              Padding(
+                padding: EdgeInsets.symmetric(vertical: 8.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    _buildInfoWithIcon(Icons.star,
+                        'Rating: ${widget.rating.toStringAsFixed(1)}'),
+                    _buildInfoWithIcon(
+                        Icons.monetization_on, 'RM${widget.fees}'),
+                  ],
+                ),
+              ),
+              ButtonBar(
+                alignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  ElevatedButton.icon(
+                    icon: Icon(Icons.info_outline, size: 16.0),
+                    label: Text('Details'),
+                    onPressed: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => PaymentConfirmationScreen(
-                            tutorSeekerName: _tutorseekerName,
-                            tutorName: widget.name,
-                            subject: widget.subject,
-                            paymentAmount: calculateFees(),
-                            paymentDate: paymentDate,
-                            startclassDate: startclassDate,
-                            endclassDate: endclassDate,
+                          builder: (context) => TutorDetailPage(
+                            tutorId: widget.tutorId,
+                            tutorPostId: widget.tutorPostId,
+                            imageURL: widget.imageURL,
                           ),
                         ),
                       );
-                    }
-                  },
-                  child: Text('Pay Now'),
-                ),
-              ],
-            ),
-          ],
+                    },
+                    style: ElevatedButton.styleFrom(
+                      primary: Theme.of(context).primaryColor,
+                      onPrimary: Colors.white,
+                    ),
+                  ),
+                  ElevatedButton.icon(
+                    icon: Icon(Icons.payment, size: 16.0),
+                    label: Text('Pay Now'),
+                    onPressed: () async {
+                      bool result = await stripePaymentHandle
+                          .stripeMakePayment(calculateFees());
+                      if (result) {
+                        DateTime paymentDate = DateTime.now();
+                        int dayOfWeekNumber = getDayOfWeekNumber(_day);
+                        // Define startclassDate and endclassDate before the async gap
+                        DateTime startclassDate =
+                            _getNextClassDate(paymentDate, dayOfWeekNumber);
+                        DateTime endclassDate = _getEndDate(startclassDate);
+
+                        // Update the payment details
+                        _update(paymentDate, calculateFees(), startclassDate,
+                            endclassDate);
+
+                        // Store the BuildContext in a variable before the async operation
+                        BuildContext currentContext = context;
+
+                        // Use the stored context to navigate to the next screen after the async operation
+                        Navigator.push(
+                          currentContext,
+                          MaterialPageRoute(
+                            builder: (context) => PaymentConfirmationScreen(
+                              tutorSeekerName: _tutorseekerName,
+                              tutorName: widget.name,
+                              subject: widget.subject,
+                              paymentAmount: calculateFees(),
+                              paymentDate: paymentDate,
+                              startclassDate: startclassDate,
+                              endclassDate: endclassDate,
+                            ),
+                          ),
+                        );
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      primary: Colors.blue,
+                      onPrimary: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       );
     } else {
@@ -407,5 +445,15 @@ class _TutorSeekerPaymentCardState extends State<TutorSeekerPaymentCard> {
 
   DateTime _getEndDate(DateTime startDate) {
     return startDate.add(Duration(days: 4 * 7));
+  }
+
+  Widget _buildInfoWithIcon(IconData icon, String text) {
+    return Row(
+      children: [
+        Icon(icon, size: 16.0),
+        SizedBox(width: 4.0),
+        Text(text),
+      ],
+    );
   }
 }

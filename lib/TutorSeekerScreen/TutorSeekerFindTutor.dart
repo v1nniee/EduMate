@@ -307,6 +307,7 @@ class _TutorSeekerFindTutorState extends State<TutorSeekerFindTutor> {
                                   'Subject not specified';
                           String fees = tutorPostDoc.get('RatePerHour') ??
                               'Rate not specified';
+                          String mode = tutorPostDoc.get('Mode')??'Mode not specified';
                           String tutorPostId = tutorPostDoc.id;
 
                           tutorCards.add(
@@ -339,6 +340,7 @@ class _TutorSeekerFindTutorState extends State<TutorSeekerFindTutor> {
                                   imageURL: imageUrl,
                                   rating: 4.0,
                                   fees: fees,
+                                  mode: mode,
                                 );
                               },
                             ),

@@ -126,103 +126,134 @@ class _ApplicationStatusTutorCardState
   }
 
   @override
-  Widget build(BuildContext context) {
-    Color cardColor;
-    String applicationStatusText;
+Widget build(BuildContext context) {
+  Color cardColor;
+  String applicationStatusText;
 
-    switch (_applicationStatus) {
-      case 'rejected':
-        cardColor = Colors.red;
-        applicationStatusText = 'Rejected';
-        break;
-      case 'pending':
-        cardColor = Colors.orange;
-        applicationStatusText = 'Pending';
-        break;
-      case 'accepted':
-        cardColor = Colors.green;
-        applicationStatusText = 'Accepted';
-        break;
-      default:
-        cardColor = Colors.grey;
-        applicationStatusText = 'Unknown';
-    }
+  switch (_applicationStatus) {
+    case 'rejected':
+      cardColor = Colors.red;
+      applicationStatusText = 'Rejected';
+      break;
+    case 'pending':
+      cardColor = Colors.orange;
+      applicationStatusText = 'Pending';
+      break;
+    case 'accepted':
+      cardColor = Colors.green;
+      applicationStatusText = 'Accepted';
+      break;
+    default:
+      cardColor = Colors.grey;
+      applicationStatusText = 'Unknown';
+  }
 
-    return Container(
+
+  double topPadding = 8.0;
+
+    return Card(
+    margin: EdgeInsets.all(4.0),
+    elevation: 2.0,
+    child: Container(
       decoration: BoxDecoration(
         color: cardColor,
         borderRadius: BorderRadius.circular(8.0),
       ),
-      margin: EdgeInsets.all(8.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Align(
-              alignment: Alignment.topRight,
-              child: Text(
-                applicationStatusText,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ),
           ListTile(
             leading: CircleAvatar(
               backgroundImage: NetworkImage(widget.imageURL),
             ),
-            title: Text(widget.name),
+            title: Text(widget.name,style: TextStyle(
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+              ),),
             subtitle: Text(widget.subject),
+            trailing: Text(
+              applicationStatusText,
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
+          
           Padding(
             padding: EdgeInsets.symmetric(vertical: 8.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                Text('Rating: ${widget.rating}'),
-                Text('Price: ${widget.fees}/hr'),
+                _buildInfoWithIcon(Icons.star, 'Rating: ${widget.rating.toStringAsFixed(1)}'),
+                _buildInfoWithIcon(Icons.monetization_on, 'RM${widget.fees}'),
               ],
             ),
           ),
-          ButtonBar(
-            alignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => TutorDetailPage(
-                        tutorId: widget.tutorId,
-                        tutorPostId: widget.tutorPostId,
+            ButtonBar(
+              alignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton.icon(
+                  icon: Icon(Icons.info_outline, size: 16.0),
+                  label: Text('Details'),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => TutorDetailPage(
+                          tutorId: widget.tutorId,
+                          tutorPostId: widget.tutorPostId,
+                          imageURL: widget.imageURL,
+                        ),
                       ),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    primary: Theme.of(context).primaryColor,
+                    onPrimary: Colors.white,
+                  ),
+                ),
+                if (_applicationStatus == "accepted")
+                  ElevatedButton.icon(
+                    icon: Icon(Icons.payment, size: 16.0),
+                    label: Text('Pay Now'),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => TutorSeekerPayment()),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      primary: Colors.blue,
+                      onPrimary: Colors.white,
                     ),
-                  );
-                },
-                child: Text('Details'),
-              ),
-              _applicationStatus == "accepted"
-                  ? ElevatedButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => TutorSeekerPayment()),
-                        );
-                      },
-                      child: Text('Pay Now'),
-                    )
-                  : ElevatedButton(
-                      onPressed: _cancelApplication,
-                      child: Text('Cancel Application'),
+                  )
+                else
+                  ElevatedButton.icon(
+                    icon: Icon(Icons.cancel, size: 16.0),
+                    label: Text('Cancel Application'),
+                    onPressed: _cancelApplication,
+                    style: ElevatedButton.styleFrom(
+                      primary: Colors.red,
+                      onPrimary: Colors.white,
                     ),
-            ],
-          ),
-        ],
+                  ),
+              ],
+            ),
+          ],
+        ),
       ),
+    );
+  }
+
+  Widget _buildInfoWithIcon(IconData icon, String text) {
+    return Row(
+      children: [
+        Icon(icon, size: 16.0),
+        SizedBox(width: 4.0),
+        Text(text),
+      ],
     );
   }
 }

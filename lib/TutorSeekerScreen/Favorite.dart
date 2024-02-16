@@ -207,6 +207,9 @@ class _FavoriteTutorState extends State<FavoriteTutor> {
                                       String fees =
                                           tutorPostDoc.get('RatePerHour') ??
                                               'Rate not specified';
+                                      String mode =
+                                          tutorPostDoc.get('Mode') ??
+                                              'Mode not specified';
                                       String tutorPostId = tutorPostDoc.id;
 
                                       tutorCards.add(
@@ -241,6 +244,7 @@ class _FavoriteTutorState extends State<FavoriteTutor> {
                                               imageURL: imageUrl,
                                               rating: 4.0,
                                               fees: fees,
+                                              mode: mode,
                                             );
                                           },
                                         ),

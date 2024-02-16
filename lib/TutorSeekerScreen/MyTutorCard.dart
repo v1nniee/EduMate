@@ -161,77 +161,113 @@ class _MyTutorCardState extends State<MyTutorCard> {
     if (_applicationStatus == 'paid') {
       _loadDate();
       Color cardColor =
-          Colors.green; // Since it's accepted, we'll use green color
+          const Color.fromARGB(255, 207, 240, 208); // Since it's accepted, we'll use green color
       String applicationStatusText = 'Paid';
 
-      return Container(
-        decoration: BoxDecoration(
-          color: cardColor,
+      return Card(
+        color: cardColor,
+        elevation: 4.0,
+        margin: EdgeInsets.all(8.0),
+        shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8.0),
         ),
-        margin: EdgeInsets.all(8.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Align(
-                alignment: Alignment.topRight,
-                child: Text(
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            children: [
+              ListTile(
+                leading: CircleAvatar(
+                  backgroundImage: NetworkImage(widget.imageURL),
+                ),
+                title: Text(widget.name,
+                    style: TextStyle(
+                        color: Colors.black, fontWeight: FontWeight.bold)),
+                subtitle:
+                    Text(widget.subject, style: TextStyle(color: Colors.black)),
+                trailing: Text(
                   applicationStatusText,
-                  style: const TextStyle(
-                    color: Colors.white,
+                  style: TextStyle(
+                    color: Colors.black,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
               ),
-            ),
-            ListTile(
-              leading: CircleAvatar(
-                backgroundImage: NetworkImage(widget.imageURL),
+              Padding(
+                padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    _buildInfoWithIcon(Icons.star,
+                        'Rating: ${widget.rating.toStringAsFixed(1)}'),
+                    _buildInfoWithIcon(Icons.attach_money, 'RM ${widget.fees}'),
+                  ],
+                ),
               ),
-              title: Text(widget.name),
-              subtitle: Text(widget.subject),
-            ),
-            Padding(
-              padding: EdgeInsets.symmetric(vertical: 8.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              ButtonBar(
+                alignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  Text('Rating: ${widget.rating}'),
-                  Text('Price: ${widget.fees}/hr'),
+                  ElevatedButton.icon(
+                    icon: Icon(Icons.info_outline, size: 16.0),
+                    label: Text('Details'),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => TutorDetailPage(
+                            tutorId: widget.tutorId,
+                            tutorPostId: widget.tutorPostId,
+                            imageURL: widget.imageURL,
+                          ),
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      primary: Theme.of(context).primaryColor,
+                      onPrimary: Colors.white,
+                    ),
+                  ),
+                  ElevatedButton.icon(
+                    icon: Icon(Icons.cancel, size: 16.0),
+                    label: Text('Cancel Application'),
+                    onPressed: _cancelApplication,
+                    style: ElevatedButton.styleFrom(
+                      primary: Colors.red,
+                      onPrimary: Colors.white,
+                    ),
+                  ),
                 ],
               ),
-            ),
-            ButtonBar(
-              alignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => TutorDetailPage(
-                          tutorId: widget.tutorId,
-                          tutorPostId: widget.tutorPostId,
-                        ),
-                      ),
-                    );
-                  },
-                  child: Text('Details'),
-                ),
-                ElevatedButton(
-                  onPressed: _cancelApplication,
-                  child: Text('Cancel Application'),
-                ),
-              ],
-            ),
-          ],
+            ],
+          ),
         ),
       );
     } else {
-      // If the application status is not 'accepted', return an empty Container or any other widget that fits your UI needs when there's no card to display
+      // If the application status is not 'accepted', return an empty Container or any other widget
       return Container();
     }
+  }
+
+  Widget _buildInfoWithIcon(IconData icon, String text) {
+    return Row(
+      children: [
+        Icon(icon, size: 16.0, color: Colors.black),
+        SizedBox(width: 4.0),
+        Text(text, style: TextStyle(color: Colors.black)),
+      ],
+    );
+  }
+
+  Widget _buildActionButton(String text, VoidCallback onPressed) {
+    return ElevatedButton(
+      onPressed: onPressed,
+      child: Text(text),
+      style: ElevatedButton.styleFrom(
+        primary: Colors.black, // Replace with your primary color
+        onPrimary: Colors.black, // Replace with your onPrimary color
+        textStyle: TextStyle(
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+    );
   }
 }

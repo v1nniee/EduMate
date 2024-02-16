@@ -123,6 +123,7 @@ class _FavoriteTutorCardState extends State<FavoriteTutorCard> {
                       builder: (context) => TutorDetailPage(
                         tutorId: widget.tutorId,
                         tutorPostId: widget.tutorPostId,
+                        imageURL: widget.imageURL,
                       ),
                     ),
                   );

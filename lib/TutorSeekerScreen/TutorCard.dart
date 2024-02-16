@@ -16,6 +16,7 @@ class TutorCard extends StatefulWidget {
   final String imageURL;
   final double rating;
   final String fees;
+  final String mode;
   const TutorCard({
     Key? key,
     required this.tutorId,
@@ -25,6 +26,7 @@ class TutorCard extends StatefulWidget {
     required this.rating,
     required this.fees,
     required this.tutorPostId,
+    required this.mode,
   }) : super(key: key);
 
   @override
@@ -218,7 +220,6 @@ class _TutorCardState extends State<TutorCard> {
                             // Rest of your logic to save the selected slot...
                             User? user = FirebaseAuth.instance.currentUser;
                             if (user != null) {
-
                               Map<String, dynamic> tutorPostApplicationData = {
                                 'Day': day,
                                 'StartTime': startTime,
@@ -295,56 +296,81 @@ class _TutorCardState extends State<TutorCard> {
   Widget build(BuildContext context) {
     return Card(
       margin: EdgeInsets.all(8.0),
+      elevation: 2.0,
       child: Column(
         children: [
           ListTile(
             leading: CircleAvatar(
               backgroundImage: NetworkImage(widget.imageURL),
             ),
-            title: Text(widget.name),
+            title: Text(widget.name,
+                style: TextStyle(fontWeight: FontWeight.bold)),
             subtitle: Text(widget.subject),
             trailing: IconButton(
               icon: Icon(
                 isFavorite ? Icons.favorite : Icons.favorite_border,
-                color: isFavorite ? Colors.red : null,
+                color: isFavorite ? Colors.red : Colors.grey,
               ),
               onPressed: _toggleFavorite,
             ),
           ),
           Padding(
-            padding: EdgeInsets.symmetric(vertical: 8.0),
+            padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                Text('Rating: ${widget.rating}'),
-                Text('Price: ${widget.fees}/hr'),
+                _buildInfoWithIcon(
+                    Icons.star, 'Rating: ${widget.rating.toStringAsFixed(1)}'),
+                _buildInfoWithIcon(Icons.monetization_on, 'RM${widget.fees}'),
+                _buildInfoWithIcon(
+                    widget.mode == 'Online' ? Icons.wifi : Icons.person,
+                    widget.mode),
               ],
             ),
           ),
           ButtonBar(
             alignment: MainAxisAlignment.spaceEvenly,
             children: [
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => TutorDetailPage(
-                        tutorId: widget.tutorId,
-                        tutorPostId: widget.tutorPostId,
-                      ),
+              _buildActionButton(context, 'Details', Icons.info_outline, () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => TutorDetailPage(
+                      tutorId: widget.tutorId,
+                      tutorPostId: widget.tutorPostId,
+                      imageURL: widget.imageURL,
                     ),
-                  );
-                },
-                child: Text('Details'),
-              ),
-              ElevatedButton(
-                onPressed: _clickApply,
-                child: Text('Apply'),
-              ),
+                  ),
+                );
+              }),
+              _buildActionButton(context, 'Apply', Icons.send, _clickApply),
             ],
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildInfoWithIcon(IconData icon, String text) {
+    return Row(
+      children: [
+        Icon(icon, size: 16.0),
+        SizedBox(width: 4.0),
+        Text(text),
+      ],
+    );
+  }
+
+  Widget _buildActionButton(BuildContext context, String text, IconData icon,
+      VoidCallback onPressed) {
+    return ElevatedButton.icon(
+      onPressed: onPressed,
+      icon: Icon(icon, size: 16.0),
+      label: Text(text),
+      style: ElevatedButton.styleFrom(
+        primary:
+            Theme.of(context).primaryColor, // replace with your primary color
+        onPrimary: Colors.white, // replace with your onPrimary color
       ),
     );
   }

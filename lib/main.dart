@@ -77,8 +77,8 @@ void main() async {
       ChangeNotifierProvider<UserTokenNotifier>(
           create: (context) => UserTokenNotifier()),
     ],
-    //child: const OverlaySupport.global(child: MyApp()),
-    child: MyApp(),
+    child: const OverlaySupport.global(child: MyApp()),
+    //child: MyApp(),
   ));
 }
 

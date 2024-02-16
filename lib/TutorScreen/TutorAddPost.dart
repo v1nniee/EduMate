@@ -24,6 +24,7 @@ class _TutorAddPostState extends State<TutorAddPost> {
   var _level = 'Beginner';
   var _ratePerHour = '';
   var _mode = 'Online';
+  var _name = '';
 
   final _ratePerHourController = TextEditingController();
 
@@ -80,6 +81,12 @@ class _TutorAddPostState extends State<TutorAddPost> {
     'Physical',
   ];
 
+  @override
+  void initState() {
+    super.initState();
+    _loadUserProfile();
+  }
+
   Future<List<String>> _uploadFiles() async {
     List<String> downloadUrls = [];
 
@@ -99,6 +106,29 @@ class _TutorAddPostState extends State<TutorAddPost> {
     return downloadUrls;
   }
 
+  Future<void> _loadUserProfile() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    try {
+      // Fetch the status of the tutor post application
+      DocumentSnapshot tutorSeekerSnapshot = await FirebaseFirestore.instance
+          .collection('Tutor')
+          .doc(user?.uid)
+          .get();
+
+      if (tutorSeekerSnapshot.exists) {
+        setState(() {
+          _name = tutorSeekerSnapshot.get('Name');
+        });
+      } else {
+        setState(() {
+          _name = 'Not found';
+        });
+      }
+    } catch (e) {
+      print('Error loading name: $e');
+    }
+  }
+
   void _submit() async {
     if (!_formKey.currentState!.validate()) {
       return;
@@ -115,7 +145,10 @@ class _TutorAddPostState extends State<TutorAddPost> {
 
       List<String> fileUrls = await _uploadFiles();
 
+      
+
       Map<String, dynamic> TutorPostData = {
+        'Name': _name,
         'SubjectsToTeach': _subject,
         'LevelofTeaching': _level,
         'RatePerHour': _ratePerHour,
