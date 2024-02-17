@@ -34,6 +34,7 @@ class TutorDetailPage extends StatelessWidget {
     var state;
     var zipcode;
     var gender;
+    var teachingLevel;
 
     FirebaseFirestore firestore = FirebaseFirestore.instance;
 
@@ -80,6 +81,7 @@ class TutorDetailPage extends StatelessWidget {
                 mode = tutorPostData.get('Mode') ?? 'Unavailable';
                 subject = tutorPostData.get('SubjectsToTeach') ?? 'Unavailable';
                 rate = tutorPostData.get('RatePerHour') ?? 'Unavailable';
+                teachingLevel = tutorPostData.get('LevelofTeaching') ?? 'Unavailable';
 
                 return FutureBuilder<DocumentSnapshot>(
                   future: firestore
@@ -133,6 +135,7 @@ class TutorDetailPage extends StatelessWidget {
                                   'Fees/class', 'RM$rate', Icons.money),
                               buildInfoCard('Mode', mode, Icons.computer),
                               buildInfoCard('Subject', subject, Icons.book),
+                              buildInfoCard('Level of Teaching', subject, Icons.leaderboard),
                               buildInfoCard('About Me', aboutMe, Icons.info),
                               if (mode != "Online")
                                 Padding(

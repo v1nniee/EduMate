@@ -1,4 +1,5 @@
 import 'package:edumateapp/TutorSeekerScreen/Favorite.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:edumateapp/TutorSeekerScreen/TutorCard.dart';
@@ -23,12 +24,58 @@ class _TutorSeekerFindTutorState extends State<TutorSeekerFindTutor> {
   double _selectedRating = 0;
   String _selectedMode = 'any';
   RangeValues _priceRange = RangeValues(0, 100);
-  List<int> _selectedRatings = [];
+  List<int> _selectedRatings = [1, 2, 3, 4, 5];
+  List<String> _subjects = [];
 
   @override
   void dispose() {
     _searchController.dispose();
     super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSubjects();
+    _selectedRatings = [1, 2, 3, 4, 5];
+  }
+
+  void _resetFilters() {
+    setState(() {
+      _selectedRatings = [1, 2, 3, 4, 5];
+      _selectedMode = 'any';
+      _priceRange = RangeValues(0, 100);
+    });
+  }
+
+  Future<void> _loadSubjects() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    try {
+      // Fetch all documents from the 'TutorPost' collection for the current user
+      QuerySnapshot tutorPostsSnapshot = await FirebaseFirestore.instance
+          .collection('Tutor')
+          .doc(user?.uid)
+          .collection('TutorPost')
+          .get();
+
+      List<String> subjectsList = [];
+
+      // Loop through each document to aggregate subjects
+      for (var doc in tutorPostsSnapshot.docs) {
+        if (doc.exists && doc.get('SubjectsToTeach') != null) {
+          // Assuming 'SubjectsToTeach' is an array of subjects
+          List<String> subjects = List.from(doc.get('SubjectsToTeach'));
+          subjectsList.addAll(subjects);
+        }
+      }
+
+      setState(() {
+        // Remove duplicates from the list if necessary
+        _subjects = subjectsList.toSet().toList();
+      });
+    } catch (e) {
+      print('Error loading subjects: $e');
+    }
   }
 
   Widget _buildFilterOptions() {
@@ -146,12 +193,9 @@ class _TutorSeekerFindTutorState extends State<TutorSeekerFindTutor> {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 20.0),
           child: ElevatedButton(
-            onPressed: () {
-              // Apply filters here
-              Navigator.of(context).pop();
-            },
+            onPressed: _resetFilters,
             child: const Text(
-              'Apply Filters',
+              'Reset',
               style: TextStyle(
                 fontSize: 20,
               ),
@@ -278,7 +322,7 @@ class _TutorSeekerFindTutorState extends State<TutorSeekerFindTutor> {
                 final filteredDocs = _searchTerm.isNotEmpty
                     ? snapshot.data!.docs.where((doc) {
                         final tutorName = doc['Name'].toString().toLowerCase();
-                        return tutorName.contains(_searchTerm);
+                        return tutorName.contains(_searchTerm) || _subjects.contains(_searchTerm);
                       }).toList()
                     : snapshot.data!.docs;
 
@@ -307,8 +351,31 @@ class _TutorSeekerFindTutorState extends State<TutorSeekerFindTutor> {
                                   'Subject not specified';
                           String fees = tutorPostDoc.get('RatePerHour') ??
                               'Rate not specified';
-                          String mode = tutorPostDoc.get('Mode')??'Mode not specified';
+                          String mode =
+                              tutorPostDoc.get('Mode') ?? 'Mode not specified';
                           String tutorPostId = tutorPostDoc.id;
+
+                          double rating = 4.9;
+
+                          if (_selectedMode != 'any' &&
+                              mode.toLowerCase() !=
+                                  _selectedMode.toLowerCase()) {
+                            continue;
+                          }
+
+                          if (_selectedRatings.isNotEmpty &&
+                              !_selectedRatings.contains(rating.toInt())) {
+                            continue;
+                          }
+
+                          if ((_priceRange.start > 0 ||
+                              _priceRange.end < 100)) {
+                            double price = double.parse(fees);
+                            if (price < _priceRange.start ||
+                                price > _priceRange.end) {
+                              continue;
+                            }
+                          }
 
                           tutorCards.add(
                             FutureBuilder<DocumentSnapshot>(
