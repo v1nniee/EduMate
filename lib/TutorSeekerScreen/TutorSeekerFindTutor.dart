@@ -118,7 +118,7 @@ class _TutorSeekerFindTutorState extends State<TutorSeekerFindTutor> {
                         });
                       },
                       style: ElevatedButton.styleFrom(
-                        primary: _selectedRatings.contains(rating)
+                        backgroundColor: _selectedRatings.contains(rating)
                             ? Colors.yellow
                             : Colors.grey,
                       ),
@@ -212,7 +212,7 @@ class _TutorSeekerFindTutorState extends State<TutorSeekerFindTutor> {
                         });
                       },
                       style: ElevatedButton.styleFrom(
-                        primary: _selectedSubject == subject
+                        backgroundColor: _selectedSubject == subject
                             ? Colors.yellow
                             : Colors.grey,
                       ),
@@ -254,7 +254,7 @@ class _TutorSeekerFindTutorState extends State<TutorSeekerFindTutor> {
           });
         },
         style: ElevatedButton.styleFrom(
-          primary: _selectedMode == mode ? Colors.yellow : Colors.grey,
+          backgroundColor: _selectedMode == mode ? Colors.yellow : Colors.grey,
         ),
         child: Text(
           label,

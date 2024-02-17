@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:edumateapp/TutorSeekerScreen/TutorDetailPage.dart';
 
-class TutorSeekerCard extends StatefulWidget {
+class MyStudentCard extends StatefulWidget {
   final String tutorseekerId;
   final String tutorPostId;
   final String name;
@@ -16,7 +16,7 @@ class TutorSeekerCard extends StatefulWidget {
   final String EndTime;
   final String Day;
 
-  const TutorSeekerCard({
+  const MyStudentCard({
     Key? key,
     required this.tutorseekerId,
     required this.name,
@@ -32,10 +32,10 @@ class TutorSeekerCard extends StatefulWidget {
   }) : super(key: key);
 
   @override
-  _TutorSeekerCardState createState() => _TutorSeekerCardState();
+  _MyStudentCardState createState() => _MyStudentCardState();
 }
 
-class _TutorSeekerCardState extends State<TutorSeekerCard> {
+class _MyStudentCardState extends State<MyStudentCard> {
   String _name = '';
   @override
   void initState() {
@@ -220,43 +220,7 @@ class _TutorSeekerCardState extends State<TutorSeekerCard> {
               ],
             ),
             // Second Row: Buttons
-            Padding(
-              padding:
-                  const EdgeInsets.only(top: 8.0), // Add padding at the top
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment
-                    .center, // Align buttons to the start of the row
-                children: <Widget>[
-                  ElevatedButton(
-                    onPressed: () {
-                      _updateStatus('rejected');
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red, // Background color for Reject
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                    ),
-                    child: const Text('Reject',
-                        style: TextStyle(color: Colors.white)),
-                  ),
-                  const SizedBox(width: 20),
-                  ElevatedButton(
-                    onPressed: () {
-                      _updateStatus('accepted');
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green, // Background color for Accept
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                    ),
-                    child:
-                        Text('Accept', style: TextStyle(color: Colors.white)),
-                  ),
-                ],
-              ),
-            ),
+            
           ],
         ),
       ),

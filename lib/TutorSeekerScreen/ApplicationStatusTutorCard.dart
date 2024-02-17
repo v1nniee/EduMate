@@ -209,8 +209,7 @@ Widget build(BuildContext context) {
                     );
                   },
                   style: ElevatedButton.styleFrom(
-                    primary: Theme.of(context).primaryColor,
-                    onPrimary: Colors.white,
+                    foregroundColor: Colors.white, backgroundColor: Theme.of(context).primaryColor,
                   ),
                 ),
                 if (_applicationStatus == "accepted")
@@ -225,8 +224,7 @@ Widget build(BuildContext context) {
                       );
                     },
                     style: ElevatedButton.styleFrom(
-                      primary: Colors.blue,
-                      onPrimary: Colors.white,
+                      foregroundColor: Colors.white, backgroundColor: Colors.blue,
                     ),
                   )
                 else
@@ -235,8 +233,7 @@ Widget build(BuildContext context) {
                     label: Text('Cancel Application'),
                     onPressed: _cancelApplication,
                     style: ElevatedButton.styleFrom(
-                      primary: Colors.red,
-                      onPrimary: Colors.white,
+                      foregroundColor: Colors.white, backgroundColor: Colors.red,
                     ),
                   ),
               ],

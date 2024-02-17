@@ -41,5 +41,5 @@ class SendNotificationClass {
     } catch (e) {
       print(e.toString());
     }
-  }
+  } 
 }

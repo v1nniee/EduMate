@@ -1,4 +1,6 @@
 import 'package:edumateapp/TutorScreen/AvailibilitySlot.dart';
+import 'package:edumateapp/TutorScreen/MyStudent.dart';
+import 'package:edumateapp/TutorScreen/StudentPayment.dart';
 import 'package:edumateapp/TutorScreen/TutorAddPost.dart';
 import 'package:edumateapp/TutorScreen/TutorEditPost.dart';
 import 'package:edumateapp/TutorScreen/TutorHome.dart';
@@ -35,7 +37,7 @@ const TutorFunctionCategories = [
     title: 'My Student',
     color: Colors.white,
     icon: Icons.group, 
-    nextPage: TutorHome(),
+    nextPage: MyStudent(),
   ),
   Category(
     id: 't5',
@@ -49,6 +51,6 @@ const TutorFunctionCategories = [
     title: 'My Student Payment',
     color: Colors.white,
     icon: Icons.payment, 
-    nextPage: TutorHome(),
+    nextPage: StudentPayment(),
   ),
 ];

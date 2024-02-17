@@ -6,6 +6,7 @@ import 'package:edumateapp/AdminScreen/AdminTabScreen.dart';
 import 'package:edumateapp/FCM/FCMSetUp.dart';
 import 'package:edumateapp/Provider/TokenNotifier.dart';
 import 'package:edumateapp/Provider/UserTypeNotifier.dart';
+import 'package:edumateapp/TutorScreen/TutorNotification.dart';
 import 'package:edumateapp/TutorScreen/TutorTabScreen.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -20,6 +21,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:workmanager/workmanager.dart';
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
@@ -59,6 +61,8 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   });
 }
 
+
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -77,8 +81,8 @@ void main() async {
       ChangeNotifierProvider<UserTokenNotifier>(
           create: (context) => UserTokenNotifier()),
     ],
-    //child: const OverlaySupport.global(child: MyApp()),
-    child: MyApp(),
+    child: const OverlaySupport.global(child: MyApp()),
+    //child: MyApp(),
   ));
 }
 

@@ -81,8 +81,7 @@ class Intro extends StatelessWidget {
                   ),
                 ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.yellow, // Button color
-                  onPrimary: Colors.black, // Text color
+                  foregroundColor: Colors.black, backgroundColor: Colors.yellow, // Text color
                   minimumSize: const Size(250, 60),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
@@ -184,8 +183,7 @@ class IntroPage2 extends StatelessWidget {
                   ),
                 ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.yellow, // Button color
-                  onPrimary: Colors.black, // Text color
+                  foregroundColor: Colors.black, backgroundColor: Colors.yellow, // Text color
                   minimumSize: const Size(250, 60),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
@@ -287,8 +285,7 @@ class IntroPage3 extends StatelessWidget {
                   ),
                 ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.yellow, // Button color
-                  onPrimary: Colors.black, // Text color
+                  foregroundColor: Colors.black, backgroundColor: Colors.yellow, // Text color
                   minimumSize: const Size(250, 60),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),

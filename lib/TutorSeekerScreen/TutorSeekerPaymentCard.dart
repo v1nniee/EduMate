@@ -358,8 +358,7 @@ class _TutorSeekerPaymentCardState extends State<TutorSeekerPaymentCard> {
                       );
                     },
                     style: ElevatedButton.styleFrom(
-                      primary: Theme.of(context).primaryColor,
-                      onPrimary: Colors.white,
+                      foregroundColor: Colors.white, backgroundColor: Theme.of(context).primaryColor,
                     ),
                   ),
                   ElevatedButton.icon(
@@ -401,8 +400,7 @@ class _TutorSeekerPaymentCardState extends State<TutorSeekerPaymentCard> {
                       }
                     },
                     style: ElevatedButton.styleFrom(
-                      primary: Colors.blue,
-                      onPrimary: Colors.white,
+                      foregroundColor: Colors.white, backgroundColor: Colors.blue,
                     ),
                   ),
                 ],

@@ -335,8 +335,7 @@ class _TutorAddPostState extends State<TutorAddPost> {
                         TextButton(
                           onPressed: _pickDocument,
                           style: TextButton.styleFrom(
-                            backgroundColor: Colors.orange,
-                            primary: Colors.white,
+                            foregroundColor: Colors.white, backgroundColor: Colors.orange,
                           ),
                           child: const Text('Upload Document'),
                         ),

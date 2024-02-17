@@ -13,15 +13,15 @@ import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
-class TutorSeekerPaymentHistory extends StatefulWidget {
-  const TutorSeekerPaymentHistory({Key? key}) : super(key: key);
+class StudentPayment extends StatefulWidget {
+  const StudentPayment({Key? key}) : super(key: key);
 
   @override
-  _TutorSeekerPaymentHistoryState createState() =>
-      _TutorSeekerPaymentHistoryState();
+  _StudentPaymentState createState() =>
+      _StudentPaymentState();
 }
 
-class _TutorSeekerPaymentHistoryState extends State<TutorSeekerPaymentHistory> {
+class _StudentPaymentState extends State<StudentPayment> {
   late Stream<QuerySnapshot> _paymentStream;
   final String _tutorSeekerId = FirebaseAuth.instance.currentUser!.uid;
 
@@ -30,9 +30,9 @@ class _TutorSeekerPaymentHistoryState extends State<TutorSeekerPaymentHistory> {
     super.initState();
     // Initialize the payment stream
     _paymentStream = FirebaseFirestore.instance
-        .collection('Tutor Seeker')
+        .collection('Tutor')
         .doc(_tutorSeekerId)
-        .collection('Payment')
+        .collection('StudentPayment')
         .orderBy('PaymentDate', descending: true)
         .snapshots();
   }
@@ -79,7 +79,7 @@ class _TutorSeekerPaymentHistoryState extends State<TutorSeekerPaymentHistory> {
         children: [
           const PageHeader(
             backgroundColor: Color.fromARGB(255, 255, 255, 115),
-            headerTitle: 'Payment History',
+            headerTitle: 'My Student Payment',
           ),
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
@@ -127,7 +127,7 @@ class _TutorSeekerPaymentHistoryState extends State<TutorSeekerPaymentHistory> {
                             child: ListTile(
                               leading: Icon(Icons.payment,
                                   color: Theme.of(context).primaryColor),
-                              title: Text(doc['TutorName']),
+                              title: Text(doc['TutorSeekerName']),
                               subtitle: Text(
                                   'Paid on ${DateFormat('dd MMM yyyy').format((doc['PaymentDate'] as Timestamp).toDate())}'),
                               trailing:

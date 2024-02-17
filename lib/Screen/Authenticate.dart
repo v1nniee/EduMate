@@ -125,12 +125,11 @@ class _AuthenticatePageState extends State<AuthenticatePage> {
                       });
                     },
                     style: ElevatedButton.styleFrom(
-                      primary: _isLogin
-                          ? Theme.of(context).colorScheme.primaryContainer
-                          : Colors.white, // Button color
-                      onPrimary: _isLogin
+                      foregroundColor: _isLogin
                           ? Color(0xFF795ED9)
-                          : Colors.black, // Text color
+                          : Colors.black, backgroundColor: _isLogin
+                          ? Theme.of(context).colorScheme.primaryContainer
+                          : Colors.white, // Text color
                       shape: const RoundedRectangleBorder(
                         borderRadius: BorderRadius.only(
                           topLeft: Radius.circular(20),
@@ -154,12 +153,11 @@ class _AuthenticatePageState extends State<AuthenticatePage> {
                       });
                     },
                     style: ElevatedButton.styleFrom(
-                      primary: !_isLogin
-                          ? Theme.of(context).colorScheme.primaryContainer
-                          : Colors.white, // Button color
-                      onPrimary: !_isLogin
+                      foregroundColor: !_isLogin
                           ? Color(0xFF795ED9)
-                          : Colors.black, // Text color
+                          : Colors.black, backgroundColor: !_isLogin
+                          ? Theme.of(context).colorScheme.primaryContainer
+                          : Colors.white, // Text color
                       shape: const RoundedRectangleBorder(
                         borderRadius: BorderRadius.only(
                           topRight: Radius.circular(20),

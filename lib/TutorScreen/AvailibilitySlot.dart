@@ -20,12 +20,57 @@ class _AvailabilitySlotState extends State<AvailabilitySlot> {
       'startTime': null,
       'endTime': null,
     });
+
+    // Fetch existing availability slots
+    _fetchExistingAvailabilitySlots();
   }
 
   final _formKey = GlobalKey<FormState>();
   List<Map<String, dynamic>> _availability = [];
+  List<Map<String, dynamic>> _existingSlots = [];
   var _isLoading = false;
   var _isValid = false;
+
+  void _fetchExistingAvailabilitySlots() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      String userId = user.uid;
+
+      try {
+        QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+            .collection('Tutor')
+            .doc(userId)
+            .collection('AvailibilitySlot')
+            .get();
+
+        var fetchedSlots = querySnapshot.docs.map((doc) {
+          Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+          // Assuming 'day', 'startTime', and 'endTime' are stored in the correct formats
+          // Convert 'startTime' and 'endTime' from String to TimeOfDay
+          return {
+            'day': data['day'],
+            'startTime': _timeFromString(data['startTime']),
+            'endTime': _timeFromString(data['endTime']),
+          };
+        }).toList();
+
+        setState(() {
+          _availability = fetchedSlots;
+        });
+      } catch (e) {
+        print('Error fetching tutor availability slots: $e');
+      }
+    } else {
+      print('No user signed in');
+    }
+  }
+
+  TimeOfDay? _timeFromString(String? timeString) {
+    if (timeString == null) return null;
+    final format = DateFormat('HH:mm'); // Adjust the format if necessary
+    DateTime? dateTime = format.parseStrict(timeString);
+    return TimeOfDay(hour: dateTime.hour, minute: dateTime.minute);
+  }
 
   void _submit() async {
     if (!_formKey.currentState!.validate()) {
@@ -72,7 +117,7 @@ class _AvailabilitySlotState extends State<AvailabilitySlot> {
               .collection('Tutor')
               .doc(userId)
               .collection('AvailibilitySlot')
-              .add(slot); 
+              .add(slot);
         }
       } catch (error) {
         print('Error saving tutor availability slots: $error');
@@ -184,7 +229,7 @@ class _AvailabilitySlotState extends State<AvailabilitySlot> {
                       child: ElevatedButton(
                         onPressed: _addAvailability,
                         style: ElevatedButton.styleFrom(
-                          primary:
+                          backgroundColor:
                               Colors.transparent, // Use your theme color here
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(20),

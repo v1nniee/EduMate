@@ -222,8 +222,7 @@ class _MyTutorCardState extends State<MyTutorCard> {
                       );
                     },
                     style: ElevatedButton.styleFrom(
-                      primary: Theme.of(context).primaryColor,
-                      onPrimary: Colors.white,
+                      foregroundColor: Colors.white, backgroundColor: Theme.of(context).primaryColor,
                     ),
                   ),
                   ElevatedButton.icon(
@@ -231,8 +230,7 @@ class _MyTutorCardState extends State<MyTutorCard> {
                     label: Text('Cancel Application'),
                     onPressed: _cancelApplication,
                     style: ElevatedButton.styleFrom(
-                      primary: Colors.red,
-                      onPrimary: Colors.white,
+                      foregroundColor: Colors.white, backgroundColor: Colors.red,
                     ),
                   ),
                 ],
@@ -262,8 +260,7 @@ class _MyTutorCardState extends State<MyTutorCard> {
       onPressed: onPressed,
       child: Text(text),
       style: ElevatedButton.styleFrom(
-        primary: Colors.black, // Replace with your primary color
-        onPrimary: Colors.black, // Replace with your onPrimary color
+        foregroundColor: Colors.black, backgroundColor: Colors.black, // Replace with your onPrimary color
         textStyle: TextStyle(
           fontWeight: FontWeight.bold,
         ),

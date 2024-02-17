@@ -208,7 +208,7 @@ class _TutorSeekerProfileState extends State<TutorSeekerProfile> {
                       // Navigate to settings screen
                     },
                     style: ElevatedButton.styleFrom(
-                      primary: const Color.fromARGB(255, 255, 255, 115),
+                      backgroundColor: const Color.fromARGB(255, 255, 255, 115),
                       minimumSize: const Size(
                           double.infinity, 50), // Make the button wider
                     ),
@@ -224,7 +224,7 @@ class _TutorSeekerProfileState extends State<TutorSeekerProfile> {
                       // After logout, navigate user to the login screen
                     },
                     style: ElevatedButton.styleFrom(
-                      primary: const Color.fromARGB(255, 255, 255, 115),
+                      backgroundColor: const Color.fromARGB(255, 255, 255, 115),
                       minimumSize: const Size(
                           double.infinity, 50), // Make the button wider
                     ),

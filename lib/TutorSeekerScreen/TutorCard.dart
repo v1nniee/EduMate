@@ -368,9 +368,7 @@ class _TutorCardState extends State<TutorCard> {
       icon: Icon(icon, size: 16.0),
       label: Text(text),
       style: ElevatedButton.styleFrom(
-        primary:
-            Theme.of(context).primaryColor, // replace with your primary color
-        onPrimary: Colors.white, // replace with your onPrimary color
+        foregroundColor: Colors.white, backgroundColor: Theme.of(context).primaryColor, // replace with your onPrimary color
       ),
     );
   }
