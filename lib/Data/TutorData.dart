@@ -2,7 +2,7 @@ import 'package:edumateapp/TutorScreen/AvailibilitySlot.dart';
 import 'package:edumateapp/TutorScreen/MyStudent.dart';
 import 'package:edumateapp/TutorScreen/StudentPayment.dart';
 import 'package:edumateapp/TutorScreen/TutorAddPost.dart';
-import 'package:edumateapp/TutorScreen/TutorEditPost.dart';
+import 'package:edumateapp/TutorScreen/TutorManagePost.dart';
 import 'package:edumateapp/TutorScreen/TutorHome.dart';
 import 'package:edumateapp/TutorScreen/TutorSeekerApplicationRequest.dart';
 import 'package:flutter/material.dart';
@@ -20,10 +20,10 @@ const TutorFunctionCategories = [
   ),
   Category(
     id: 't2',
-    title: 'Edit Post',
+    title: 'Manage Post',
     color: Colors.white,
     icon: Icons.edit, 
-    nextPage: TutorEditPost(),
+    nextPage: TutorManagePost(),
   ),
   Category(
     id: 't3',

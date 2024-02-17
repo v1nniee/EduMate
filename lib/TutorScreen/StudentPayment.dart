@@ -23,7 +23,7 @@ class StudentPayment extends StatefulWidget {
 
 class _StudentPaymentState extends State<StudentPayment> {
   late Stream<QuerySnapshot> _paymentStream;
-  final String _tutorSeekerId = FirebaseAuth.instance.currentUser!.uid;
+  final String _tutorId = FirebaseAuth.instance.currentUser!.uid;
 
   @override
   void initState() {
@@ -31,7 +31,7 @@ class _StudentPaymentState extends State<StudentPayment> {
     // Initialize the payment stream
     _paymentStream = FirebaseFirestore.instance
         .collection('Tutor')
-        .doc(_tutorSeekerId)
+        .doc(_tutorId)
         .collection('StudentPayment')
         .orderBy('PaymentDate', descending: true)
         .snapshots();
