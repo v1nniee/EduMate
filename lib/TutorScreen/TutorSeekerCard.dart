@@ -36,9 +36,35 @@ class TutorSeekerCard extends StatefulWidget {
 }
 
 class _TutorSeekerCardState extends State<TutorSeekerCard> {
+  String _name = '';
   @override
   void initState() {
     super.initState();
+    _loadTutorName();
+  }
+
+  
+  Future<void> _loadTutorName() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    try {
+      // Fetch the status of the tutor post application
+      DocumentSnapshot tutorSnapshot = await FirebaseFirestore.instance
+          .collection('Tutor')
+          .doc(user?.uid)
+          .get();
+
+      if (tutorSnapshot.exists) {
+        setState(() {
+          _name = tutorSnapshot.get('Name');
+        });
+      } else {
+        setState(() {
+          _name = 'Not found';
+        });
+      }
+    } catch (e) {
+      print('Error loading tutor doc: $e');
+    }
   }
 
   void _showDialog(String title, String content) {
@@ -73,7 +99,7 @@ class _TutorSeekerCardState extends State<TutorSeekerCard> {
 
     Map<String, dynamic> updateData = {
       'Status': newStatus,
-      'LastPayment': null, // Assuming you want to set this to null initially
+      'LastPayment': null,
     };
 
     // Only add the AcceptedDate field if the new status is 'accepted'
@@ -90,7 +116,6 @@ class _TutorSeekerCardState extends State<TutorSeekerCard> {
       _showDialog('Error', 'Failed to update tutor seeker status: $e');
     });
 
-    // Update in Tutor's collection
     await FirebaseFirestore.instance
         .doc(
             'Tutor/$tutorId/ApplicationRequest/${widget.tutorseekerId}_${widget.tutorPostId}')
@@ -98,6 +123,29 @@ class _TutorSeekerCardState extends State<TutorSeekerCard> {
         .catchError((e) {
       _showDialog('Error', 'Failed to update status: $e');
     });
+
+    _sendNotification(widget.tutorseekerId, "Application Update",
+        "Your Application from ${_name} has been ${widget.status}.", now);
+  }
+
+  void _sendNotification(
+      String tutorseekerId, String title, String content, DateTime NotificationTime) async {
+    Map<String, dynamic> NotificationData = {
+      'Title': title,
+      'Content': content,
+      'Status': "Unsend",
+      'NotificationTime': NotificationTime,
+    };
+
+    try {
+      await FirebaseFirestore.instance
+          .collection('Tutor Seeker')
+          .doc(tutorseekerId)
+          .collection('Notification')
+          .add(NotificationData);
+    } catch (error) {
+      print('Error saving notification: $error');
+    }
   }
 
   @override
@@ -150,7 +198,7 @@ class _TutorSeekerCardState extends State<TutorSeekerCard> {
                     children: <Widget>[
                       Text(
                         widget.name,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.bold,
                         ),

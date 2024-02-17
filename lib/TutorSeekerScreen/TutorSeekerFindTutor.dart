@@ -25,7 +25,43 @@ class _TutorSeekerFindTutorState extends State<TutorSeekerFindTutor> {
   String _selectedMode = 'any';
   RangeValues _priceRange = RangeValues(0, 100);
   List<int> _selectedRatings = [1, 2, 3, 4, 5];
-  List<String> _subjects = [];
+  final List<String> _SubjectsList = [
+    'All',
+    'Lower Primary Bahasa Melayu',
+    'Lower Primary English',
+    'Lower Primary Tamil',
+    'Lower Primary Mandarin',
+    'Lower Primary Moral',
+    'Lower Primary Science',
+    'Lower Primary Mathematics',
+    'Upper Primary Bahasa Melayu',
+    'Upper Primary English',
+    'Upper Primary Tamil',
+    'Upper Primary Mandarin',
+    'Upper Primary Moral',
+    'Upper Primary Science',
+    'Upper Primary Mathematics',
+    'Upper Primary Sejarah',
+    'Lower Secondary Bahasa Melayu',
+    'Lower Secondary English',
+    'Lower Secondary Moral',
+    'Lower Secondary Sejarah',
+    'Lower Secondary Mathematics',
+    'Lower Secondary Science',
+    'Upper Secondary Bahasa Melayu',
+    'Upper Secondary English',
+    'Upper Secondary Moral',
+    'Upper Secondary Science',
+    'Upper Secondary Mathematics',
+    'Upper Secondary Sejarah',
+    'Upper Secondary Physics',
+    'Upper Secondary Chemistry',
+    'Upper Secondary Biology',
+    'Upper Secondary Additional Math',
+    'Upper Secondary Accounting',
+    'Upper Secondary Business Studies',
+  ];
+  String _selectedSubject = 'All';
 
   @override
   void dispose() {
@@ -36,46 +72,16 @@ class _TutorSeekerFindTutorState extends State<TutorSeekerFindTutor> {
   @override
   void initState() {
     super.initState();
-    _loadSubjects();
     _selectedRatings = [1, 2, 3, 4, 5];
   }
 
   void _resetFilters() {
     setState(() {
       _selectedRatings = [1, 2, 3, 4, 5];
+      _selectedSubject = 'All';
       _selectedMode = 'any';
       _priceRange = RangeValues(0, 100);
     });
-  }
-
-  Future<void> _loadSubjects() async {
-    User? user = FirebaseAuth.instance.currentUser;
-    try {
-      // Fetch all documents from the 'TutorPost' collection for the current user
-      QuerySnapshot tutorPostsSnapshot = await FirebaseFirestore.instance
-          .collection('Tutor')
-          .doc(user?.uid)
-          .collection('TutorPost')
-          .get();
-
-      List<String> subjectsList = [];
-
-      // Loop through each document to aggregate subjects
-      for (var doc in tutorPostsSnapshot.docs) {
-        if (doc.exists && doc.get('SubjectsToTeach') != null) {
-          // Assuming 'SubjectsToTeach' is an array of subjects
-          List<String> subjects = List.from(doc.get('SubjectsToTeach'));
-          subjectsList.addAll(subjects);
-        }
-      }
-
-      setState(() {
-        // Remove duplicates from the list if necessary
-        _subjects = subjectsList.toSet().toList();
-      });
-    } catch (e) {
-      print('Error loading subjects: $e');
-    }
   }
 
   Widget _buildFilterOptions() {
@@ -185,6 +191,38 @@ class _TutorSeekerFindTutorState extends State<TutorSeekerFindTutor> {
                   _priceRange.start.toStringAsFixed(2),
                   _priceRange.end.toStringAsFixed(2),
                 ),
+              ),
+              const Text(
+                "Subjects",
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              SizedBox(height: 8),
+              Wrap(
+                children: _SubjectsList.map((subject) {
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 8.0),
+                    child: ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          // Set the selected subject directly
+                          _selectedSubject = subject;
+                        });
+                      },
+                      style: ElevatedButton.styleFrom(
+                        primary: _selectedSubject == subject
+                            ? Colors.yellow
+                            : Colors.grey,
+                      ),
+                      child: Text(
+                        subject,
+                        style: TextStyle(fontSize: 16),
+                      ),
+                    ),
+                  );
+                }).toList(),
               ),
             ],
           ),
@@ -322,7 +360,7 @@ class _TutorSeekerFindTutorState extends State<TutorSeekerFindTutor> {
                 final filteredDocs = _searchTerm.isNotEmpty
                     ? snapshot.data!.docs.where((doc) {
                         final tutorName = doc['Name'].toString().toLowerCase();
-                        return tutorName.contains(_searchTerm) || _subjects.contains(_searchTerm);
+                        return tutorName.contains(_searchTerm);
                       }).toList()
                     : snapshot.data!.docs;
 
@@ -375,6 +413,12 @@ class _TutorSeekerFindTutorState extends State<TutorSeekerFindTutor> {
                                 price > _priceRange.end) {
                               continue;
                             }
+                          }
+
+                          if (_selectedSubject.isNotEmpty &&
+                              !_selectedSubject.contains("All") &&
+                              !_selectedSubject.contains(subject)) {
+                            continue;
                           }
 
                           tutorCards.add(

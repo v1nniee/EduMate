@@ -58,13 +58,13 @@ class _TutorSeekerApplicationRequestState
       for (var profile in userProfile.docs) {
         String name = profile['Name'];
         String imageURL = profile[
-            'ImageUrl']; // Make sure the field name matches your Firestore
+            'ImageUrl']; 
         String grade =
-            profile['Grade']; // Make sure the field name matches your Firestore
+            profile['Grade']; 
         String requirement = profile[
-            'Requirement']; // Make sure the field name matches your Firestore
+            'Requirement']; 
 
-        // Create a TutorSeekerCard for each application
+        
         TutorSeekerCard card = TutorSeekerCard(
           tutorseekerId: seekerId,
           tutorPostId: tutorPostId,
