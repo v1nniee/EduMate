@@ -23,7 +23,6 @@ class TutorSeekerApplicationRequest extends StatefulWidget {
 class _TutorSeekerApplicationRequestState
     extends State<TutorSeekerApplicationRequest> {
   final TextEditingController _searchController = TextEditingController();
-  
 
   @override
   void dispose() {
@@ -40,6 +39,9 @@ class _TutorSeekerApplicationRequestState
     var applicationRequests = await FirebaseFirestore.instance
         .collection('Tutor/$tutorId/ApplicationRequest')
         .get();
+    if (applicationRequests.docs.isEmpty) {
+      return cards;
+    }
 
     for (var applicationRequest in applicationRequests.docs) {
       String seekerId = applicationRequest['TutorSeekerId'];
@@ -57,14 +59,10 @@ class _TutorSeekerApplicationRequestState
 
       for (var profile in userProfile.docs) {
         String name = profile['Name'];
-        String imageURL = profile[
-            'ImageUrl']; 
-        String grade =
-            profile['Grade']; 
-        String requirement = profile[
-            'Requirement']; 
+        String imageURL = profile['ImageUrl'];
+        String grade = profile['Grade'];
+        String requirement = profile['Requirement'];
 
-        
         TutorSeekerCard card = TutorSeekerCard(
           tutorseekerId: seekerId,
           tutorPostId: tutorPostId,
@@ -99,7 +97,6 @@ class _TutorSeekerApplicationRequestState
             backgroundColor: Color.fromARGB(255, 255, 255, 115),
             headerTitle: 'Tutor Seeker Application Request',
           ),
-          
           const SizedBox(height: 12),
           Expanded(
             child: FutureBuilder<List<TutorSeekerCard>>(
@@ -112,14 +109,19 @@ class _TutorSeekerApplicationRequestState
                   return Center(child: Text('Error: ${snapshot.error}'));
                 } else if (snapshot.hasData) {
                   List<TutorSeekerCard> cards = snapshot.data!;
-                  return ListView.builder(
-                    itemCount: cards.length,
-                    itemBuilder: (context, index) {
-                      // Implement search filtering logic if needed
-                      TutorSeekerCard card = cards[index];
-                      return card;
-                    },
-                  );
+                  if (cards.isEmpty) {
+                    return Center(
+                        child: Text('No application requests found.'));
+                  } else {
+                    return ListView.builder(
+                      itemCount: cards.length,
+                      itemBuilder: (context, index) {
+                        // Implement search filtering logic if needed
+                        TutorSeekerCard card = cards[index];
+                        return card;
+                      },
+                    );
+                  }
                 } else {
                   return Center(child: Text('No application requests found.'));
                 }

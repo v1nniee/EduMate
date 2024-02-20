@@ -6,6 +6,7 @@
 import 'dart:io';
 
 import 'package:edumateapp/Data/ZipCodeData.dart';
+import 'package:edumateapp/Provider/TokenNotifier.dart';
 import 'package:edumateapp/TutorSeekerScreen/TutorSeekerTabScreen.dart';
 import 'package:edumateapp/Widgets/PageHeader.dart';
 import 'package:edumateapp/Widgets/UserImagePicker.dart';
@@ -13,6 +14,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:provider/provider.dart';
 
 class TutorSeekerRegistration extends StatefulWidget {
   final VoidCallback onSaved;
@@ -44,7 +46,6 @@ class _TutorSeekerRegistrationState extends State<TutorSeekerRegistration> {
   final _stateController = TextEditingController();
   final _cityController = TextEditingController();
   final _requirementController = TextEditingController();
-  
 
   var _isLoading = false;
   File? _selectedImageFile;
@@ -118,13 +119,17 @@ class _TutorSeekerRegistrationState extends State<TutorSeekerRegistration> {
         if (imageURL != null) 'ImageUrl': imageURL else 'ImageUrl': null,
       };
 
+      final userTokenNotifier =
+          Provider.of<UserTokenNotifier>(context, listen: false);
+      final fcmToken = userTokenNotifier.fcmToken;
+
       try {
-         await FirebaseFirestore.instance
-          .collection('Tutor Seeker')
-          .doc(userId)
-          .collection('UserProfile') 
-          .doc(userId) // The document ID will be the same as the userId
-          .set(userProfileData, SetOptions(merge: true)); 
+        await FirebaseFirestore.instance
+            .collection('Tutor Seeker')
+            .doc(userId)
+            .collection('UserProfile')
+            .doc(userId) // The document ID will be the same as the userId
+            .set(userProfileData, SetOptions(merge: true));
 
         await FirebaseFirestore.instance
             .collection('Tutor Seeker')
@@ -138,6 +143,14 @@ class _TutorSeekerRegistrationState extends State<TutorSeekerRegistration> {
             .collection('Tutor Seeker')
             .doc(userId)
             .set({'UserType': "Tutor Seeker"}, SetOptions(merge: true));
+        setState(() {
+          _isLoading = false;
+        });
+
+        await FirebaseFirestore.instance
+            .collection('Tutor Seeker')
+            .doc(userId)
+            .set({'FCMToken': fcmToken}, SetOptions(merge: true));
         setState(() {
           _isLoading = false;
         });

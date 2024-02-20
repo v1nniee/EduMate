@@ -1,8 +1,6 @@
-
 import 'dart:io';
 
 import 'package:edumateapp/Data/ZipCodeData.dart';
-import 'package:edumateapp/Provider/TokenNotifier.dart';
 import 'package:edumateapp/TutorSeekerScreen/TutorSeekerTabScreen.dart';
 import 'package:edumateapp/Widgets/PageHeader.dart';
 import 'package:edumateapp/Widgets/UserImagePicker.dart';
@@ -10,18 +8,44 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:provider/provider.dart';
+import 'package:flutter/material.dart';
 
-class TutorRegistration extends StatefulWidget {
+class EditTutorProfile extends StatefulWidget {
   final VoidCallback onSaved;
-  const TutorRegistration({super.key, required this.onSaved});
+  final String? name;
+  final String? gender;
+  final String? imageURL;
+  final String? date;
+  final String? mobileNumber;
+  final String? address;
+  final String? zip;
+  final String? state;
+  final String? city;
+  final String? grade;
+  final String? aboutMe;
+
+  const EditTutorProfile({
+    super.key,
+    required this.onSaved,
+    this.name,
+    this.gender,
+    this.imageURL,
+    this.date,
+    this.mobileNumber,
+    this.address,
+    this.zip,
+    this.state,
+    this.city,
+    this.grade,
+    this.aboutMe,
+  });
 
   @override
-  State<TutorRegistration> createState() =>
-      _TutorRegistrationState();
+  State<EditTutorProfile> createState() =>
+      _EditTutorProfileState();
 }
 
-class _TutorRegistrationState extends State<TutorRegistration> {
+class _EditTutorProfileState extends State<EditTutorProfile> {
   final _formKey = GlobalKey<FormState>();
   var _enteredFirstName = '';
   var _enteredLastName = '';
@@ -32,24 +56,43 @@ class _TutorRegistrationState extends State<TutorRegistration> {
   var _enteredState = '';
   var _enteredCity = '';
   var _enteredAboutme = '';
+  String? imageURL;
+  var _gender = 'Male';
 
+  late TextEditingController _firstNameController = TextEditingController();
+  late TextEditingController _lastNameController = TextEditingController();
+  late TextEditingController _dateController = TextEditingController();
+  late TextEditingController _mobileNumberController = TextEditingController();
+  late TextEditingController _addressController = TextEditingController();
+  late TextEditingController _zipController = TextEditingController();
+  late TextEditingController _stateController = TextEditingController();
+  late TextEditingController _cityController = TextEditingController();
+  late TextEditingController _aboutMeController = TextEditingController();
 
-  final _firstNameController = TextEditingController();
-  final _lastNameController = TextEditingController();
-  final TextEditingController _dateController = TextEditingController();
-  final _mobileNumberController = TextEditingController();
-  final _addressController = TextEditingController();
-  final _zipController = TextEditingController();
-  final _stateController = TextEditingController();
-  final _cityController = TextEditingController();
-  final _enteredAboutmeController = TextEditingController();
-
+  @override
+  void initState() {
+    super.initState();
+    _firstNameController =
+        TextEditingController(text: widget.name?.split(' ')[0]);
+    _lastNameController =
+        TextEditingController(text: widget.name?.split(' ')[1]);
+    _dateController = TextEditingController(text: widget.date);
+    _mobileNumberController = TextEditingController(text: widget.mobileNumber);
+    _addressController = TextEditingController(text: widget.address);
+    _zipController = TextEditingController(text: widget.zip);
+    _stateController = TextEditingController(text: widget.state);
+    _cityController = TextEditingController(text: widget.city);
+    _aboutMeController = TextEditingController(text: widget.aboutMe);
+    imageURL = widget.imageURL!;
+    _gender = widget.gender!;
+  }
 
   var _isLoading = false;
   File? _selectedImageFile;
   var _isValid = false;
-  var _gender = 'Male';
-  final List<String> _genderTypes = ['Male', 'Female'];
+
+  final List<String> _userTypes = ['Male', 'Female'];
+
 
   void _submit() async {
     if (!_formKey.currentState!.validate()) {
@@ -65,10 +108,8 @@ class _TutorRegistrationState extends State<TutorRegistration> {
         _isLoading = true;
       });
 
-      String? imageURL;
-
       if (_selectedImageFile != null) {
-        String fileName = 'TutorProfileImages';
+        String fileName = 'TutorSeekerProfileImages';
         Reference storageRef =
             FirebaseStorage.instance.ref().child(fileName).child('$userId.jpg');
 
@@ -95,21 +136,20 @@ class _TutorRegistrationState extends State<TutorRegistration> {
         'ZipCode': _enteredZip,
         'State': _enteredState,
         'City': _enteredCity,
-        'AboutMe': _enteredAboutme,
+        if (_enteredAboutme != null && _enteredAboutme.isNotEmpty)
+          'AboutMe': _enteredAboutme
+        else
+          'AboutMe': null,
         if (imageURL != null) 'ImageUrl': imageURL else 'ImageUrl': null,
       };
 
-      final userTokenNotifier =
-          Provider.of<UserTokenNotifier>(context, listen: false);
-      final fcmToken = userTokenNotifier.fcmToken;
-
       try {
-         await FirebaseFirestore.instance
-          .collection('Tutor')
-          .doc(userId)
-          .collection('UserProfile') 
-          .doc(userId) // The document ID will be the same as the userId
-          .set(userProfileData, SetOptions(merge: true)); 
+        await FirebaseFirestore.instance
+            .collection('Tutor')
+            .doc(userId)
+            .collection('UserProfile')
+            .doc(userId) // The document ID will be the same as the userId
+            .set(userProfileData, SetOptions(merge: true));
 
         await FirebaseFirestore.instance
             .collection('Tutor')
@@ -118,8 +158,7 @@ class _TutorRegistrationState extends State<TutorRegistration> {
         setState(() {
           _isLoading = false;
         });
-      
-        
+
         await FirebaseFirestore.instance
             .collection('Tutor')
             .doc(userId)
@@ -127,17 +166,6 @@ class _TutorRegistrationState extends State<TutorRegistration> {
         setState(() {
           _isLoading = false;
         });
-
-        await FirebaseFirestore.instance
-            .collection('Tutor')
-            .doc(userId)
-            .set({'FCMToken': fcmToken}, SetOptions(merge: true));
-        setState(() {
-          _isLoading = false;
-        });
-
-        
-        
 
         widget.onSaved();
       } catch (error) {
@@ -198,6 +226,7 @@ class _TutorRegistrationState extends State<TutorRegistration> {
 
   @override
   Widget build(BuildContext context) {
+
     double screenHeight = MediaQuery.of(context).size.height;
     double screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(
@@ -217,7 +246,7 @@ class _TutorRegistrationState extends State<TutorRegistration> {
             children: <Widget>[
               const PageHeader(
                   backgroundColor: Color.fromARGB(255, 255, 255, 115),
-                  headerTitle: "Tutor Profile"),
+                  headerTitle: "Tutor Seeker Profile"),
               Container(
                 width: screenWidth * 0.9,
                 height: screenHeight * 0.15,
@@ -225,12 +254,15 @@ class _TutorRegistrationState extends State<TutorRegistration> {
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(30),
                 ),
-                child: UserImagePicker(onPickImage: (pickedImage) {
-                  setState(() {
-                    _selectedImageFile = pickedImage;
-                    print(_selectedImageFile!.path.split('/').last);
-                  });
-                }),
+                child: UserImagePicker(
+                  onPickImage: (pickedImage) {
+                    setState(() {
+                      _selectedImageFile = pickedImage;
+                      print(_selectedImageFile!.path.split('/').last);
+                    });
+                  },
+                  existingImage: imageURL,
+                ),
               ),
               const SizedBox(
                 height: 10,
@@ -339,7 +371,7 @@ class _TutorRegistrationState extends State<TutorRegistration> {
                             ),
                             filled: true,
                           ),
-                          items: _genderTypes.map((String value) {
+                          items: _userTypes.map((String value) {
                             return DropdownMenuItem<String>(
                               value: value,
                               child: Text(value),
@@ -470,12 +502,11 @@ class _TutorRegistrationState extends State<TutorRegistration> {
                             _enteredState = value!;
                           },
                         ),
-                        
                         const SizedBox(
                           height: 10,
                         ),
                         TextFormField(
-                          controller: _enteredAboutmeController,
+                          controller: _aboutMeController,
                           decoration: InputDecoration(
                             labelText: 'About Me',
                             border: OutlineInputBorder(
@@ -522,6 +553,7 @@ class _TutorRegistrationState extends State<TutorRegistration> {
     _zipController.dispose();
     _stateController.dispose();
     _cityController.dispose();
+    _aboutMeController.dispose();
     super.dispose();
   }
 }

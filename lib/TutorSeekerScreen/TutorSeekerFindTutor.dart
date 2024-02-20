@@ -352,7 +352,13 @@ class _TutorSeekerFindTutorState extends State<TutorSeekerFindTutor> {
                   FirebaseFirestore.instance.collection('Tutor').snapshots(),
               builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
                 if (!snapshot.hasData) {
-                  return const CircularProgressIndicator();
+                  return Center(
+  child: SizedBox(
+    width: 50,
+    height: 50,
+    child: CircularProgressIndicator(),
+  ),
+);
                 }
                 if (_searchTerm.isEmpty && _isClickingSearch) {
                   return SizedBox();
@@ -387,7 +393,7 @@ class _TutorSeekerFindTutorState extends State<TutorSeekerFindTutor> {
                           String subject =
                               tutorPostDoc.get('SubjectsToTeach') ??
                                   'Subject not specified';
-                          String fees = tutorPostDoc.get('RatePerHour') ??
+                          String fees = tutorPostDoc.get('RatePerClass') ??
                               'Rate not specified';
                           String mode =
                               tutorPostDoc.get('Mode') ?? 'Mode not specified';

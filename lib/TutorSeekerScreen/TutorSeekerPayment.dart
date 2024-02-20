@@ -87,7 +87,13 @@ class _TutorSeekerPaymentState extends State<TutorSeekerPayment> {
               stream: FirebaseFirestore.instance.collection('Tutor').snapshots(),
               builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
                 if (!snapshot.hasData) {
-                  return const CircularProgressIndicator();
+                  return Center(
+  child: SizedBox(
+    width: 50,
+    height: 50,
+    child: CircularProgressIndicator(),
+  ),
+);
                 }
                 if (_searchTerm.isEmpty && _isClickingSearch) {
                   return SizedBox();
@@ -117,7 +123,7 @@ class _TutorSeekerPaymentState extends State<TutorSeekerPayment> {
 
                         for (var tutorPostDoc in tutorPosts) {
                           String subject = tutorPostDoc.get('SubjectsToTeach') ?? 'Subject not specified';
-                          String fees = tutorPostDoc.get('RatePerHour') ?? 'Rate not specified';
+                          String fees = tutorPostDoc.get('RatePerClass') ?? 'Rate not specified';
                           String tutorPostId = tutorPostDoc.id;
                           
                           tutorCards.add(

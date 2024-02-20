@@ -127,7 +127,13 @@ class _FavoriteTutorState extends State<FavoriteTutor> {
                   FirebaseFirestore.instance.collection('Tutor').snapshots(),
               builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
                 if (!snapshot.hasData) {
-                  return const CircularProgressIndicator();
+                  return Center(
+                    child: SizedBox(
+                      width: 50,
+                      height: 50,
+                      child: CircularProgressIndicator(),
+                    ),
+                  );
                 }
                 if (_searchTerm.isEmpty && _isClickingSearch) {
                   return SizedBox();
@@ -144,7 +150,13 @@ class _FavoriteTutorState extends State<FavoriteTutor> {
                   builder: (context, favoriteTutorIdsSnapshot) {
                     if (favoriteTutorIdsSnapshot.connectionState ==
                         ConnectionState.waiting) {
-                      return CircularProgressIndicator();
+                      return Center(
+                        child: SizedBox(
+                          width: 50,
+                          height: 50,
+                          child: CircularProgressIndicator(),
+                        ),
+                      );
                     } else if (favoriteTutorIdsSnapshot.hasError) {
                       return Text('Error: ${favoriteTutorIdsSnapshot.error}');
                     } else if (favoriteTutorIdsSnapshot.data!.isEmpty) {
@@ -162,7 +174,13 @@ class _FavoriteTutorState extends State<FavoriteTutor> {
                         builder: (context, tutorPostIdsSnapshot) {
                           if (tutorPostIdsSnapshot.connectionState ==
                               ConnectionState.waiting) {
-                            return CircularProgressIndicator();
+                            return Center(
+                              child: SizedBox(
+                                width: 50,
+                                height: 50,
+                                child: CircularProgressIndicator(),
+                              ),
+                            );
                           } else if (tutorPostIdsSnapshot.hasError) {
                             return Text('Error: ${tutorPostIdsSnapshot.error}');
                           } else if (favoriteTutorIdsSnapshot.data!.isEmpty) {
@@ -205,11 +223,10 @@ class _FavoriteTutorState extends State<FavoriteTutor> {
                                           tutorPostDoc.get('SubjectsToTeach') ??
                                               'Subject not specified';
                                       String fees =
-                                          tutorPostDoc.get('RatePerHour') ??
+                                          tutorPostDoc.get('ratePerHour') ??
                                               'Rate not specified';
-                                      String mode =
-                                          tutorPostDoc.get('Mode') ??
-                                              'Mode not specified';
+                                      String mode = tutorPostDoc.get('Mode') ??
+                                          'Mode not specified';
                                       String tutorPostId = tutorPostDoc.id;
 
                                       tutorCards.add(

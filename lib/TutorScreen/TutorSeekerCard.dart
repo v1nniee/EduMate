@@ -146,6 +146,7 @@ class _TutorSeekerCardState extends State<TutorSeekerCard> {
     } catch (error) {
       print('Error saving notification: $error');
     }
+     _showDialog('Application Update', 'The application status has been updated.');
   }
 
   @override

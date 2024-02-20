@@ -1,6 +1,7 @@
 
 import 'package:edumateapp/TutorSeekerScreen/Favorite.dart';
 import 'package:edumateapp/TutorSeekerScreen/MyTutor.dart';
+import 'package:edumateapp/TutorSeekerScreen/RateReview.dart';
 import 'package:edumateapp/TutorSeekerScreen/TutorSeekerApplicationStatus.dart';
 import 'package:edumateapp/TutorSeekerScreen/TutorSeekerFindTutor.dart';
 import 'package:edumateapp/TutorSeekerScreen/TutorSeekerPayment.dart';
@@ -53,5 +54,13 @@ const TutorSeekerFunctionCategories = [
     color: Colors.white,
     icon:Icons.history,
     nextPage: TutorSeekerPaymentHistory(),
+  ),
+
+  Category(
+    id: 'ts7',
+    title: 'Rate and Review',
+    color: Colors.white,
+    icon:Icons.reviews,
+    nextPage: RateReview(),
   ),
 ];

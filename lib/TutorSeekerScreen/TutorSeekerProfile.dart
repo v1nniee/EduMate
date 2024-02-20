@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:edumateapp/Provider/UserTypeNotifier.dart';
 import 'package:edumateapp/Screen/Authenticate.dart';
 import 'package:edumateapp/Screen/CategoriesScreen.dart';
+import 'package:edumateapp/TutorSeekerScreen/Setting.dart';
 import 'package:edumateapp/TutorSeekerScreen/TutorSeekerRegistration.dart';
 import 'package:edumateapp/TutorSeekerScreen/TutorSeekerUpdateProfile.dart';
 import 'package:edumateapp/Widgets/HomeHeader.dart';
@@ -205,7 +206,10 @@ class _TutorSeekerProfileState extends State<TutorSeekerProfile> {
                 children: [
                   ElevatedButton(
                     onPressed: () {
-                      // Navigate to settings screen
+                      Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => Setting()),
+                  );
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color.fromARGB(255, 255, 255, 115),

@@ -19,12 +19,16 @@ class TutorAddPost extends StatefulWidget {
 }
 
 class _TutorAddPostState extends State<TutorAddPost> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   final _formKey = GlobalKey<FormState>();
   var _subject = 'Lower Primary Science';
   var _level = 'Beginner';
-  var _ratePerHour = '';
+  var _ratePerClass = '';
   var _mode = 'Online';
   var _name = '';
+  var _defaultSubject = 'Lower Primary Science';
+  var _defaultLevel = 'Beginner';
+  var _defaultMode = 'Online';
 
   final _ratePerHourController = TextEditingController();
 
@@ -145,13 +149,11 @@ class _TutorAddPostState extends State<TutorAddPost> {
 
       List<String> fileUrls = await _uploadFiles();
 
-      
-
       Map<String, dynamic> TutorPostData = {
         'Name': _name,
         'SubjectsToTeach': _subject,
         'LevelofTeaching': _level,
-        'RatePerHour': _ratePerHour,
+        'RatePerClass': _ratePerClass,
         'Mode': _mode,
         'Experience': fileUrls,
       };
@@ -165,9 +167,30 @@ class _TutorAddPostState extends State<TutorAddPost> {
 
         setState(() {
           _isLoading = false;
+          _ratePerHourController.clear();
+          _selectedDocuments.clear();
+          _subject = _defaultSubject;
+          _level = _defaultLevel;
+          _mode = _defaultMode;
         });
 
-        //widget.onSaved();
+        showDialog(
+          context: _scaffoldKey.currentContext!,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text('Submission Successful'),
+              content: Text('Your tutor post has been submitted successfully.'),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text('OK'),
+                ),
+              ],
+            );
+          },
+        );
       } catch (error) {
         print('Error saving tutor post: $error');
       } finally {
@@ -198,6 +221,7 @@ class _TutorAddPostState extends State<TutorAddPost> {
     double screenHeight = MediaQuery.of(context).size.height;
     double screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(
+      key: _scaffoldKey,
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 255, 116, 36),
         elevation: 0,
@@ -255,6 +279,12 @@ class _TutorAddPostState extends State<TutorAddPost> {
                               _subject = newValue!;
                             });
                           },
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please select a subject.';
+                            }
+                            return null;
+                          },
                         ),
                         const SizedBox(
                           height: 10,
@@ -280,7 +310,14 @@ class _TutorAddPostState extends State<TutorAddPost> {
                               _level = newValue!;
                             });
                           },
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please select a teaching level.';
+                            }
+                            return null;
+                          },
                         ),
+
                         const SizedBox(
                           height: 10,
                         ),
@@ -304,6 +341,12 @@ class _TutorAddPostState extends State<TutorAddPost> {
                             setState(() {
                               _mode = newValue!;
                             });
+                          },
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please select a teaching mode.';
+                            }
+                            return null;
                           },
                         ),
                         const SizedBox(
@@ -335,7 +378,8 @@ class _TutorAddPostState extends State<TutorAddPost> {
                         TextButton(
                           onPressed: _pickDocument,
                           style: TextButton.styleFrom(
-                            foregroundColor: Colors.white, backgroundColor: Colors.orange,
+                            foregroundColor: Colors.white,
+                            backgroundColor: Colors.orange,
                           ),
                           child: const Text('Upload Document'),
                         ),
@@ -349,8 +393,10 @@ class _TutorAddPostState extends State<TutorAddPost> {
                         ),
                         TextFormField(
                           controller: _ratePerHourController,
+                          keyboardType: TextInputType
+                              .number, // Set the keyboard type to number
                           decoration: InputDecoration(
-                            labelText: 'Rate per Hour (RM)',
+                            labelText: 'Rate per Class (RM)',
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(20),
                               borderSide: BorderSide.none,
@@ -359,15 +405,15 @@ class _TutorAddPostState extends State<TutorAddPost> {
                           ),
                           validator: (value) {
                             if (value == null || value.trim().isEmpty) {
-                              return 'Please enter a valid rate per hour.';
+                              return 'Please enter a valid rate per class.';
                             }
                             return null;
                           },
                           onSaved: (value) {
-                            _ratePerHour = value!;
+                            _ratePerClass = value!;
                           },
                         ),
-                        
+
                         const SizedBox(
                           height: 10,
                         ),

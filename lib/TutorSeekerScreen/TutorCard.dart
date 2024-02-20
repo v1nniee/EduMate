@@ -142,6 +142,7 @@ class _TutorCardState extends State<TutorCard> {
     try {
       List<Map<String, dynamic>> slots =
           await _getAvailabilitySlot(widget.tutorId);
+
       // ignore: use_build_context_synchronously
       _showAvailabilityDialog(dialogContext, slots);
     } catch (e) {
@@ -153,6 +154,26 @@ class _TutorCardState extends State<TutorCard> {
     setState(() {
       selectedSlot = slot;
     });
+  }
+
+  void _sendNotification(String tutorseekerId, String title, String content,
+      DateTime NotificationTime) async {
+    Map<String, dynamic> NotificationData = {
+      'Title': title,
+      'Content': content,
+      'Status': "Unsend",
+      'NotificationTime': NotificationTime,
+    };
+
+    try {
+      await FirebaseFirestore.instance
+          .collection('Tutor')
+          .doc(tutorseekerId)
+          .collection('Notification')
+          .add(NotificationData);
+    } catch (error) {
+      print('Error saving notification: $error');
+    }
   }
 
   Future<void> _showAvailabilityDialog(
@@ -260,6 +281,14 @@ class _TutorCardState extends State<TutorCard> {
                                   .collection('ApplicationRequest')
                                   .doc(documentId)
                                   .set(tutorApplicationFromTsData);
+
+                              DateTime now = DateTime.now();
+
+                              _sendNotification(
+                                  widget.tutorId,
+                                  "Application Request",
+                                  "You have Received Application from ${widget.name}.",
+                                  now);
                             }
                             // Close the dialog
                             Navigator.of(dialogContext).pop();
@@ -368,7 +397,9 @@ class _TutorCardState extends State<TutorCard> {
       icon: Icon(icon, size: 16.0),
       label: Text(text),
       style: ElevatedButton.styleFrom(
-        foregroundColor: Colors.white, backgroundColor: Theme.of(context).primaryColor, // replace with your onPrimary color
+        foregroundColor: Colors.white,
+        backgroundColor:
+            Theme.of(context).primaryColor, // replace with your onPrimary color
       ),
     );
   }

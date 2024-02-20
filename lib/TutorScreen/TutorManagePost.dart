@@ -26,12 +26,48 @@ class _TutorManagePostState extends State<TutorManagePost> {
   }
 
   Future<void> _deleteTutorPost(String tutorPostId) async {
-    await FirebaseFirestore.instance
-        .collection('Tutor')
-        .doc(_tutorId)
-        .collection('TutorPost')
-        .doc(tutorPostId)
-        .delete();
+    try {
+      // Delete tutor post
+      await FirebaseFirestore.instance
+          .collection('Tutor')
+          .doc(_tutorId)
+          .collection('TutorPost')
+          .doc(tutorPostId)
+          .delete();
+
+      // Delete application requests associated with this tutor post
+      var applicationRequests = await FirebaseFirestore.instance
+          .collection('Tutor')
+          .doc(_tutorId)
+          .collection('ApplicationRequest')
+          .where('TutorPostId', isEqualTo: tutorPostId)
+          .get();
+
+      for (var requestDoc in applicationRequests.docs) {
+        // Delete application request
+        await requestDoc.reference.delete();
+
+        var docid = requestDoc.id.split('_');
+        var tutorseekerid = docid[0];
+
+        // Delete seeker application requests associated with this tutor post
+        var seekerApplicationRequests = await FirebaseFirestore.instance
+            .collection('Tutor Seeker')
+            .doc(tutorseekerid)
+            .collection('ApplicationRequest')
+            .where('TutorPostId', isEqualTo: tutorPostId)
+            .get();
+
+        for (var seekerRequestDoc in seekerApplicationRequests.docs) {
+          await seekerRequestDoc.reference.delete();
+        }
+      }
+
+      // Successfully deleted tutor post and associated application requests
+    } catch (e) {
+      print('Error deleting tutor post: $e');
+      // Handle the error as needed (logging, reporting, etc.)
+    }
   }
 
   @override
@@ -74,7 +110,7 @@ class _TutorManagePostState extends State<TutorManagePost> {
                         subtitle: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text('Rate: RM ${doc['RatePerHour']}'),
+                            Text('Rate: RM ${doc['RatePerClass']}'),
                             Text('Mode: ${doc['Mode']}'),
                             Text('Teaching Level: ${doc['LevelofTeaching']}'),
                           ],

@@ -11,6 +11,7 @@ class AvailabilitySlot extends StatefulWidget {
 }
 
 class _AvailabilitySlotState extends State<AvailabilitySlot> {
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   @override
   void initState() {
     super.initState();
@@ -73,7 +74,14 @@ class _AvailabilitySlotState extends State<AvailabilitySlot> {
   }
 
   void _submit() async {
-    if (!_formKey.currentState!.validate()) {
+    if (!_formKey.currentState!.validate() || !_isAvailabilityValid()) {
+      // Show an error message if availability is not valid
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Please fill in all availability slots.'),
+          backgroundColor: Colors.red,
+        ),
+      );
       return;
     }
     _formKey.currentState!.save();
@@ -86,41 +94,33 @@ class _AvailabilitySlotState extends State<AvailabilitySlot> {
         _isLoading = true;
       });
 
-      List<Map<String, dynamic>> formattedAvailability =
-          _availability.map((slot) {
-        return {
-          'day': slot['day'],
-          'startTime': slot['startTime'] != null
-              ? DateFormat('HH:mm').format(DateTime(
-                  DateTime.now().year,
-                  DateTime.now().month,
-                  DateTime.now().day,
-                  slot['startTime'].hour,
-                  slot['startTime'].minute,
-                ))
-              : null,
-          'endTime': slot['endTime'] != null
-              ? DateFormat('HH:mm').format(DateTime(
-                  DateTime.now().year,
-                  DateTime.now().month,
-                  DateTime.now().day,
-                  slot['endTime'].hour,
-                  slot['endTime'].minute,
-                ))
-              : null,
-        };
-      }).toList();
-
       try {
-        for (var slot in formattedAvailability) {
-          await FirebaseFirestore.instance
-              .collection('Tutor')
-              .doc(userId)
-              .collection('AvailibilitySlot')
-              .add(slot);
-        }
+        // Delete existing availability slots
+        await _deleteExistingAvailabilitySlots(userId);
+
+        // Save new availability slots
+        await _saveAvailabilitySlots(userId);
+
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text('Submission Successful'),
+              content: Text(
+                  'Your availability slots have been updated successfully.'),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text('OK'),
+                ),
+              ],
+            );
+          },
+        );
       } catch (error) {
-        print('Error saving tutor availability slots: $error');
+        print('Error saving or deleting tutor availability slots: $error');
       } finally {
         setState(() {
           _isLoading = false;
@@ -128,6 +128,60 @@ class _AvailabilitySlotState extends State<AvailabilitySlot> {
       }
     } else {
       print('No user signed in');
+    }
+  }
+
+  Future<void> _deleteExistingAvailabilitySlots(String userId) async {
+    try {
+      // Fetch existing availability slots
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+          .collection('Tutor')
+          .doc(userId)
+          .collection('AvailibilitySlot')
+          .get();
+
+      // Delete each existing slot
+      for (var doc in querySnapshot.docs) {
+        await doc.reference.delete();
+      }
+    } catch (e) {
+      print('Error deleting existing tutor availability slots: $e');
+    }
+  }
+
+  Future<void> _saveAvailabilitySlots(String userId) async {
+    List<Map<String, dynamic>> formattedAvailability =
+        _availability.map((slot) {
+      return {
+        'day': slot['day'],
+        'startTime': slot['startTime'] != null
+            ? DateFormat('HH:mm').format(DateTime(
+                DateTime.now().year,
+                DateTime.now().month,
+                DateTime.now().day,
+                slot['startTime'].hour,
+                slot['startTime'].minute,
+              ))
+            : null,
+        'endTime': slot['endTime'] != null
+            ? DateFormat('HH:mm').format(DateTime(
+                DateTime.now().year,
+                DateTime.now().month,
+                DateTime.now().day,
+                slot['endTime'].hour,
+                slot['endTime'].minute,
+              ))
+            : null,
+      };
+    }).toList();
+
+    // Save each new slot
+    for (var slot in formattedAvailability) {
+      await FirebaseFirestore.instance
+          .collection('Tutor')
+          .doc(userId)
+          .collection('AvailibilitySlot')
+          .add(slot);
     }
   }
 
@@ -151,6 +205,12 @@ class _AvailabilitySlotState extends State<AvailabilitySlot> {
     if (picked != null) {
       setState(() {
         _availability[slotIndex]['startTime'] = picked;
+
+        // Calculate and set end time as 2 hours after start time
+        final int endHour = picked.hour + 2;
+        final int endMinute = picked.minute;
+        _availability[slotIndex]['endTime'] =
+            TimeOfDay(hour: endHour, minute: endMinute);
       });
     }
   }
@@ -185,11 +245,23 @@ class _AvailabilitySlotState extends State<AvailabilitySlot> {
     return tod != null ? format.format(dt) : "Select Time";
   }
 
+  bool _isAvailabilityValid() {
+    for (var slot in _availability) {
+      if (slot['day'] == null ||
+          slot['startTime'] == null ||
+          slot['endTime'] == null) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   @override
   Widget build(BuildContext context) {
     double screenHeight = MediaQuery.of(context).size.height;
     double screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(
+      key: _scaffoldKey,
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 255, 116, 36),
         elevation: 0,
@@ -275,6 +347,12 @@ class _AvailabilitySlotState extends State<AvailabilitySlot> {
                               setState(() {
                                 slot['day'] = newValue;
                               });
+                            },
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please select a day';
+                              }
+                              return null;
                             },
                           ),
                           Row(

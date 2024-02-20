@@ -60,7 +60,8 @@ dependencies:
   path_provider: ^2.1.2
   share_plus: ^7.2.2
   printing: ^5.11.1
-  workmanager: ^0.5.2
+  flutter_rating_bar: ^4.0.1
+  
   
 
 

@@ -124,7 +124,13 @@ class _TutorSeekerApplicationStatusState
                   FirebaseFirestore.instance.collection('Tutor').snapshots(),
               builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
                 if (!snapshot.hasData) {
-                  return const CircularProgressIndicator();
+                  return Center(
+                    child: SizedBox(
+                      width: 50,
+                      height: 50,
+                      child: CircularProgressIndicator(),
+                    ),
+                  );
                 }
                 if (_searchTerm.isEmpty && _isClickingSearch) {
                   return SizedBox();
@@ -141,7 +147,13 @@ class _TutorSeekerApplicationStatusState
                   builder: (context, appliedTutorIdsSnapshot) {
                     if (appliedTutorIdsSnapshot.connectionState ==
                         ConnectionState.waiting) {
-                      return CircularProgressIndicator();
+                      return Center(
+                        child: SizedBox(
+                          width: 50,
+                          height: 50,
+                          child: CircularProgressIndicator(),
+                        ),
+                      );
                     } else if (appliedTutorIdsSnapshot.hasError) {
                       return Text('Error: ${appliedTutorIdsSnapshot.error}');
                     } else if (appliedTutorIdsSnapshot.data!.isEmpty) {
@@ -159,7 +171,13 @@ class _TutorSeekerApplicationStatusState
                         builder: (context, tutorPostIdsSnapshot) {
                           if (tutorPostIdsSnapshot.connectionState ==
                               ConnectionState.waiting) {
-                            return CircularProgressIndicator();
+                            return Center(
+                              child: SizedBox(
+                                width: 50,
+                                height: 50,
+                                child: CircularProgressIndicator(),
+                              ),
+                            );
                           } else if (tutorPostIdsSnapshot.hasError) {
                             return Text('Error: ${tutorPostIdsSnapshot.error}');
                           } else if (appliedTutorIdsSnapshot.data!.isEmpty) {
@@ -202,7 +220,7 @@ class _TutorSeekerApplicationStatusState
                                           tutorPostDoc.get('SubjectsToTeach') ??
                                               'Subject not specified';
                                       String fees =
-                                          tutorPostDoc.get('RatePerHour') ??
+                                          tutorPostDoc.get('RatePerClass') ??
                                               'Rate not specified';
                                       String tutorPostId = tutorPostDoc.id;
 

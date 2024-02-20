@@ -5,19 +5,31 @@ import 'package:flutter/material.dart';
 class HomeHeader extends StatelessWidget {
   final String profileImagePath;
   final Color backgroundColor;
-  final String greetingText;
 
   const HomeHeader({
     Key? key,
     this.profileImagePath = 'assets/images/tutor_seeker_profile.png',
-    required this.backgroundColor, 
-    this.greetingText = 'Good Morning', 
+    required this.backgroundColor,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     double screenHeight = MediaQuery.of(context).size.height;
     double screenWidth = MediaQuery.of(context).size.width;
+
+    String _getGreeting() {
+      var hour = DateTime.now().hour;
+      if (hour < 12 || hour > 5) {
+        return 'Good Morning';
+      } else if (hour < 18) {
+        return 'Good Afternoon';
+      } else if (hour < 22) {
+        return 'Good Evening';
+      } else {
+        return 'Good Night';
+      }
+    }
+
     return Stack(
       children: [
         Container(
@@ -59,7 +71,7 @@ class HomeHeader extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       const Text(
-                        'Welcome to the Home Page',
+                        'Welcome to EduMate',
                         textAlign: TextAlign.center,
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
@@ -68,7 +80,7 @@ class HomeHeader extends StatelessWidget {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        greetingText,
+                        _getGreeting(), // Dynamically changing greeting
                         textAlign: TextAlign.center,
                         style: const TextStyle(
                           fontSize: 16,
@@ -81,8 +93,7 @@ class HomeHeader extends StatelessWidget {
                 CircleAvatar(
                   radius: 60,
                   backgroundColor: Colors.transparent,
-                  backgroundImage:
-                      AssetImage(profileImagePath),
+                  backgroundImage: AssetImage(profileImagePath),
                 ),
               ],
             ),

@@ -38,7 +38,7 @@ class _MyTutorCardState extends State<MyTutorCard> {
     _loadApplicationStatus();
   }
 
-  Future<void> _loadApplicationStatus() async {
+  Future<bool> _loadApplicationStatus() async {
     User? user = FirebaseAuth.instance.currentUser;
     try {
       // Fetch the status of the tutor post application
@@ -54,13 +54,17 @@ class _MyTutorCardState extends State<MyTutorCard> {
         setState(() {
           _applicationStatus = tutorPostApplicationSnapshot.get('Status');
         });
+
+        return _applicationStatus == 'paid';
       } else {
         setState(() {
           _applicationStatus = 'Not found';
         });
+        return false;
       }
     } catch (e) {
       print('Error loading application status: $e');
+      return false;
     }
   }
 

@@ -32,6 +32,10 @@ class _MyStudentState extends State<MyStudent> {
         .collection('Tutor/$tutorId/ApplicationRequest')
         .get();
 
+    if (applicationRequests.size == 0) {
+      return cards; // Return an empty list if the collection is empty
+    }
+
     for (var applicationRequest in applicationRequests.docs) {
       String seekerId = applicationRequest['TutorSeekerId'];
       String subject = applicationRequest['Subject'];
@@ -76,30 +80,39 @@ class _MyStudentState extends State<MyStudent> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: const Color.fromARGB(255, 255, 255, 115),
-        elevation: 0,
-      ),
-      body: Column(
-        children: [
-          const PageHeader(
-            backgroundColor: Color.fromARGB(255, 255, 255, 115),
-            headerTitle: 'My Student',
-          ),
-          const SizedBox(height: 12),
-          Expanded(
-            child: FutureBuilder<List<MyStudentCard>>(
-              future: _fetchApplicationRequests(),
-              builder: (BuildContext context,
-                  AsyncSnapshot<List<MyStudentCard>> snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(child: CircularProgressIndicator());
-                } else if (snapshot.hasError) {
-                  return Center(child: Text('Error: ${snapshot.error}'));
-                } else if (snapshot.hasData) {
-                  List<MyStudentCard> cards = snapshot.data!;
+Widget build(BuildContext context) {
+  return Scaffold(
+    appBar: AppBar(
+      backgroundColor: const Color.fromARGB(255, 255, 255, 115),
+      elevation: 0,
+    ),
+    body: Column(
+      children: [
+        const PageHeader(
+          backgroundColor: Color.fromARGB(255, 255, 255, 115),
+          headerTitle: 'My Student',
+        ),
+        const SizedBox(height: 12),
+        Expanded(
+          child: FutureBuilder<List<MyStudentCard>>(
+            future: _fetchApplicationRequests(),
+            builder: (BuildContext context,
+                AsyncSnapshot<List<MyStudentCard>> snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(
+  child: SizedBox(
+    width: 50,
+    height: 50,
+    child: CircularProgressIndicator(),
+  ),
+);
+              } else if (snapshot.hasError) {
+                return Center(child: Text('Error: ${snapshot.error}'));
+              } else if (snapshot.hasData) {
+                List<MyStudentCard> cards = snapshot.data!;
+                if (cards.isEmpty) {
+                  return Center(child: Text('No student applications yet.'));
+                } else {
                   return ListView.builder(
                     itemCount: cards.length,
                     itemBuilder: (context, index) {
@@ -107,14 +120,16 @@ class _MyStudentState extends State<MyStudent> {
                       return card;
                     },
                   );
-                } else {
-                  return Center(child: Text('No application requests found.'));
                 }
-              },
-            ),
+              } else {
+                return Center(child: Text('No application requests found.'));
+              }
+            },
           ),
-        ],
-      ),
-    );
-  }
+        ),
+      ],
+    ),
+  );
+}
+
 }

@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:edumateapp/Widgets/PageHeader.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 
 class TutorDetailPage extends StatelessWidget {
   final String tutorId;
@@ -80,8 +81,9 @@ class TutorDetailPage extends StatelessWidget {
                 var tutorPostData = tutorPostSnapshot.data!;
                 mode = tutorPostData.get('Mode') ?? 'Unavailable';
                 subject = tutorPostData.get('SubjectsToTeach') ?? 'Unavailable';
-                rate = tutorPostData.get('RatePerHour') ?? 'Unavailable';
-                teachingLevel = tutorPostData.get('LevelofTeaching') ?? 'Unavailable';
+                rate = tutorPostData.get('RatePerClass') ?? 'Unavailable';
+                teachingLevel =
+                    tutorPostData.get('LevelofTeaching') ?? 'Unavailable';
 
                 return FutureBuilder<DocumentSnapshot>(
                   future: firestore
@@ -135,7 +137,8 @@ class TutorDetailPage extends StatelessWidget {
                                   'Fees/class', 'RM$rate', Icons.money),
                               buildInfoCard('Mode', mode, Icons.computer),
                               buildInfoCard('Subject', subject, Icons.book),
-                              buildInfoCard('Level of Teaching', subject, Icons.leaderboard),
+                              buildInfoCard('Level of Teaching', subject,
+                                  Icons.leaderboard),
                               buildInfoCard('About Me', aboutMe, Icons.info),
                               if (mode != "Online")
                                 Padding(
@@ -153,6 +156,77 @@ class TutorDetailPage extends StatelessWidget {
                                     ],
                                   ),
                                 ),
+                            ],
+                          ),
+                        ),
+                        Card(
+                          elevation: 4.0,
+                          margin: const EdgeInsets.all(8.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Text(
+                                  'Reviews',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                              ),
+                              FutureBuilder<QuerySnapshot>(
+                                future: firestore
+                                    .collection('Tutor')
+                                    .doc(tutorId)
+                                    .collection('RatingsAndReviews')
+                                    .get(),
+                                builder: (context, snapshot) {
+                                  if (snapshot.connectionState ==
+                                      ConnectionState.waiting) {
+                                    return Center(
+                                        child: CircularProgressIndicator());
+                                  }
+                                  if (!snapshot.hasData) {
+                                    return Center(
+                                        child: Text("No reviews available."));
+                                  }
+                                  // Extract and display reviews
+                                  return Column(
+                                    children: snapshot.data!.docs
+                                        .map((DocumentSnapshot doc) {
+                                      Map<String, dynamic> data =
+                                          doc.data() as Map<String, dynamic>;
+                                      return ListTile(
+                                        title: Row(
+                                          children: [
+                                            RatingBar.builder(
+                                              initialRating: data['Rating'],
+                                              minRating: 1,
+                                              direction: Axis.horizontal,
+                                              allowHalfRating: true,
+                                              itemCount: 5,
+                                              itemSize: 20,
+                                              itemPadding: const EdgeInsets.symmetric(
+                                                  horizontal: 2.0),
+                                              itemBuilder: (context, _) => Icon(
+                                                Icons.star,
+                                                color: Colors.amber,
+                                              ),
+                                              onRatingUpdate: (rating) {
+                                                print(rating);
+                                              },
+                                            ),
+                                            SizedBox(width: 8),
+                                            
+                                          ],
+                                        ),
+                                        subtitle: Text(data['Review']),
+                                      );
+                                    }).toList(),
+                                  );
+                                },
+                              ),
                             ],
                           ),
                         ),

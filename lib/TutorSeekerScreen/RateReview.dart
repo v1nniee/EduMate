@@ -1,18 +1,19 @@
 import 'package:edumateapp/TutorSeekerScreen/Favorite.dart';
 import 'package:edumateapp/TutorSeekerScreen/MyTutorCard.dart';
+import 'package:edumateapp/TutorSeekerScreen/RateReviewCard.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:edumateapp/TutorSeekerScreen/TutorCard.dart';
 import 'package:edumateapp/Widgets/PageHeader.dart';
 
-class MyTutor extends StatefulWidget {
-  const MyTutor({Key? key}) : super(key: key);
+class RateReview extends StatefulWidget {
+  const RateReview({Key? key}) : super(key: key);
 
   @override
-  State<MyTutor> createState() => _MyTutorState();
+  State<RateReview> createState() => _RateReviewState();
 }
 
-class _MyTutorState extends State<MyTutor> {
+class _RateReviewState extends State<RateReview> {
   final TextEditingController _searchController = TextEditingController();
   bool _isSearching = false;
   String _searchTerm = '';
@@ -35,7 +36,7 @@ class _MyTutorState extends State<MyTutor> {
         children: [
           const PageHeader(
             backgroundColor: Color.fromARGB(255, 255, 255, 115),
-            headerTitle: 'My Tutor',
+            headerTitle: 'Rate and Review',
           ),
           Padding(
             padding: const EdgeInsets.all(8.0),
@@ -159,7 +160,7 @@ class _MyTutorState extends State<MyTutor> {
                                     ? userProfileSnapshot.data!.get('ImageUrl')
                                     : 'tutor_seeker_profile.png';
 
-                                return MyTutorCard(
+                                return RateReviewCard(
                                   tutorId: document.id,
                                   tutorPostId: tutorPostId,
                                   name: document['Name'],
