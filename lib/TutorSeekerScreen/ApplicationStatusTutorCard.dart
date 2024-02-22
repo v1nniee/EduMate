@@ -31,7 +31,7 @@ class ApplicationStatusTutorCard extends StatefulWidget {
 class _ApplicationStatusTutorCardState
     extends State<ApplicationStatusTutorCard> {
   bool isFavorite = false;
-  String _applicationStatus = ''; // Add this line
+  String _applicationStatus = 'pending'; 
 
   @override
   void initState() {

@@ -43,7 +43,6 @@ class _TutorSeekerCardState extends State<TutorSeekerCard> {
     _loadTutorName();
   }
 
-  
   Future<void> _loadTutorName() async {
     User? user = FirebaseAuth.instance.currentUser;
     try {
@@ -87,7 +86,7 @@ class _TutorSeekerCardState extends State<TutorSeekerCard> {
     );
   }
 
-  void _updateStatus(String newStatus) async {
+  void _updateAccepted() async {
     User? currentUser = FirebaseAuth.instance.currentUser;
     if (currentUser == null) {
       _showDialog('Error', 'User not logged in');
@@ -98,16 +97,88 @@ class _TutorSeekerCardState extends State<TutorSeekerCard> {
     DateTime now = DateTime.now();
 
     Map<String, dynamic> updateData = {
-      'Status': newStatus,
-      'LastPayment': null,
+      'Status': "accepted",
+      'AcceptedDate': now,
     };
 
-    // Only add the AcceptedDate field if the new status is 'accepted'
-    if (newStatus == 'accepted') {
-      updateData['AcceptedDate'] = now;
+    String tutorDocumentId = "${widget.tutorseekerId}_${widget.tutorPostId}";
+    print(tutorId);
+    var tutorApplicationRequestDocRef = FirebaseFirestore.instance
+        .doc('Tutor/${tutorId}/ApplicationRequest/$tutorDocumentId');
+    var toPayTutorSeekerDocRef = FirebaseFirestore.instance
+        .collection('Tutor')
+        .doc(tutorId)
+        .collection('ToPayTutorSeeker')
+        .doc(tutorDocumentId);
+
+    try {
+      var docSnapshot = await tutorApplicationRequestDocRef.get();
+      if (docSnapshot.exists) {
+        Map<String, dynamic> existingData =
+            docSnapshot.data() as Map<String, dynamic>;
+
+        Map<String, dynamic> mergedData = {...existingData, ...updateData};
+
+        await toPayTutorSeekerDocRef.set(mergedData).then((_) async {
+          await tutorApplicationRequestDocRef.delete();
+        });
+      } else {
+        _showDialog('Error', 'Document does not exist');
+      }
+    } catch (e) {
+      _showDialog('Error', 'Failed to transfer data: $e');
     }
 
-    // Update in Tutor Seeker's collection
+    String tutorSeekerDocumentId = "${tutorId}_${widget.tutorPostId}";
+    var tutorSeekerApplicationRequestDocRef = FirebaseFirestore.instance.doc(
+        'Tutor Seeker/${widget.tutorseekerId}/ApplicationRequest/$tutorSeekerDocumentId');
+    var toPayDocRef = FirebaseFirestore.instance
+        .collection('Tutor Seeker')
+        .doc(widget.tutorseekerId)
+        .collection('ToPay')
+        .doc(tutorSeekerDocumentId);
+
+    try {
+      var docSnapshot = await tutorSeekerApplicationRequestDocRef.get();
+      if (docSnapshot.exists) {
+        Map<String, dynamic> existingData =
+            docSnapshot.data() as Map<String, dynamic>;
+
+        Map<String, dynamic> mergedData = {...existingData, ...updateData};
+
+        await toPayDocRef.set(mergedData);
+
+        await tutorSeekerApplicationRequestDocRef
+            .update(updateData)
+            .catchError((e) {
+          _showDialog('Error', 'Failed to update tutor seeker status: $e');
+        });
+      }
+    } catch (e) {
+      _showDialog('Error', 'An error occurred: $e');
+    }
+
+    _sendNotification(widget.tutorseekerId, "Application Update",
+        "Your Application from ${_name} has been accepted.", now);
+
+    _showDialog(
+        'Application Update', 'The application status has been updated.');
+  }
+
+  void _updateReject() async {
+    User? currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser == null) {
+      _showDialog('Error', 'User not logged in');
+      return;
+    }
+    String tutorId = currentUser.uid;
+    // Get the current date/time as the accepted date
+    DateTime now = DateTime.now();
+
+    Map<String, dynamic> updateData = {
+      'Status': "rejected",
+    };
+
     await FirebaseFirestore.instance
         .doc(
             'Tutor Seeker/${widget.tutorseekerId}/ApplicationRequest/${tutorId}_${widget.tutorPostId}')
@@ -125,11 +196,13 @@ class _TutorSeekerCardState extends State<TutorSeekerCard> {
     });
 
     _sendNotification(widget.tutorseekerId, "Application Update",
-        "Your Application from ${_name} has been ${widget.status}.", now);
+        "Your Application from ${_name} has been rejected.", now);
+    _showDialog(
+        'Application Update', 'The application status has been updated.');
   }
 
-  void _sendNotification(
-      String tutorseekerId, String title, String content, DateTime NotificationTime) async {
+  void _sendNotification(String tutorseekerId, String title, String content,
+      DateTime NotificationTime) async {
     Map<String, dynamic> NotificationData = {
       'Title': title,
       'Content': content,
@@ -146,7 +219,6 @@ class _TutorSeekerCardState extends State<TutorSeekerCard> {
     } catch (error) {
       print('Error saving notification: $error');
     }
-     _showDialog('Application Update', 'The application status has been updated.');
   }
 
   @override
@@ -230,10 +302,11 @@ class _TutorSeekerCardState extends State<TutorSeekerCard> {
                 children: <Widget>[
                   ElevatedButton(
                     onPressed: () {
-                      _updateStatus('rejected');
+                      _updateReject();
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red, // Background color for Reject
+                      backgroundColor:
+                          Colors.red, // Background color for Reject
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(20),
                       ),
@@ -244,10 +317,11 @@ class _TutorSeekerCardState extends State<TutorSeekerCard> {
                   const SizedBox(width: 20),
                   ElevatedButton(
                     onPressed: () {
-                      _updateStatus('accepted');
+                      _updateAccepted();
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green, // Background color for Accept
+                      backgroundColor:
+                          Colors.green, // Background color for Accept
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(20),
                       ),

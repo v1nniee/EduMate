@@ -23,7 +23,6 @@ class Setting extends StatelessWidget {
               );
             },
           ),
-          // Add more list tiles for other settings options
         ],
       ),
     );

@@ -223,30 +223,10 @@ class _TutorSeekerApplicationStatusState
                                           tutorPostDoc.get('RatePerClass') ??
                                               'Rate not specified';
                                       String tutorPostId = tutorPostDoc.id;
+                                      String imageUrl =
+                                          tutorPostDoc.get('ImageUrl') ??
+                                              'tutor_seeker_profile.png';
 
-                                      tutorCards.add(
-                                        FutureBuilder<DocumentSnapshot>(
-                                          future: document.reference
-                                              .collection('UserProfile')
-                                              .doc(document.id)
-                                              .get(),
-                                          builder: (context,
-                                              AsyncSnapshot<DocumentSnapshot>
-                                                  userProfileSnapshot) {
-                                            if (!userProfileSnapshot.hasData) {
-                                              return const Card(
-                                                child: ListTile(
-                                                  leading:
-                                                      CircularProgressIndicator(),
-                                                ),
-                                              );
-                                            }
-
-                                            String imageUrl =
-                                                userProfileSnapshot.data!.exists
-                                                    ? userProfileSnapshot.data!
-                                                        .get('ImageUrl')
-                                                    : 'tutor_seeker_profile.png';
 
                                             return ApplicationStatusTutorCard(
                                               tutorId: document.id,
@@ -257,9 +237,7 @@ class _TutorSeekerApplicationStatusState
                                               rating: 4.0,
                                               fees: fees,
                                             );
-                                          },
-                                        ),
-                                      );
+
                                     }
 
                                     return Column(children: tutorCards);

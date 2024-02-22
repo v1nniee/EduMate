@@ -119,9 +119,6 @@ class _TutorSeekerRegistrationState extends State<TutorSeekerRegistration> {
         if (imageURL != null) 'ImageUrl': imageURL else 'ImageUrl': null,
       };
 
-      final userTokenNotifier =
-          Provider.of<UserTokenNotifier>(context, listen: false);
-      final fcmToken = userTokenNotifier.fcmToken;
 
       try {
         await FirebaseFirestore.instance
@@ -147,13 +144,6 @@ class _TutorSeekerRegistrationState extends State<TutorSeekerRegistration> {
           _isLoading = false;
         });
 
-        await FirebaseFirestore.instance
-            .collection('Tutor Seeker')
-            .doc(userId)
-            .set({'FCMToken': fcmToken}, SetOptions(merge: true));
-        setState(() {
-          _isLoading = false;
-        });
 
         widget.onSaved();
       } catch (error) {

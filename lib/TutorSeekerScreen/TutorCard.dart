@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:edumateapp/TutorSeekerScreen/TutorSeekerChat.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:edumateapp/TutorSeekerScreen/TutorDetailPage.dart';
@@ -35,6 +36,7 @@ class TutorCard extends StatefulWidget {
 
 class _TutorCardState extends State<TutorCard> {
   bool isFavorite = false;
+
   Map<String, dynamic>? selectedSlot;
   String? applicationStatus;
 
@@ -62,6 +64,24 @@ class _TutorCardState extends State<TutorCard> {
         });
       }
     }
+  }
+
+  Future<bool> checkApplication() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      DocumentSnapshot<Map<String, dynamic>> doc = await FirebaseFirestore
+          .instance
+          .collection('Tutor Seeker')
+          .doc(user.uid)
+          .collection('ApplicationRequest')
+          .doc('${widget.tutorId}_${widget.tutorPostId}')
+          .get();
+
+      if (doc.exists) {
+        return true;
+      }
+    }
+    return false;
   }
 
   void _toggleFavorite() {
@@ -115,7 +135,6 @@ class _TutorCardState extends State<TutorCard> {
       String tutorId) async {
     List<Map<String, dynamic>> slotsList = [];
 
-    // Retrieve the AvailabilitySlot collection for the given tutorId
     var snapshot = await FirebaseFirestore.instance
         .collection('Tutor')
         .doc(tutorId)
@@ -138,15 +157,36 @@ class _TutorCardState extends State<TutorCard> {
   }
 
   void _clickApply() async {
-    final BuildContext dialogContext = context;
-    try {
-      List<Map<String, dynamic>> slots =
-          await _getAvailabilitySlot(widget.tutorId);
+    if (!await checkApplication()) {
+      final BuildContext dialogContext = context;
+      try {
+        List<Map<String, dynamic>> slots =
+            await _getAvailabilitySlot(widget.tutorId);
 
-      // ignore: use_build_context_synchronously
-      _showAvailabilityDialog(dialogContext, slots);
-    } catch (e) {
-      print(e);
+        // Show availability dialog
+        _showAvailabilityDialog(dialogContext, slots);
+      } catch (e) {
+        print(e);
+      }
+    } else {
+      // User has already applied
+      showDialog<void>(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext dialogContext) {
+          return AlertDialog(
+            title: const Text('Already Applied'),
+            content:
+                const Text('You have already applied for this tutor post.'),
+            actions: <Widget>[
+              TextButton(
+                child: const Text('OK'),
+                onPressed: () => Navigator.of(dialogContext).pop(),
+              ),
+            ],
+          );
+        },
+      );
     }
   }
 
@@ -179,146 +219,179 @@ class _TutorCardState extends State<TutorCard> {
   Future<void> _showAvailabilityDialog(
       BuildContext context, List<Map<String, dynamic>> slots) async {
     int? selectedSlotIndex;
-
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder: (BuildContext dialogContext) {
-        return StatefulBuilder(
-          builder: (context, setState) {
-            return AlertDialog(
-              title: const Text('Choose an Availability Slot'),
-              content: SingleChildScrollView(
-                child: ListBody(
-                  children: List<Widget>.generate(slots.length, (index) {
-                    bool isSelected = selectedSlotIndex == index;
-                    return Container(
-                      margin: EdgeInsets.symmetric(vertical: 4.0),
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: isSelected ? Colors.yellow : Colors.grey,
-                          width: 2.0,
-                        ),
-                        borderRadius: BorderRadius.circular(5.0),
-                      ),
-                      child: ListTile(
-                        title: Text(
-                            '${slots[index]['day']} ${slots[index]['startTime']} - ${slots[index]['endTime']}'),
-                        onTap: () {
-                          setState(() {
-                            selectedSlotIndex =
-                                index; // Update the selected index
-                          });
-                          _handleSlotSelection(slots[index]);
-                        },
-                      ),
-                    );
-                  }),
-                ),
+    if (slots.isEmpty) {
+      return showDialog<void>(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext dialogContext) {
+          return AlertDialog(
+            title: const Text('No Availability Slots'),
+            content: const Text(
+                'There are no availability slots. You may chat with this tutor to let them add slots.'),
+            actions: <Widget>[
+              TextButton(
+                child: const Text('Chat'),
+                onPressed: () {
+                  Navigator.of(dialogContext).pop();
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) =>
+                            TutorSeekerChat(ReceiverUserId: widget.tutorId)),
+                  );
+                },
               ),
-              actions: <Widget>[
-                TextButton(
-                  child: Text('Cancel'),
-                  onPressed: () {
-                    Navigator.of(dialogContext).pop();
-                  },
-                ),
-                if (selectedSlotIndex != null)
-                  TextButton(
-                    child: Text('Confirm'),
-                    onPressed: selectedSlotIndex != null
-                        ? () async {
-                            assert(selectedSlotIndex != null,
-                                'selectedSlotIndex must not be null');
-                            Map<String, dynamic> selectedSlot =
-                                slots[selectedSlotIndex!];
-
-                            // Extract the start time, end time, and day from the selected slot
-                            String startTime = selectedSlot['startTime'];
-                            String endTime = selectedSlot['endTime'];
-                            String day = selectedSlot['day'];
-
-                            // Rest of your logic to save the selected slot...
-                            User? user = FirebaseAuth.instance.currentUser;
-                            if (user != null) {
-                              Map<String, dynamic> tutorPostApplicationData = {
-                                'Day': day,
-                                'StartTime': startTime,
-                                'EndTime': endTime,
-                                'Status': "pending",
-                                "Subject": widget.subject,
-                                'TutorPostId': widget.tutorPostId,
-                                'TutorId': widget.tutorId,
-                              };
-
-                              Map<String, dynamic> tutorApplicationFromTsData =
-                                  {
-                                'Day': day,
-                                'StartTime': startTime,
-                                'EndTime': endTime,
-                                'Status': "pending",
-                                "Subject": widget.subject,
-                                'TutorPostId': widget.tutorPostId,
-                                'TutorSeekerId': user.uid,
-                              };
-
-                              String TSdocumentId =
-                                  '${widget.tutorId}_${widget.tutorPostId}';
-
-                              FirebaseFirestore.instance
-                                  .collection('Tutor Seeker')
-                                  .doc(user.uid)
-                                  .collection('ApplicationRequest')
-                                  .doc(TSdocumentId)
-                                  .set(tutorPostApplicationData);
-
-                              String documentId =
-                                  '${user.uid}_${widget.tutorPostId}';
-
-                              FirebaseFirestore.instance
-                                  .collection('Tutor')
-                                  .doc(widget.tutorId)
-                                  .collection('ApplicationRequest')
-                                  .doc(documentId)
-                                  .set(tutorApplicationFromTsData);
-
-                              DateTime now = DateTime.now();
-
-                              _sendNotification(
-                                  widget.tutorId,
-                                  "Application Request",
-                                  "You have Received Application from ${widget.name}.",
-                                  now);
-                            }
-                            // Close the dialog
-                            Navigator.of(dialogContext).pop();
-
-                            // ignore: use_build_context_synchronously
-                            showDialog(
-                              context: dialogContext,
-                              builder: (BuildContext context) {
-                                return AlertDialog(
-                                  title: const Text("Applied Successfully!"),
-                                  actions: <Widget>[
-                                    TextButton(
-                                      onPressed: () {
-                                        Navigator.of(context).pop();
-                                      },
-                                      child: const Text('OK'),
-                                    ),
-                                  ],
-                                );
-                              },
-                            );
-                          }
-                        : null,
+              TextButton(
+                child: const Text('Cancel'),
+                onPressed: () {
+                  Navigator.of(dialogContext).pop();
+                },
+              ),
+            ],
+          );
+        },
+      );
+    } else {
+      return showDialog<void>(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext dialogContext) {
+          return StatefulBuilder(
+            builder: (context, setState) {
+              return AlertDialog(
+                title: const Text('Choose an Availability Slot'),
+                content: SingleChildScrollView(
+                  child: ListBody(
+                    children: List<Widget>.generate(slots.length, (index) {
+                      bool isSelected = selectedSlotIndex == index;
+                      return Container(
+                        margin: EdgeInsets.symmetric(vertical: 4.0),
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: isSelected ? Colors.yellow : Colors.grey,
+                            width: 2.0,
+                          ),
+                          borderRadius: BorderRadius.circular(5.0),
+                        ),
+                        child: ListTile(
+                          title: Text(
+                              '${slots[index]['day']} ${slots[index]['startTime']} - ${slots[index]['endTime']}'),
+                          onTap: () {
+                            setState(() {
+                              selectedSlotIndex = index;
+                            });
+                            _handleSlotSelection(slots[index]);
+                          },
+                        ),
+                      );
+                    }),
                   ),
-              ],
-            );
-          },
-        );
-      },
-    );
+                ),
+                actions: <Widget>[
+                  TextButton(
+                    child: Text('Cancel'),
+                    onPressed: () {
+                      Navigator.of(dialogContext).pop();
+                    },
+                  ),
+                  if (selectedSlotIndex != null)
+                    TextButton(
+                      child: Text('Confirm'),
+                      onPressed: selectedSlotIndex != null
+                          ? () async {
+                              assert(selectedSlotIndex != null,
+                                  'selectedSlotIndex must not be null');
+                              Map<String, dynamic> selectedSlot =
+                                  slots[selectedSlotIndex!];
+
+                              String startTime = selectedSlot['startTime'];
+                              String endTime = selectedSlot['endTime'];
+                              String day = selectedSlot['day'];
+
+                              User? user = FirebaseAuth.instance.currentUser;
+                              if (user != null) {
+                                Map<String, dynamic> tutorPostApplicationData =
+                                    {
+                                  'Day': day,
+                                  'StartTime': startTime,
+                                  'EndTime': endTime,
+                                  'Status': "pending",
+                                  "RatePerClass": widget.fees,
+                                  "Subject": widget.subject,
+                                  'TutorPostId': widget.tutorPostId,
+                                  'TutorId': widget.tutorId,
+                                };
+
+                                Map<String, dynamic>
+                                    tutorApplicationFromTsData = {
+                                  'Day': day,
+                                  'StartTime': startTime,
+                                  'EndTime': endTime,
+                                  'Status': "pending",
+                                  "RatePerClass": widget.fees,
+                                  "Subject": widget.subject,
+                                  'TutorPostId': widget.tutorPostId,
+                                  'TutorSeekerId': user.uid,
+                                };
+
+                                String TSdocumentId =
+                                    '${widget.tutorId}_${widget.tutorPostId}';
+
+                                FirebaseFirestore.instance
+                                    .collection('Tutor Seeker')
+                                    .doc(user.uid)
+                                    .collection('ApplicationRequest')
+                                    .doc(TSdocumentId)
+                                    .set(tutorPostApplicationData);
+
+                                String documentId =
+                                    '${user.uid}_${widget.tutorPostId}';
+
+                                FirebaseFirestore.instance
+                                    .collection('Tutor')
+                                    .doc(widget.tutorId)
+                                    .collection('ApplicationRequest')
+                                    .doc(documentId)
+                                    .set(tutorApplicationFromTsData);
+
+                                DateTime now = DateTime.now();
+
+                                _sendNotification(
+                                    widget.tutorId,
+                                    "Application Request",
+                                    "You have Received Application from ${widget.name}.",
+                                    now);
+                              }
+
+                              Navigator.of(dialogContext).pop();
+
+                              // ignore: use_build_context_synchronously
+                              showDialog(
+                                context: dialogContext,
+                                builder: (BuildContext context) {
+                                  return AlertDialog(
+                                    title: const Text("Applied Successfully!"),
+                                    actions: <Widget>[
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                        },
+                                        child: const Text('OK'),
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                            }
+                          : null,
+                    ),
+                ],
+              );
+            },
+          );
+        },
+      );
+    }
   }
 
   @override
@@ -398,8 +471,7 @@ class _TutorCardState extends State<TutorCard> {
       label: Text(text),
       style: ElevatedButton.styleFrom(
         foregroundColor: Colors.white,
-        backgroundColor:
-            Theme.of(context).primaryColor, // replace with your onPrimary color
+        backgroundColor: Theme.of(context).primaryColor,
       ),
     );
   }

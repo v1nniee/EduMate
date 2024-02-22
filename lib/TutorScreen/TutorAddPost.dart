@@ -26,6 +26,7 @@ class _TutorAddPostState extends State<TutorAddPost> {
   var _ratePerClass = '';
   var _mode = 'Online';
   var _name = '';
+  var _imageUrl = '';
   var _defaultSubject = 'Lower Primary Science';
   var _defaultLevel = 'Beginner';
   var _defaultMode = 'Online';
@@ -114,14 +115,17 @@ class _TutorAddPostState extends State<TutorAddPost> {
     User? user = FirebaseAuth.instance.currentUser;
     try {
       // Fetch the status of the tutor post application
-      DocumentSnapshot tutorSeekerSnapshot = await FirebaseFirestore.instance
+      DocumentSnapshot tutorSnapshot = await FirebaseFirestore.instance
           .collection('Tutor')
+          .doc(user?.uid)
+          .collection('UserProfile')
           .doc(user?.uid)
           .get();
 
-      if (tutorSeekerSnapshot.exists) {
+      if (tutorSnapshot.exists) {
         setState(() {
-          _name = tutorSeekerSnapshot.get('Name');
+          _name = tutorSnapshot.get('Name');
+          _imageUrl= tutorSnapshot.get('ImageUrl');
         });
       } else {
         setState(() {
@@ -151,6 +155,7 @@ class _TutorAddPostState extends State<TutorAddPost> {
 
       Map<String, dynamic> TutorPostData = {
         'Name': _name,
+        'ImageUrl' :_imageUrl,
         'SubjectsToTeach': _subject,
         'LevelofTeaching': _level,
         'RatePerClass': _ratePerClass,

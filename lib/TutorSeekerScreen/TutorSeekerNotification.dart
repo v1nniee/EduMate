@@ -1,13 +1,21 @@
+import 'package:edumateapp/FCM/SendNotification.dart';
+import 'package:edumateapp/Provider/TokenNotifier.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:edumateapp/Widgets/PageHeader.dart';
+import 'package:provider/provider.dart';
 
 class TutorSeekerNotification extends StatelessWidget {
   const TutorSeekerNotification({Key? key});
+  
 
   @override
   Widget build(BuildContext context) {
+    final userTokenNotifier =
+        Provider.of<UserTokenNotifier>(context, listen: false);
+    final fcmToken = userTokenNotifier.fcmToken;
+    
     final currentUser = FirebaseAuth.instance.currentUser!;
     final notificationsRef = FirebaseFirestore.instance
         .collection('Tutor Seeker')
@@ -125,7 +133,7 @@ class TutorSeekerNotification extends StatelessWidget {
                                     ),
                                   ),
                                   onTap: () {
-                                    // Handle tapping on a notification if needed
+                                    SendNotificationClass().sendNotification("title", "body",fcmToken);
                                   },
                                 ),
                               ),

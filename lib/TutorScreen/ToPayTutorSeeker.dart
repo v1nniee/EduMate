@@ -1,19 +1,20 @@
 import 'package:edumateapp/TutorScreen/ApplicationDetails.dart';
 import 'package:edumateapp/TutorScreen/MyStudentCard.dart';
+import 'package:edumateapp/TutorScreen/ToPayTutorSeekerCard.dart';
 import 'package:edumateapp/TutorSeekerScreen/ApplicationStatusTutorCard.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:edumateapp/Widgets/PageHeader.dart';
 
-class MyStudent extends StatefulWidget {
-  const MyStudent({Key? key}) : super(key: key);
+class ToPayTutorSeeker extends StatefulWidget {
+  const ToPayTutorSeeker({Key? key}) : super(key: key);
 
   @override
-  _MyStudentState createState() => _MyStudentState();
+  _ToPayTutorSeekerState createState() => _ToPayTutorSeekerState();
 }
 
-class _MyStudentState extends State<MyStudent> {
+class _ToPayTutorSeekerState extends State<ToPayTutorSeeker> {
   final TextEditingController _searchController = TextEditingController();
 
   @override
@@ -22,57 +23,60 @@ class _MyStudentState extends State<MyStudent> {
     super.dispose();
   }
 
-  Future<List<MyStudentCard>> _fetchApplicationRequests() async {
-    List<MyStudentCard> cards = [];
+  DateTime convertTimestampToDateTime(Timestamp timestamp) {
+  return timestamp.toDate();
+}
+
+  Future<List<ToPayTutorSeekerCard>> _fetchApplicationRequests() async {
+    List<ToPayTutorSeekerCard> cards = [];
     User currentUser = FirebaseAuth.instance.currentUser!;
     String tutorId = currentUser.uid;
 
     // Get the Application Requests for the current tutor
-    var applicationRequests = await FirebaseFirestore.instance
-        .collection('Tutor/$tutorId/ApplicationRequest')
+    var ToPayTutorSeekers = await FirebaseFirestore.instance
+        .collection('Tutor/$tutorId/ToPayTutorSeeker')
         .get();
 
-    if (applicationRequests.size == 0) {
-      return cards; // Return an empty list if the collection is empty
+    if (ToPayTutorSeekers.size == 0) {
+      return cards;
     }
 
-    for (var applicationRequest in applicationRequests.docs) {
+    for (var applicationRequest in ToPayTutorSeekers.docs) {
       String seekerId = applicationRequest['TutorSeekerId'];
       String subject = applicationRequest['Subject'];
       String status = applicationRequest['Status'];
       String start = applicationRequest['StartTime'];
       String end = applicationRequest['EndTime'];
       String day = applicationRequest['Day'];
+      DateTime acceptedDate = applicationRequest['AcceptedDate'].toDate();
       String tutorPostId = applicationRequest['TutorPostId'];
 
-      if (status == 'paid') {
-        // Only include cards with status "paid"
-        var userProfile = await FirebaseFirestore.instance
-            .collection('Tutor Seeker/$seekerId/UserProfile')
-            .get();
+      var userProfile = await FirebaseFirestore.instance
+          .collection('Tutor Seeker/$seekerId/UserProfile')
+          .get();
 
-        for (var profile in userProfile.docs) {
-          String name = profile['Name'];
-          String imageURL = profile['ImageUrl'];
-          String grade = profile['Grade'];
-          String requirement = profile['Requirement'];
+      for (var profile in userProfile.docs) {
+        String name = profile['Name'];
+        String imageURL = profile['ImageUrl'];
+        String grade = profile['Grade'];
+        String requirement = profile['Requirement'];
 
-          MyStudentCard card = MyStudentCard(
-            tutorseekerId: seekerId,
-            tutorPostId: tutorPostId,
-            name: name,
-            imageURL: imageURL,
-            subject: subject,
-            grade: grade,
-            requirement: requirement,
-            status: status,
-            StartTime: start,
-            EndTime: end,
-            Day: day,
-          );
+        ToPayTutorSeekerCard card = ToPayTutorSeekerCard(
+          tutorseekerId: seekerId,
+          tutorPostId: tutorPostId,
+          name: name,
+          imageURL: imageURL,
+          subject: subject,
+          grade: grade,
+          requirement: requirement,
+          status: status,
+          StartTime: start,
+          EndTime: end,
+          Day: day,
+          AcceptedDate: acceptedDate,
+        );
 
-          cards.add(card);
-        }
+        cards.add(card);
       }
     }
 
@@ -90,16 +94,16 @@ class _MyStudentState extends State<MyStudent> {
         children: [
           const PageHeader(
             backgroundColor: Color.fromARGB(255, 255, 255, 115),
-            headerTitle: 'My Student',
+            headerTitle: 'To Pay Tutor Seeker',
           ),
           const SizedBox(height: 12),
           Expanded(
-            child: FutureBuilder<List<MyStudentCard>>(
+            child: FutureBuilder<List<ToPayTutorSeekerCard>>(
               future: _fetchApplicationRequests(),
               builder: (BuildContext context,
-                  AsyncSnapshot<List<MyStudentCard>> snapshot) {
+                  AsyncSnapshot<List<ToPayTutorSeekerCard>> snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(
+                  return const Center(
                     child: SizedBox(
                       width: 50,
                       height: 50,
@@ -109,20 +113,20 @@ class _MyStudentState extends State<MyStudent> {
                 } else if (snapshot.hasError) {
                   return Center(child: Text('Error: ${snapshot.error}'));
                 } else if (snapshot.hasData) {
-                  List<MyStudentCard> cards = snapshot.data!;
+                  List<ToPayTutorSeekerCard> cards = snapshot.data!;
                   if (cards.isEmpty) {
-                    return Center(child: Text('No student applications yet.'));
+                    return Center(child: Text('No to pay tutor seeker yet.'));
                   } else {
                     return ListView.builder(
                       itemCount: cards.length,
                       itemBuilder: (context, index) {
-                        MyStudentCard card = cards[index];
+                        ToPayTutorSeekerCard card = cards[index];
                         return card;
                       },
                     );
                   }
                 } else {
-                  return Center(child: Text('No student applications found.'));
+                  return Center(child: Text('No to pay tutor seeker found.'));
                 }
               },
             ),

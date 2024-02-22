@@ -1,4 +1,3 @@
-
 import 'package:edumateapp/Payment/GenrateReceipt.dart';
 import 'package:edumateapp/Payment/StripePaymentHandle.dart';
 import 'package:edumateapp/Widgets/PageHeader.dart';
@@ -22,19 +21,18 @@ class PaymentConfirmationScreen extends StatelessWidget {
     required this.paymentDate,
     required this.startclassDate,
     required this.endclassDate,
-
   }) : super(key: key);
 
   final GenerateReceipt _GenerateReceipt = GenerateReceipt();
 
   @override
   Widget build(BuildContext context) {
+    print("hi im here");
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 255, 255, 115),
         elevation: 0,
       ),
-      
       body: Column(
         children: [
           const PageHeader(
@@ -44,24 +42,23 @@ class PaymentConfirmationScreen extends StatelessWidget {
           ListTile(
             onTap: () async {
               await _GenerateReceipt.generateReceipt(
-              tutorSeekerName,
-              tutorName,
-              subject,
-              paymentAmount,
-              startclassDate,
-              endclassDate,
-              paymentDate,
-              context
-              
-              // Pass the BuildContext here
-            );
+                  tutorSeekerName,
+                  tutorName,
+                  subject,
+                  paymentAmount,
+                  startclassDate,
+                  endclassDate,
+                  paymentDate,
+                  context
+
+                  // Pass the BuildContext here
+                  );
             },
             title: const Text('Generate Receipt'),
             trailing: const Icon(Icons.chevron_right_rounded),
           )
         ],
-     ),
-
+      ),
     );
   }
 }

@@ -119,7 +119,6 @@ class MyApp extends StatelessWidget {
             Provider.of<UserTypeNotifier>(context, listen: false)
                 .setUserType(snapshot.data!.uid);
 
-            // We use a Consumer here to listen to UserTypeNotifier updates
             return Consumer<UserTypeNotifier>(
               builder: (context, userTypeNotifier, child) {
                 final userType = userTypeNotifier.userType;

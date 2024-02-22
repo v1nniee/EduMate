@@ -20,6 +20,7 @@ class FirebaseAPI {
     // Assuming you have access to the context here. If not, you'll need to pass it to this method.
     Provider.of<UserTokenNotifier>(context, listen: false).setToken(FCMToken!);
 
+    /*
     // Configure foreground message handling
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       print("onMessage: $message");
@@ -48,5 +49,6 @@ class FirebaseAPI {
         }, duration: const Duration(milliseconds: 4000));
       }
     });
+    */
   }
 }

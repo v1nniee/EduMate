@@ -7,6 +7,7 @@
 import 'dart:io';
 
 import 'package:edumateapp/Data/ZipCodeData.dart';
+import 'package:edumateapp/Provider/TokenNotifier.dart';
 import 'package:edumateapp/TutorSeekerScreen/TutorSeekerTabScreen.dart';
 import 'package:edumateapp/Widgets/PageHeader.dart';
 import 'package:edumateapp/Widgets/UserImagePicker.dart';
@@ -16,6 +17,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
 class TutorSeekerUpdateProfile extends StatefulWidget {
   final VoidCallback onSaved;
@@ -191,6 +193,8 @@ class _TutorSeekerUpdateProfileState extends State<TutorSeekerUpdateProfile> {
         setState(() {
           _isLoading = false;
         });
+
+        
 
         widget.onSaved();
       } catch (error) {

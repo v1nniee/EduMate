@@ -352,13 +352,13 @@ class _TutorSeekerFindTutorState extends State<TutorSeekerFindTutor> {
                   FirebaseFirestore.instance.collection('Tutor').snapshots(),
               builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
                 if (!snapshot.hasData) {
-                  return Center(
-  child: SizedBox(
-    width: 50,
-    height: 50,
-    child: CircularProgressIndicator(),
-  ),
-);
+                  return const Center(
+                    child: SizedBox(
+                      width: 50,
+                      height: 50,
+                      child: CircularProgressIndicator(),
+                    ),
+                  );
                 }
                 if (_searchTerm.isEmpty && _isClickingSearch) {
                   return SizedBox();
@@ -398,6 +398,8 @@ class _TutorSeekerFindTutorState extends State<TutorSeekerFindTutor> {
                           String mode =
                               tutorPostDoc.get('Mode') ?? 'Mode not specified';
                           String tutorPostId = tutorPostDoc.id;
+                          String imageUrl = tutorPostDoc.get('ImageUrl') ??
+                              'tutor_seeker_profile.png';
 
                           double rating = 4.9;
 
@@ -427,40 +429,15 @@ class _TutorSeekerFindTutorState extends State<TutorSeekerFindTutor> {
                             continue;
                           }
 
-                          tutorCards.add(
-                            FutureBuilder<DocumentSnapshot>(
-                              future: document.reference
-                                  .collection('UserProfile')
-                                  .doc(document.id)
-                                  .get(),
-                              builder: (context,
-                                  AsyncSnapshot<DocumentSnapshot>
-                                      userProfileSnapshot) {
-                                if (!userProfileSnapshot.hasData) {
-                                  return const Card(
-                                    child: ListTile(
-                                      leading: CircularProgressIndicator(),
-                                    ),
-                                  );
-                                }
-
-                                String imageUrl = userProfileSnapshot
-                                        .data!.exists
-                                    ? userProfileSnapshot.data!.get('ImageUrl')
-                                    : 'tutor_seeker_profile.png';
-
-                                return TutorCard(
-                                  tutorId: document.id,
-                                  tutorPostId: tutorPostId,
-                                  name: document['Name'],
-                                  subject: subject,
-                                  imageURL: imageUrl,
-                                  rating: 4.0,
-                                  fees: fees,
-                                  mode: mode,
-                                );
-                              },
-                            ),
+                          return TutorCard(
+                            tutorId: document.id,
+                            tutorPostId: tutorPostId,
+                            name: document['Name'],
+                            subject: subject,
+                            imageURL: imageUrl,
+                            rating: 4.0,
+                            fees: fees,
+                            mode: mode,
                           );
                         }
 

@@ -26,7 +26,6 @@ class _TutorSeekerChatState extends State<TutorSeekerChat> {
   @override
   void initState() {
     super.initState();
-
     setupPushNotification();
   }
 

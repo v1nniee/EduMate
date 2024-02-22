@@ -1,8 +1,6 @@
-import 'package:edumateapp/TutorSeekerScreen/Favorite.dart';
-import 'package:edumateapp/TutorSeekerScreen/MyTutorCard.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:edumateapp/TutorSeekerScreen/TutorCard.dart';
+import 'package:edumateapp/TutorSeekerScreen/MyTutorCard.dart';
 import 'package:edumateapp/Widgets/PageHeader.dart';
 
 class MyTutor extends StatefulWidget {
@@ -13,17 +11,6 @@ class MyTutor extends StatefulWidget {
 }
 
 class _MyTutorState extends State<MyTutor> {
-  final TextEditingController _searchController = TextEditingController();
-  bool _isSearching = false;
-  String _searchTerm = '';
-  bool _isClickingSearch = false;
-
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -37,53 +24,11 @@ class _MyTutorState extends State<MyTutor> {
             backgroundColor: Color.fromARGB(255, 255, 255, 115),
             headerTitle: 'My Tutor',
           ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                labelText: 'Search',
-                suffixIcon: _isClickingSearch
-                    ? IconButton(
-                        icon: Icon(Icons.cancel),
-                        onPressed: () {
-                          setState(() {
-                            _isSearching = false;
-                            _searchTerm = '';
-                            _isClickingSearch = false;
-                            _searchController.clear(); // Clear text field
-                          });
-                          FocusScope.of(context).unfocus();
-                        },
-                      )
-                    : Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20.0),
-                ),
-                filled: true,
-                fillColor: Colors.white,
-              ),
-              onChanged: (value) {
-                setState(() {
-                  _searchTerm = value.trim().toLowerCase();
-                  _isSearching = _searchTerm.isNotEmpty;
-                  _isClickingSearch = true;
-                });
-              },
-              onTap: () {
-                setState(() {
-                  _isClickingSearch = true;
-                });
-              },
-            ),
-          ),
-          const SizedBox(
-            height: 12,
-          ),
           Expanded(
             child: StreamBuilder(
-              stream:
-                  FirebaseFirestore.instance.collection('Tutor').snapshots(),
+              stream: FirebaseFirestore.instance
+                  .collection('Tutor Seeker')
+                  .snapshots(),
               builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
                 if (!snapshot.hasData) {
                   return Center(
@@ -96,84 +41,72 @@ class _MyTutorState extends State<MyTutor> {
                 }
 
                 if (snapshot.data!.docs.isEmpty) {
-                  return Center(child: Text('No tutors found.'));
+                 return const Center(
+                        child: Text(
+                          'There are no my tutors now.',
+                          style: TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
+                      );
                 }
-
-                if (_searchTerm.isEmpty && _isClickingSearch) {
-                  return Center(child: Text('Please enter a search term.'));
-                }
-
-                final filteredDocs = _searchTerm.isNotEmpty
-                    ? snapshot.data!.docs.where((doc) {
-                        final tutorName = doc['Name'].toString().toLowerCase();
-                        return tutorName.contains(_searchTerm);
-                      }).toList()
-                    : snapshot.data!.docs;
 
                 return ListView(
-                  children: filteredDocs.map((document) {
+                  children: snapshot.data!.docs.map((document) {
+                    // This StreamBuilder listens for changes in the 'mytutor' collection for each TutorSeeker document.
                     return StreamBuilder<QuerySnapshot>(
-                      stream: document.reference
-                          .collection('TutorPost')
-                          .snapshots(),
+                      stream:
+                          document.reference.collection('MyTutor').snapshots(),
                       builder: (context,
                           AsyncSnapshot<QuerySnapshot> tutorPostSnapshot) {
+                        // Check if there's data and the 'mytutor' collection is not empty.
                         if (!tutorPostSnapshot.hasData) {
-                          return const Card(
-                            child: ListTile(
-                              leading: CircularProgressIndicator(),
+                          return const Center(
+                            child: SizedBox(
+                              width: 50,
+                              height: 50,
+                              child: CircularProgressIndicator(),
                             ),
+                          );
+                        } else if (tutorPostSnapshot.data!.docs.isEmpty) {
+                          return const Center(
+                            child: Text('No My Tutor found.'),
                           );
                         }
 
                         var tutorPosts = tutorPostSnapshot.data!.docs;
-                        List<Widget> tutorCards = [];
 
-                        for (var tutorPostDoc in tutorPosts) {
-                          String subject =
-                              tutorPostDoc.get('SubjectsToTeach') ??
-                                  'Subject not specified';
-                          String fees = tutorPostDoc.get('RatePerClass') ??
-                              'Rate not specified';
-                          String tutorPostId = tutorPostDoc.id;
+                        return Column(
+                          children: tutorPosts.map((tutorPostDoc) {
+                            String subject = tutorPostDoc.get('Subject') ??
+                                'Subject not specified';
+                            DateTime startDate =
+                                tutorPostDoc.get('StartClassDate').toDate();
+                            DateTime endDate =
+                                tutorPostDoc.get('EndClassDate').toDate();
+                            String day =
+                                tutorPostDoc.get('Day') ?? 'Day not specified';
+                            String startTime = tutorPostDoc.get('StartTime') ??
+                                'StartTime not specified';
+                            String endTime = tutorPostDoc.get('EndTime') ??
+                                'EndTime not specified';
+                             String TutorId = tutorPostDoc.get('TutorId') ??
+                                'TutorId not specified';
 
-                          tutorCards.add(
-                            FutureBuilder<DocumentSnapshot>(
-                              future: document.reference
-                                  .collection('UserProfile')
-                                  .doc(document.id)
-                                  .get(),
-                              builder: (context,
-                                  AsyncSnapshot<DocumentSnapshot>
-                                      userProfileSnapshot) {
-                                if (!userProfileSnapshot.hasData) {
-                                  return const Card(
-                                    child: ListTile(
-                                      leading: CircularProgressIndicator(),
-                                    ),
-                                  );
-                                }
+                            String TutorPostId = tutorPostDoc.get('TutorPostId') ??
+                                'TutorPostId not specified';
 
-                                String imageUrl = userProfileSnapshot
-                                        .data!.exists
-                                    ? userProfileSnapshot.data!.get('ImageUrl')
-                                    : 'tutor_seeker_profile.png';
-
-                                return MyTutorCard(
-                                  tutorId: document.id,
-                                  tutorPostId: tutorPostId,
-                                  name: document['Name'],
-                                  subject: subject,
-                                  imageURL: imageUrl,
-                                  rating: 4.0,
-                                  fees: fees,
-                                );
-                              },
-                            ),
-                          );
-                        }
-
-                        return Column(children: tutorCards);
+                            return MyTutorCard(
+                              tutorId: TutorId,
+                              tutorPostId: TutorPostId,
+                              subject: subject,
+                              startClassDate: startDate,
+                              endClassDate: endDate,
+                              day: day,
+                              startTime: startTime,
+                              endTime: endTime,
+                            );
+                          }).toList(),
+                        );
                       },
                     );
                   }).toList(),

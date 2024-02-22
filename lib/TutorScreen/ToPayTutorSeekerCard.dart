@@ -2,8 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:edumateapp/TutorSeekerScreen/TutorDetailPage.dart';
+import 'package:intl/intl.dart';
 
-class MyStudentCard extends StatefulWidget {
+class ToPayTutorSeekerCard extends StatefulWidget {
   final String tutorseekerId;
   final String tutorPostId;
   final String name;
@@ -15,8 +16,9 @@ class MyStudentCard extends StatefulWidget {
   final String StartTime;
   final String EndTime;
   final String Day;
+  final DateTime AcceptedDate;
 
-  const MyStudentCard({
+  const ToPayTutorSeekerCard({
     Key? key,
     required this.tutorseekerId,
     required this.name,
@@ -29,13 +31,14 @@ class MyStudentCard extends StatefulWidget {
     required this.StartTime,
     required this.EndTime,
     required this.Day,
+    required this.AcceptedDate,
   }) : super(key: key);
 
   @override
-  _MyStudentCardState createState() => _MyStudentCardState();
+  _ToPayTutorSeekerCardState createState() => _ToPayTutorSeekerCardState();
 }
 
-class _MyStudentCardState extends State<MyStudentCard> {
+class _ToPayTutorSeekerCardState extends State<ToPayTutorSeekerCard> {
   String _name = '';
   @override
   void initState() {
@@ -86,12 +89,14 @@ class _MyStudentCardState extends State<MyStudentCard> {
     );
   }
 
-
   @override
   Widget build(BuildContext context) {
     User currentUser = FirebaseAuth.instance.currentUser!;
     Color cardColor;
     String applicationStatusText;
+
+    DateTime originalDate = widget.AcceptedDate;
+    DateTime duedate = originalDate.add(Duration(days: 7));
 
     switch (widget.status) {
       case 'rejected':
@@ -147,11 +152,11 @@ class _MyStudentCardState extends State<MyStudentCard> {
                           style: TextStyle(fontSize: 13)),
                       Text('Grade: ${widget.grade}',
                           style: TextStyle(fontSize: 13)),
-                      if (widget.requirement != "N/A")
-                        Text('Requirement: ${widget.requirement}',
-                            style: TextStyle(fontSize: 13)),
                       Text(
                           'Day: ${widget.Day} ${widget.StartTime} - ${widget.EndTime}',
+                          style: TextStyle(fontSize: 13)),
+                      Text(
+                          'Payment Due: ${DateFormat('yyyy-MM-dd').format(duedate)}',
                           style: TextStyle(fontSize: 13)),
                     ],
                   ),
