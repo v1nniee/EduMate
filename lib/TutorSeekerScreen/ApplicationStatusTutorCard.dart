@@ -1,4 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:edumateapp/TutorSeekerScreen/TutorCard.dart';
+import 'package:edumateapp/TutorSeekerScreen/TutorSeekerFindTutor.dart';
 import 'package:edumateapp/TutorSeekerScreen/TutorSeekerPayment.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -12,6 +14,7 @@ class ApplicationStatusTutorCard extends StatefulWidget {
   final String imageURL;
   final double rating;
   final String fees;
+  final int numberOfRating;
   const ApplicationStatusTutorCard({
     Key? key,
     required this.tutorId,
@@ -20,6 +23,7 @@ class ApplicationStatusTutorCard extends StatefulWidget {
     required this.imageURL,
     required this.rating,
     required this.fees,
+    required this.numberOfRating,
     required this.tutorPostId,
   }) : super(key: key);
 
@@ -31,7 +35,9 @@ class ApplicationStatusTutorCard extends StatefulWidget {
 class _ApplicationStatusTutorCardState
     extends State<ApplicationStatusTutorCard> {
   bool isFavorite = false;
-  String _applicationStatus = 'pending'; 
+  String _applicationStatus = 'pending';
+  bool isApplicationCanceled = false;
+  bool _isCancelling = false;
 
   @override
   void initState() {
@@ -66,6 +72,9 @@ class _ApplicationStatusTutorCardState
   }
 
   Future<void> _cancelApplication() async {
+    setState(() {
+      _isCancelling = true;
+    });
     User? user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       // Reference to the TutorApplication document
@@ -95,13 +104,26 @@ class _ApplicationStatusTutorCardState
         if (tutorApplicationfromTSSnapshot.exists) {
           await tutorApplicationfromTSDocRef.delete();
         }
+        setState(() {
+          _isCancelling = false;
+        });
 
         _showDialog('Cancelled', 'Application cancelled successfully');
+        _loadApplicationStatus();
+        setState(() {
+          isApplicationCanceled = true;
+        });
       } catch (e) {
         _showDialog('Error', 'Error cancelling application: $e');
+        setState(() {
+          _isCancelling = false;
+        });
       }
     } else {
       _showDialog('Error', 'You are not logged in');
+      setState(() {
+        _isCancelling = false;
+      });
     }
   }
 
@@ -125,71 +147,81 @@ class _ApplicationStatusTutorCardState
     );
   }
 
-  @override
-Widget build(BuildContext context) {
-  Color cardColor;
-  String applicationStatusText;
-
-  switch (_applicationStatus) {
-    case 'rejected':
-      cardColor = Colors.red;
-      applicationStatusText = 'Rejected';
-      break;
-    case 'pending':
-      cardColor = Colors.orange;
-      applicationStatusText = 'Pending';
-      break;
-    case 'accepted':
-      cardColor = Colors.green;
-      applicationStatusText = 'Accepted';
-      break;
-    default:
-      cardColor = Colors.grey;
-      applicationStatusText = 'Unknown';
+  void _cancelled() {
+    setState(() {
+      isApplicationCanceled = true;
+    });
   }
 
+  @override
+  Widget build(BuildContext context) {
+    String ratingText = widget.numberOfRating != 0
+        ? '${widget.rating.toStringAsFixed(1)} (${widget.numberOfRating})'
+        : "No ratings yet";
+    Color cardColor;
+    String applicationStatusText;
 
-  double topPadding = 8.0;
+    switch (_applicationStatus) {
+      case 'rejected':
+        cardColor = Colors.red;
+        applicationStatusText = 'Rejected';
+        break;
+      case 'pending':
+        cardColor = Colors.orange;
+        applicationStatusText = 'Pending';
+        break;
+      case 'accepted':
+        cardColor = Colors.green;
+        applicationStatusText = 'Accepted';
+        break;
+      default:
+        cardColor = Colors.grey;
+        applicationStatusText = '';
+    }
+
+    double topPadding = 8.0;
 
     return Card(
-    margin: EdgeInsets.all(4.0),
-    elevation: 2.0,
-    child: Container(
-      decoration: BoxDecoration(
-        color: cardColor,
-        borderRadius: BorderRadius.circular(8.0),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          ListTile(
-            leading: CircleAvatar(
-              backgroundImage: NetworkImage(widget.imageURL),
-            ),
-            title: Text(widget.name,style: TextStyle(
-                color: Colors.black,
-                fontWeight: FontWeight.bold,
-              ),),
-            subtitle: Text(widget.subject),
-            trailing: Text(
-              applicationStatusText,
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
+      margin: EdgeInsets.all(4.0),
+      elevation: 2.0,
+      child: Container(
+        decoration: BoxDecoration(
+          color: cardColor,
+          borderRadius: BorderRadius.circular(8.0),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            ListTile(
+              leading: CircleAvatar(
+                backgroundImage: NetworkImage(widget.imageURL),
+              ),
+              title: Text(
+                widget.name,
+                style: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              subtitle: Text(widget.subject),
+              trailing: Text(
+                applicationStatusText,
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
-          ),
-          
-          Padding(
-            padding: EdgeInsets.symmetric(vertical: 8.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _buildInfoWithIcon(Icons.star, 'Rating: ${widget.rating.toStringAsFixed(1)}'),
-                _buildInfoWithIcon(Icons.monetization_on, 'RM${widget.fees}'),
-              ],
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: 8.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  _buildInfoWithIcon(Icons.star, 'Rating: ${ratingText}'),
+                  _buildInfoWithIcon(Icons.monetization_on, 'RM${widget.fees}'),
+                ],
+              ),
             ),
-          ),
             ButtonBar(
               alignment: MainAxisAlignment.spaceEvenly,
               children: [
@@ -209,7 +241,8 @@ Widget build(BuildContext context) {
                     );
                   },
                   style: ElevatedButton.styleFrom(
-                    foregroundColor: Colors.white, backgroundColor: Theme.of(context).primaryColor,
+                    foregroundColor: Colors.white,
+                    backgroundColor: Theme.of(context).primaryColor,
                   ),
                 ),
                 if (_applicationStatus == "accepted")
@@ -224,18 +257,36 @@ Widget build(BuildContext context) {
                       );
                     },
                     style: ElevatedButton.styleFrom(
-                      foregroundColor: Colors.white, backgroundColor: Colors.blue,
+                      foregroundColor: Colors.white,
+                      backgroundColor: Colors.blue,
                     ),
                   )
                 else
-                  ElevatedButton.icon(
-                    icon: Icon(Icons.cancel, size: 16.0),
-                    label: Text('Cancel Application'),
-                    onPressed: _cancelApplication,
-                    style: ElevatedButton.styleFrom(
-                      foregroundColor: Colors.white, backgroundColor: Colors.red,
-                    ),
-                  ),
+                  _isCancelling
+                      ? const Center(
+                          child: CircularProgressIndicator(
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(Colors.red),
+                          ),
+                        )
+                      : ElevatedButton.icon(
+                          icon: Icon(
+                              isApplicationCanceled
+                                  ? Icons.cancel_sharp
+                                  : Icons.cancel,
+                              size: 16.0),
+                          label: Text(isApplicationCanceled
+                              ? 'Application Cancelled'
+                              : 'Cancel Application'),
+                          onPressed:
+                              isApplicationCanceled ? null : _cancelApplication,
+                          style: ElevatedButton.styleFrom(
+                            foregroundColor: Colors.white,
+                            backgroundColor: isApplicationCanceled
+                                ? Colors.red
+                                : const Color.fromRGBO(244, 67, 54, 1),
+                          ),
+                        ),
               ],
             ),
           ],

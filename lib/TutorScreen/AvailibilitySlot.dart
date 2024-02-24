@@ -52,6 +52,7 @@ class _AvailabilitySlotState extends State<AvailabilitySlot> {
             'day': data['day'],
             'startTime': _timeFromString(data['startTime']),
             'endTime': _timeFromString(data['endTime']),
+            'status': data['status'],
           };
         }).toList();
 
@@ -105,8 +106,8 @@ class _AvailabilitySlotState extends State<AvailabilitySlot> {
           context: context,
           builder: (BuildContext context) {
             return AlertDialog(
-              title: Text('Submission Successful'),
-              content: Text(
+              title: const Text('Submission Successful'),
+              content: const Text(
                   'Your availability slots have been updated successfully.'),
               actions: <Widget>[
                 TextButton(
@@ -172,6 +173,7 @@ class _AvailabilitySlotState extends State<AvailabilitySlot> {
                 slot['endTime'].minute,
               ))
             : null,
+        'status': slot['status'],
       };
     }).toList();
 
@@ -191,6 +193,7 @@ class _AvailabilitySlotState extends State<AvailabilitySlot> {
         'day': null,
         'startTime': null,
         'endTime': null,
+        'status': 'available',
       });
     });
   }
@@ -313,8 +316,12 @@ class _AvailabilitySlotState extends State<AvailabilitySlot> {
                   ],
                 ),
                 ..._availability.map((slot) {
+                  Color slotColor = slot['status'] == 'unavailable'
+                      ? Colors.red
+                      : Colors.white;
                   return Card(
                     margin: const EdgeInsets.all(8.0),
+                    color: slotColor,
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Column(

@@ -125,7 +125,7 @@ class _TutorSeekerRegistrationState extends State<TutorSeekerRegistration> {
             .collection('Tutor Seeker')
             .doc(userId)
             .collection('UserProfile')
-            .doc(userId) // The document ID will be the same as the userId
+            .doc(userId) 
             .set(userProfileData, SetOptions(merge: true));
 
         await FirebaseFirestore.instance

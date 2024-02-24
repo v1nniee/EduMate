@@ -24,7 +24,6 @@ class _TutorSeekerFindTutorState extends State<TutorSeekerFindTutor> {
   double _selectedRating = 0;
   String _selectedMode = 'any';
   RangeValues _priceRange = RangeValues(0, 100);
-  List<int> _selectedRatings = [1, 2, 3, 4, 5];
   final List<String> _SubjectsList = [
     'All',
     'Lower Primary Bahasa Melayu',
@@ -72,12 +71,10 @@ class _TutorSeekerFindTutorState extends State<TutorSeekerFindTutor> {
   @override
   void initState() {
     super.initState();
-    _selectedRatings = [1, 2, 3, 4, 5];
   }
 
   void _resetFilters() {
     setState(() {
-      _selectedRatings = [1, 2, 3, 4, 5];
       _selectedSubject = 'All';
       _selectedMode = 'any';
       _priceRange = RangeValues(0, 100);
@@ -94,42 +91,8 @@ class _TutorSeekerFindTutorState extends State<TutorSeekerFindTutor> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                "Rating",
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              SizedBox(height: 8),
-              Wrap(
-                children: List.generate(5, (index) {
-                  int rating = index + 1;
-                  return Padding(
-                    padding: EdgeInsets.only(right: 8.0),
-                    child: ElevatedButton(
-                      onPressed: () {
-                        setState(() {
-                          if (_selectedRatings.contains(rating)) {
-                            _selectedRatings.remove(rating);
-                          } else {
-                            _selectedRatings.add(rating);
-                          }
-                        });
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: _selectedRatings.contains(rating)
-                            ? Colors.yellow
-                            : Colors.grey,
-                      ),
-                      child: Text(
-                        rating.toString(),
-                        style: TextStyle(fontSize: 16),
-                      ),
-                    ),
-                  );
-                }),
-              ),
+
+              
               SizedBox(height: 20),
               const Text(
                 "Mode",
@@ -398,19 +361,10 @@ class _TutorSeekerFindTutorState extends State<TutorSeekerFindTutor> {
                           String mode =
                               tutorPostDoc.get('Mode') ?? 'Mode not specified';
                           String tutorPostId = tutorPostDoc.id;
-                          String imageUrl = tutorPostDoc.get('ImageUrl') ??
-                              'tutor_seeker_profile.png';
-
-                          double rating = 4.9;
 
                           if (_selectedMode != 'any' &&
                               mode.toLowerCase() !=
                                   _selectedMode.toLowerCase()) {
-                            continue;
-                          }
-
-                          if (_selectedRatings.isNotEmpty &&
-                              !_selectedRatings.contains(rating.toInt())) {
                             continue;
                           }
 
@@ -429,15 +383,49 @@ class _TutorSeekerFindTutorState extends State<TutorSeekerFindTutor> {
                             continue;
                           }
 
-                          return TutorCard(
-                            tutorId: document.id,
-                            tutorPostId: tutorPostId,
-                            name: document['Name'],
-                            subject: subject,
-                            imageURL: imageUrl,
-                            rating: 4.0,
-                            fees: fees,
-                            mode: mode,
+
+                          
+
+                          tutorCards.add(
+                            FutureBuilder<DocumentSnapshot>(
+                              future: document.reference
+                                  .collection('UserProfile')
+                                  .doc(document.id)
+                                  .get(),
+                              builder: (context,
+                                  AsyncSnapshot<DocumentSnapshot>
+                                      userProfileSnapshot) {
+                                if (!userProfileSnapshot.hasData) {
+                                  return const Card(
+                                    child: ListTile(
+                                      leading: CircularProgressIndicator(),
+                                    ),
+                                  );
+                                }
+
+                                var userData = userProfileSnapshot.data!.exists
+                                    ? userProfileSnapshot.data!
+                                    : null;
+
+                                String imageUrl = userData?.get('ImageUrl') ??
+                                    'tutor_seeker_profile.png';
+                                double rating = userData?.get('Rating') ?? 0.0;
+                                int numberOfRating =
+                                    userData?.get('NumberOfRating') ?? 0;
+
+                                return TutorCard(
+                                  tutorId: document.id,
+                                  tutorPostId: tutorPostId,
+                                  name: document['Name'],
+                                  subject: subject,
+                                  imageURL: imageUrl,
+                                  rating: rating,
+                                  fees: fees,
+                                  mode: mode,
+                                  numberOfRating: numberOfRating,
+                                );
+                              },
+                            ),
                           );
                         }
 

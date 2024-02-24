@@ -85,6 +85,8 @@ class _TutorProfileState extends State<TutorProfile> {
             city: userData['City'] ?? 'N/A',
             grade: userData['Grade'] ?? 'N/A',
             aboutMe: userData['AboutMe'] ?? 'N/A',
+            rating: userData['Rating'] ?? 'N/A',
+            numberOfRating: userData['NumberOfRating'] ?? 'N/A',
           ),
         ),
       ),

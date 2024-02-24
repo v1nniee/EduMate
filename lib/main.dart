@@ -8,6 +8,7 @@ import 'package:edumateapp/Provider/TokenNotifier.dart';
 import 'package:edumateapp/Provider/UserTypeNotifier.dart';
 import 'package:edumateapp/TutorScreen/TutorNotification.dart';
 import 'package:edumateapp/TutorScreen/TutorTabScreen.dart';
+import 'package:edumateapp/TutorScreen/UnverifiedTutorHome.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -130,7 +131,9 @@ class MyApp extends StatelessWidget {
                   case 'Tutor Seeker':
                     return const TutorSeekerTabScreen();
                   case 'New Tutor':
-                    return const TutorTabScreen();
+                    return const UnverifiedTutorHome();
+                  case 'Unverified Tutor':
+                    return const UnverifiedTutorHome();
                   case 'New Tutor Seeker':
                     return const TutorSeekerTabScreen();
                   case 'Admin':

@@ -1,4 +1,3 @@
-
 import 'dart:io';
 
 import 'package:edumateapp/Data/ZipCodeData.dart';
@@ -6,6 +5,7 @@ import 'package:edumateapp/Provider/TokenNotifier.dart';
 import 'package:edumateapp/TutorSeekerScreen/TutorSeekerTabScreen.dart';
 import 'package:edumateapp/Widgets/PageHeader.dart';
 import 'package:edumateapp/Widgets/UserImagePicker.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -17,8 +17,7 @@ class TutorRegistration extends StatefulWidget {
   const TutorRegistration({super.key, required this.onSaved});
 
   @override
-  State<TutorRegistration> createState() =>
-      _TutorRegistrationState();
+  State<TutorRegistration> createState() => _TutorRegistrationState();
 }
 
 class _TutorRegistrationState extends State<TutorRegistration> {
@@ -32,7 +31,8 @@ class _TutorRegistrationState extends State<TutorRegistration> {
   var _enteredState = '';
   var _enteredCity = '';
   var _enteredAboutme = '';
-
+  var _enteredQualification = 'Diploma';
+  var _gender = 'Male';
 
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
@@ -44,17 +44,52 @@ class _TutorRegistrationState extends State<TutorRegistration> {
   final _cityController = TextEditingController();
   final _enteredAboutmeController = TextEditingController();
 
-
   var _isLoading = false;
   File? _selectedImageFile;
+  File? _selectedCertification;
+  String? _selectedCertificationName;
+
   var _isValid = false;
-  var _gender = 'Male';
+
   final List<String> _genderTypes = ['Male', 'Female'];
+  final List<String> _qualificationType = [
+    "Diploma",
+    "Bachelor's degree",
+    "Master's Degree",
+    "Ph.D."
+  ];
+
+  Future<void> _pickDocument() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.custom,
+      allowedExtensions: ['pdf'],
+    );
+
+    if (result != null) {
+      PlatformFile file = result.files.first;
+
+      setState(() {
+        _selectedCertification = File(file.path!);
+        _selectedCertificationName = file.name;
+      });
+    } else {
+      // User canceled the picker
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text('No file selected'),
+      ));
+    }
+  }
 
   void _submit() async {
-    if (!_formKey.currentState!.validate()) {
+    final isDocumentSelected = _selectedCertification != null;
+    if (!_formKey.currentState!.validate() || !isDocumentSelected) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text('Please fill all fields and upload a document.')),
+      );
       return;
     }
+
     _formKey.currentState!.save();
 
     User? user = FirebaseAuth.instance.currentUser;
@@ -96,49 +131,52 @@ class _TutorRegistrationState extends State<TutorRegistration> {
         'State': _enteredState,
         'City': _enteredCity,
         'AboutMe': _enteredAboutme,
+        'Rating': 0.1,
+        'NumberOfRating': 0,
+        'HighestQualification': _enteredQualification,
         if (imageURL != null) 'ImageUrl': imageURL else 'ImageUrl': null,
       };
 
-      final userTokenNotifier =
-          Provider.of<UserTokenNotifier>(context, listen: false);
-      final fcmToken = userTokenNotifier.fcmToken;
 
       try {
-         await FirebaseFirestore.instance
-          .collection('Tutor')
-          .doc(userId)
-          .collection('UserProfile') 
-          .doc(userId) // The document ID will be the same as the userId
-          .set(userProfileData, SetOptions(merge: true)); 
+
+        if (_selectedCertification != null) {
+          String docFileName =
+              'TutorCertificationDocuments/${userId}_${DateTime.now().millisecondsSinceEpoch}.pdf';
+          Reference storageRef =
+              FirebaseStorage.instance.ref().child(docFileName);
+
+          UploadTask uploadTask = storageRef.putFile(_selectedCertification!);
+          TaskSnapshot taskSnapshot = await uploadTask;
+          String docURL = await taskSnapshot.ref.getDownloadURL();
+
+          userProfileData['DocumentUrl'] = docURL;
+        }
+
+        await FirebaseFirestore.instance
+            .collection('Tutor')
+            .doc(userId)
+            .collection('UserProfile')
+            .doc(userId)
+            .set(userProfileData, SetOptions(merge: true));
 
         await FirebaseFirestore.instance
             .collection('Tutor')
             .doc(userId)
             .set({'Name': userProfileData['Name']}, SetOptions(merge: true));
-        setState(() {
-          _isLoading = false;
-        });
-      
-        
-        await FirebaseFirestore.instance
-            .collection('Tutor')
-            .doc(userId)
-            .set({'UserType': "Tutor"}, SetOptions(merge: true));
-        setState(() {
-          _isLoading = false;
-        });
 
         await FirebaseFirestore.instance
             .collection('Tutor')
             .doc(userId)
-            .set({'FCMToken': fcmToken}, SetOptions(merge: true));
+            .set({'UserType': "Unverified Tutor"}, SetOptions(merge: true));
         setState(() {
           _isLoading = false;
         });
 
+        setState(() {
+          _isLoading = false;
+        });
         
-        
-
         widget.onSaved();
       } catch (error) {
         print('Error saving profile: $error');
@@ -470,7 +508,6 @@ class _TutorRegistrationState extends State<TutorRegistration> {
                             _enteredState = value!;
                           },
                         ),
-                        
                         const SizedBox(
                           height: 10,
                         ),
@@ -488,6 +525,48 @@ class _TutorRegistrationState extends State<TutorRegistration> {
                             _enteredAboutme = value!;
                           },
                         ),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        DropdownButtonFormField<String>(
+                          value: _enteredQualification,
+                          decoration: InputDecoration(
+                            labelText: 'Highest Qualification',
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(20),
+                              borderSide: BorderSide.none,
+                            ),
+                            filled: true,
+                          ),
+                          items: _qualificationType.map((String value) {
+                            return DropdownMenuItem<String>(
+                              value: value,
+                              child: Text(value),
+                            );
+                          }).toList(),
+                          onChanged: (newValue) {
+                            setState(() {
+                              _enteredQualification = newValue!;
+                            });
+                          },
+                        ),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        ElevatedButton.icon(
+                          onPressed: _pickDocument,
+                          icon: Icon(Icons.upload_file),
+                          label: Text("Upload Document"),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blue,
+                          ),
+                        ),
+                        if (_selectedCertificationName != null)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8.0),
+                            child:
+                                Text("Uploaded: $_selectedCertificationName"),
+                          ),
                         if (_isValid) SizedBox(height: 12),
                         if (!_isValid)
                           if (_isLoading) const CircularProgressIndicator(),

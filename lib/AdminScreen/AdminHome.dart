@@ -1,7 +1,6 @@
 import 'package:edumateapp/Data/AdminData.dart';
 import 'package:edumateapp/Screen/CategoriesScreen.dart';
 import 'package:edumateapp/Widgets/HomeHeader.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class AdminHome extends StatelessWidget {
@@ -12,7 +11,7 @@ class AdminHome extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: const Text("Home Page"),
+        
         backgroundColor: const Color.fromARGB(255, 16, 212, 252),
         elevation: 0,
 

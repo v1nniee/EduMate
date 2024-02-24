@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:edumateapp/FCM/StoreNotification.dart';
 import 'package:edumateapp/TutorSeekerScreen/PaymentConfirmationScreen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -10,20 +11,22 @@ import 'package:printing/printing.dart';
 class TutorSeekerPaymentCard extends StatefulWidget {
   final String tutorId;
   final String tutorPostId;
-  final String name;
+  final String day;
   final String subject;
-  final String imageURL;
-  final double rating;
+  final String startTime;
+  final String endTime;
   final String fees;
+  final DateTime acceptedDate;
   const TutorSeekerPaymentCard({
     Key? key,
     required this.tutorId,
-    required this.name,
+    required this.day,
     required this.subject,
-    required this.imageURL,
-    required this.rating,
+    required this.startTime,
+    required this.endTime,
     required this.fees,
     required this.tutorPostId,
+    required this.acceptedDate,
   }) : super(key: key);
 
   @override
@@ -33,38 +36,32 @@ class TutorSeekerPaymentCard extends StatefulWidget {
 class _TutorSeekerPaymentCardState extends State<TutorSeekerPaymentCard> {
   bool isFavorite = false;
 
-  DateTime? _acceptedDate;
   DateTime? _dueDate;
   String _tutorseekerName = '';
-  String _day = '';
+  String _tutorName = '';
+  String _imageURL = '';
 
   @override
   void initState() {
     super.initState();
     _loadUserProfile();
-    _loadAcceptedDate();
+    _deleteDuePayment();
+    _loadTutorProfile();
   }
 
-  Future<void> _loadAcceptedDate() async {
+  Future<void> _deleteDuePayment() async {
     User? user = FirebaseAuth.instance.currentUser;
     try {
-      // Fetch the status of the tutor post application
       DocumentSnapshot tutorPostApplicationSnapshot = await FirebaseFirestore
           .instance
           .collection('Tutor Seeker')
           .doc(user?.uid)
-          .collection('ToPay')
+          .collection('ToPayTutorSeeker')
           .doc('${widget.tutorId}_${widget.tutorPostId}')
           .get();
 
       if (tutorPostApplicationSnapshot.exists) {
-        setState(() {
-          _acceptedDate =
-              tutorPostApplicationSnapshot.get('AcceptedDate').toDate();
-          _day = tutorPostApplicationSnapshot.get('Day');
-          ;
-        });
-        _dueDate = _acceptedDate?.add(Duration(days: 7));
+        _dueDate = widget.acceptedDate.add(Duration(days: 7));
         DateTime now = DateTime.now();
 
         if (now.isAfter(_dueDate!)) {
@@ -90,6 +87,44 @@ class _TutorSeekerPaymentCardState extends State<TutorSeekerPaymentCard> {
           if (ToPaySnapshot.exists) {
             await ToPayDocRef.delete();
           }
+
+          DocumentReference ApplicationRequestDocRef = FirebaseFirestore
+              .instance
+              .collection('Tutor Seeker')
+              .doc(user?.uid)
+              .collection('ApplicationRequest')
+              .doc('${widget.tutorId}_${widget.tutorPostId}');
+
+          DocumentSnapshot ApplicationRequestSnapshot =
+              await ApplicationRequestDocRef.get();
+          if (ApplicationRequestSnapshot.exists) {
+            await ApplicationRequestDocRef.delete();
+          }
+
+          DocumentReference ApplicationRequestfromtutorDocRef =
+              FirebaseFirestore.instance
+                  .collection('Tutor')
+                  .doc(widget.tutorId)
+                  .collection('ApplicationRequest')
+                  .doc('${user?.uid}_${widget.tutorPostId}');
+
+          DocumentSnapshot ApplicationRequestfromTutorSnapshot =
+              await ApplicationRequestfromtutorDocRef.get();
+          if (ApplicationRequestfromTutorSnapshot.exists) {
+            await ApplicationRequestfromtutorDocRef.delete();
+          }
+
+          StoreNotification().sendNotificationtoTutor(
+              widget.tutorId,
+              "Pending Payment Alert",
+              "Payment from ${_tutorseekerName} is due. The application has been cancelled.",
+              now);
+
+          StoreNotification().sendNotificationtoTutorSeeker(
+              user!.uid,
+              "Payment Overdue",
+              "Your payment for sessions with ${_tutorName} on ${widget.subject} is due. The application has been cancelled.",
+              now);
         }
       }
     } catch (e) {
@@ -118,22 +153,14 @@ class _TutorSeekerPaymentCardState extends State<TutorSeekerPaymentCard> {
   }
 
   String calculateFees() {
-    // Parse the fees String to a double
     int fees = int.tryParse(widget.fees) ?? 0;
-
     int updatedFees = (fees * 4);
-
-    // Convert back to String and return
     return updatedFees.toStringAsFixed(0);
   }
 
   String removeCommisionFees() {
-    // Parse the fees String to a double
     int fees = int.tryParse(widget.fees) ?? 0;
-
     int updatedFees = (fees * 4) - 10;
-
-    // Convert back to String and return
     return updatedFees.toStringAsFixed(0);
   }
 
@@ -153,6 +180,32 @@ class _TutorSeekerPaymentCardState extends State<TutorSeekerPaymentCard> {
       } else {
         setState(() {
           _tutorseekerName = 'Not found';
+        });
+      }
+    } catch (e) {
+      print('Error loading name: $e');
+    }
+  }
+
+  Future<void> _loadTutorProfile() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    try {
+      // Fetch the status of the tutor post application
+      DocumentSnapshot tutorSeekerSnapshot = await FirebaseFirestore.instance
+          .collection('Tutor')
+          .doc(widget.tutorId)
+          .collection('UserProfile')
+          .doc(widget.tutorId)
+          .get();
+
+      if (tutorSeekerSnapshot.exists) {
+        setState(() {
+          _tutorName = tutorSeekerSnapshot.get('Name');
+          _imageURL = tutorSeekerSnapshot.get('ImageUrl');
+        });
+      } else {
+        setState(() {
+          _tutorName = 'Not found';
         });
       }
     } catch (e) {
@@ -237,6 +290,35 @@ class _TutorSeekerPaymentCardState extends State<TutorSeekerPaymentCard> {
         .doc(widget.tutorId)
         .collection('StudentPayment')
         .add(studentPaymentData);
+
+    DocumentReference ApplicationRequestDocRef = FirebaseFirestore.instance
+        .collection('Tutor')
+        .doc(widget.tutorId)
+        .collection('ApplicationRequest')
+        .doc('${currentUser.uid}_${widget.tutorPostId}');
+
+    DocumentSnapshot ApplicationRequestSnapshot =
+        await ApplicationRequestDocRef.get();
+    if (ApplicationRequestSnapshot.exists) {
+      await ApplicationRequestDocRef.delete();
+    }
+    DateTime now = DateTime.now();
+
+    StoreNotification().sendNotificationtoTutor(
+        widget.tutorId,
+        "Payment",
+        "Payment from ${_tutorseekerName} has been successfully processed.",
+        now);
+    
+    await FirebaseFirestore.instance
+        .collection('Tutor')
+        .doc(widget.tutorId)
+        .collection('StudentPayment')
+        .add(studentPaymentData);
+
+
+
+    
   }
 
   void _updateTutorSeeker(DateTime paymentDate, String paymentAmount,
@@ -286,7 +368,7 @@ class _TutorSeekerPaymentCardState extends State<TutorSeekerPaymentCard> {
       'PaymentDate': paymentDate,
       'PaymentAmount': paymentAmount,
       'TutorId': widget.tutorId,
-      'TutorName': widget.name,
+      'TutorName': _tutorName,
     };
 
     await FirebaseFirestore.instance
@@ -294,6 +376,26 @@ class _TutorSeekerPaymentCardState extends State<TutorSeekerPaymentCard> {
         .doc(tutorseekerId)
         .collection('Payment')
         .add(paymentData);
+
+    DocumentReference ApplicationRequestDocRef = FirebaseFirestore.instance
+        .collection('Tutor Seeker')
+        .doc(currentUser.uid)
+        .collection('ApplicationRequest')
+        .doc('${widget.tutorId}_${widget.tutorPostId}');
+
+    DocumentSnapshot ApplicationRequestSnapshot =
+        await ApplicationRequestDocRef.get();
+    if (ApplicationRequestSnapshot.exists) {
+      await ApplicationRequestDocRef.delete();
+    }
+
+    DateTime now = DateTime.now();
+
+    StoreNotification().sendNotificationtoTutorSeeker(
+        currentUser!.uid,
+        "Payment Success",
+        "Your payment for sessions with ${_tutorName} in ${widget.subject} has been successfully processed.",
+        now);
   }
 
   @override
@@ -315,11 +417,11 @@ class _TutorSeekerPaymentCardState extends State<TutorSeekerPaymentCard> {
           children: [
             ListTile(
               leading: CircleAvatar(
-                backgroundImage: NetworkImage(widget.imageURL),
+                backgroundImage: NetworkImage(_imageURL),
               ),
               title: Row(
                 children: [
-                  Expanded(child: Text(widget.name)),
+                  Expanded(child: Text(_tutorName)),
                 ],
               ),
               subtitle: Text(widget.subject),
@@ -329,9 +431,10 @@ class _TutorSeekerPaymentCardState extends State<TutorSeekerPaymentCard> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  _buildInfoWithIcon(Icons.star,
-                      'Rating: ${widget.rating.toStringAsFixed(1)}'),
                   _buildInfoWithIcon(Icons.monetization_on, 'RM${widget.fees}'),
+                  SizedBox(height: 8),
+                  _buildInfoWithIcon(Icons.timeline,
+                      '${widget.day} ${widget.startTime} - ${widget.endTime}'),
                 ],
               ),
             ),
@@ -348,7 +451,7 @@ class _TutorSeekerPaymentCardState extends State<TutorSeekerPaymentCard> {
                         builder: (context) => TutorDetailPage(
                           tutorId: widget.tutorId,
                           tutorPostId: widget.tutorPostId,
-                          imageURL: widget.imageURL,
+                          imageURL: _imageURL,
                         ),
                       ),
                     );
@@ -365,15 +468,14 @@ class _TutorSeekerPaymentCardState extends State<TutorSeekerPaymentCard> {
                     bool result = await stripePaymentHandle
                         .stripeMakePayment(calculateFees());
                     if (result) {
-                      print("hi");
                       DateTime paymentDate = DateTime.now();
-                      print(_day);
-                      int dayOfWeekNumber = getDayOfWeekNumber(_day);
-                      
+                      int dayOfWeekNumber = getDayOfWeekNumber(widget.day);
+
                       // Define startclassDate and endclassDate before the async gap
-                      DateTime startclassDate =
-                          _getNextClassDate(paymentDate, dayOfWeekNumber);
-                      DateTime endclassDate = _getEndDate(startclassDate);
+                      DateTime startclassDate = _getNextClassDate(
+                          paymentDate, dayOfWeekNumber, widget.startTime);
+                      DateTime endclassDate =
+                          _getEndDate(startclassDate, widget.endTime);
 
                       // Update the payment details
                       _updateTutor(paymentDate, removeCommisionFees(),
@@ -391,7 +493,7 @@ class _TutorSeekerPaymentCardState extends State<TutorSeekerPaymentCard> {
                         MaterialPageRoute(
                           builder: (context) => PaymentConfirmationScreen(
                             tutorSeekerName: _tutorseekerName,
-                            tutorName: widget.name,
+                            tutorName: _tutorName,
                             subject: widget.subject,
                             paymentAmount: calculateFees(),
                             paymentDate: paymentDate,
@@ -416,7 +518,8 @@ class _TutorSeekerPaymentCardState extends State<TutorSeekerPaymentCard> {
   }
 }
 
-DateTime _getNextClassDate(DateTime paymentDate, int classDayOfWeek) {
+DateTime _getNextClassDate(
+    DateTime paymentDate, int classDayOfWeek, String startTime) {
   bool countForThisWeek =
       paymentDate.weekday == classDayOfWeek && paymentDate.hour < 12;
 
@@ -434,11 +537,26 @@ DateTime _getNextClassDate(DateTime paymentDate, int classDayOfWeek) {
     }
   }
 
+  List<String> timeParts = startTime.split(':');
+  int hour = int.parse(timeParts[0]);
+  int minute = int.parse(timeParts[1]);
+
+  // Set the hour and minute to the nextClassDate
+  nextClassDate = DateTime(
+      nextClassDate.year, nextClassDate.month, nextClassDate.day, hour, minute);
+
   return nextClassDate;
 }
 
-DateTime _getEndDate(DateTime startDate) {
-  return startDate.add(Duration(days: 4 * 7));
+DateTime _getEndDate(DateTime startDate, String endTime) {
+  DateTime endDate = startDate.add(Duration(days: 4 * 7));
+
+  List<String> parts = endTime.split(':');
+  int hour = int.parse(parts[0]);
+  int minute = int.parse(parts[1]);
+
+  endDate = DateTime(endDate.year, endDate.month, endDate.day, hour, minute);
+  return endDate;
 }
 
 Widget _buildInfoWithIcon(IconData icon, String text) {

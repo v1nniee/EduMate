@@ -8,43 +8,69 @@ import 'package:edumateapp/TutorSeekerScreen/TutorDetailPage.dart';
 //IF THE STUDENT/TUTOR TIME OVERLAP
 //IF THE STUDENT APPLY ON THE SAME DATE
 
-class TutorCard extends StatefulWidget {
+class FavoriteTutorCard extends StatefulWidget {
   final String tutorId;
   final String tutorPostId;
   final String name;
   final String subject;
   final String imageURL;
-  final double rating;
-  final int numberOfRating;
   final String fees;
   final String mode;
-  const TutorCard({
+  const FavoriteTutorCard({
     Key? key,
     required this.tutorId,
     required this.name,
     required this.subject,
     required this.imageURL,
-    required this.rating,
     required this.fees,
-    required this.numberOfRating,
     required this.tutorPostId,
     required this.mode,
   }) : super(key: key);
 
   @override
-  _TutorCardState createState() => _TutorCardState();
+  _FavoriteTutorCardState createState() => _FavoriteTutorCardState();
 }
 
-class _TutorCardState extends State<TutorCard> {
+class _FavoriteTutorCardState extends State<FavoriteTutorCard> {
   bool isFavorite = false;
 
   Map<String, dynamic>? selectedSlot;
-  String? applicationStatus;
+  double _rating = 0.0;
+  int _numberOfRating = 0;
 
   @override
   void initState() {
     super.initState();
     checkFavorite();
+    
+  }
+
+  Future<void> _loadTutorUserProfile() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    try {
+      // Fetch the status of the tutor post application
+      DocumentSnapshot tutorPostApplicationSnapshot = await FirebaseFirestore
+          .instance
+          .collection('Tutor')
+          .doc(widget.tutorId)
+          .collection('UserProfile')
+          .doc(widget.tutorId)
+          .get();
+
+      if (tutorPostApplicationSnapshot.exists) {
+        setState(() {
+          _rating = tutorPostApplicationSnapshot.get('Rating');
+          _numberOfRating = tutorPostApplicationSnapshot.get('NumberOfRating');
+        });
+      } else {
+        setState(() {
+          _rating = 0.00;
+          _numberOfRating = 0;
+        });
+      }
+    } catch (e) {
+      print('Error loading application status: $e');
+    }
   }
 
   Future<void> checkFavorite() async {
@@ -380,8 +406,9 @@ class _TutorCardState extends State<TutorCard> {
 
   @override
   Widget build(BuildContext context) {
-    String ratingText = widget.numberOfRating != 0
-        ? '${widget.rating.toStringAsFixed(1)} (${widget.numberOfRating})'
+    _loadTutorUserProfile();
+    String ratingText = _numberOfRating != 0
+        ? '${_rating.toStringAsFixed(1)} (${_numberOfRating})'
         : "No ratings yet";
     return Card(
       margin: EdgeInsets.all(8.0),
@@ -401,7 +428,6 @@ class _TutorCardState extends State<TutorCard> {
                 color: isFavorite ? Colors.red : Colors.grey,
               ),
               onPressed: _toggleFavorite,
-              
             ),
           ),
           Padding(
@@ -420,14 +446,14 @@ class _TutorCardState extends State<TutorCard> {
           ButtonBar(
             alignment: MainAxisAlignment.spaceEvenly,
             children: [
-               _buildActionButton(context, 'Chat', Icons.chat, () {
+              _buildActionButton(context, 'Chat', Icons.chat, () {
                 Navigator.of(context).pop();
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) =>
-                            TutorSeekerChat(ReceiverUserId: widget.tutorId)),
-                  );
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) =>
+                          TutorSeekerChat(ReceiverUserId: widget.tutorId)),
+                );
               }),
               _buildActionButton(context, 'Details', Icons.info_outline, () {
                 Navigator.push(
@@ -441,10 +467,7 @@ class _TutorCardState extends State<TutorCard> {
                   ),
                 );
               }),
-              
               _buildActionButton(context, 'Apply', Icons.send, _clickApply),
-
-              
             ],
           ),
         ],

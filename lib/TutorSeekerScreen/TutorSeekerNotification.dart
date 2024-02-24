@@ -8,20 +8,19 @@ import 'package:provider/provider.dart';
 
 class TutorSeekerNotification extends StatelessWidget {
   const TutorSeekerNotification({Key? key});
-  
 
   @override
   Widget build(BuildContext context) {
     final userTokenNotifier =
         Provider.of<UserTokenNotifier>(context, listen: false);
     final fcmToken = userTokenNotifier.fcmToken;
-    
+
     final currentUser = FirebaseAuth.instance.currentUser!;
     final notificationsRef = FirebaseFirestore.instance
         .collection('Tutor Seeker')
         .doc(currentUser.uid)
         .collection('Notification')
-        .where('Status', isEqualTo: 'Unsend');
+        .where('Status', isEqualTo: 'Sent');
 
     return Scaffold(
       appBar: AppBar(
@@ -56,14 +55,21 @@ class TutorSeekerNotification extends StatelessWidget {
                 // Group notifications by date
                 Map<String, List<DocumentSnapshot>> groupedNotifications = {};
                 documents.forEach((document) {
-                  final notification =
-                      document.data() as Map<String, dynamic>;
+                  final notification = document.data() as Map<String, dynamic>;
                   final notificationTime =
-                      (notification['NotificationTime'] as Timestamp)
-                          .toDate();
+                      (notification['NotificationTime'] as Timestamp).toDate();
                   String date = getDateText(notificationTime);
                   groupedNotifications.putIfAbsent(date, () => []);
                   groupedNotifications[date]!.add(document);
+                });
+
+                // Sort individual notifications by time in descending order
+                groupedNotifications.forEach((date, docs) {
+                  docs.sort((a, b) {
+                    Timestamp aTimestamp = a['NotificationTime'];
+                    Timestamp bTimestamp = b['NotificationTime'];
+                    return bTimestamp.compareTo(aTimestamp);
+                  });
                 });
 
                 // Sort keys in descending order
@@ -95,8 +101,8 @@ class TutorSeekerNotification extends StatelessWidget {
                           physics: ClampingScrollPhysics(),
                           itemCount: notifications.length,
                           itemBuilder: (context, index) {
-                            final notification =
-                                notifications[index].data() as Map<String, dynamic>;
+                            final notification = notifications[index].data()
+                                as Map<String, dynamic>;
                             final notificationTime =
                                 (notification['NotificationTime'] as Timestamp)
                                     .toDate();
@@ -123,7 +129,8 @@ class TutorSeekerNotification extends StatelessWidget {
                                   ),
                                   title: Text(
                                     title,
-                                    style: TextStyle(fontWeight: FontWeight.bold),
+                                    style:
+                                        TextStyle(fontWeight: FontWeight.bold),
                                   ),
                                   subtitle: Text(content),
                                   trailing: Text(
@@ -133,7 +140,8 @@ class TutorSeekerNotification extends StatelessWidget {
                                     ),
                                   ),
                                   onTap: () {
-                                    SendNotificationClass().sendNotification("title", "body",fcmToken);
+                                    SendNotificationClass().sendNotification(
+                                        "title", "body", fcmToken);
                                   },
                                 ),
                               ),
@@ -163,4 +171,3 @@ class TutorSeekerNotification extends StatelessWidget {
     }
   }
 }
-

@@ -1,34 +1,30 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:edumateapp/FCM/StoreNotification.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:edumateapp/TutorSeekerScreen/TutorDetailPage.dart';
+import 'package:intl/intl.dart';
 
 class MyStudentCard extends StatefulWidget {
-  final String tutorseekerId;
+  final String tutorSeekerId;
   final String tutorPostId;
-  final String name;
   final String subject;
-  final String grade;
-  final String imageURL;
-  final String requirement;
-  final String status;
-  final String StartTime;
-  final String EndTime;
-  final String Day;
+  final DateTime startClassDate;
+  final DateTime endClassDate;
+  final String day;
+  final String startTime;
+  final String endTime;
 
   const MyStudentCard({
     Key? key,
-    required this.tutorseekerId,
-    required this.name,
+    required this.tutorSeekerId,
     required this.subject,
-    required this.imageURL,
     required this.tutorPostId,
-    required this.grade,
-    required this.requirement,
-    required this.status,
-    required this.StartTime,
-    required this.EndTime,
-    required this.Day,
+    required this.startClassDate,
+    required this.endClassDate,
+    required this.day,
+    required this.startTime,
+    required this.endTime,
   }) : super(key: key);
 
   @override
@@ -37,32 +33,33 @@ class MyStudentCard extends StatefulWidget {
 
 class _MyStudentCardState extends State<MyStudentCard> {
   String _name = '';
+  String _imageURL = '';
   @override
   void initState() {
     super.initState();
-    _loadTutorName();
+    _loadTutorInfo();
+    _updateMyStudent();
   }
 
-  Future<void> _loadTutorName() async {
+  Future<void> _loadTutorInfo() async {
     User? user = FirebaseAuth.instance.currentUser;
     try {
-      // Fetch the status of the tutor post application
-      DocumentSnapshot tutorSnapshot = await FirebaseFirestore.instance
-          .collection('Tutor')
-          .doc(user?.uid)
+      DocumentSnapshot tutorPostApplicationSnapshot = await FirebaseFirestore
+          .instance
+          .collection('Tutor Seeker')
+          .doc(widget.tutorSeekerId)
+          .collection('UserProfile')
+          .doc(widget.tutorSeekerId)
           .get();
 
-      if (tutorSnapshot.exists) {
+      if (tutorPostApplicationSnapshot.exists) {
         setState(() {
-          _name = tutorSnapshot.get('Name');
-        });
-      } else {
-        setState(() {
-          _name = 'Not found';
+          _name = tutorPostApplicationSnapshot["Name"];
+          _imageURL = tutorPostApplicationSnapshot["ImageUrl"];
         });
       }
     } catch (e) {
-      print('Error loading tutor doc: $e');
+      print('Error loading application status: $e');
     }
   }
 
@@ -86,80 +83,155 @@ class _MyStudentCardState extends State<MyStudentCard> {
     );
   }
 
+  Future<String> fetchTutorName(String tutorSeekerId) async {
+    DocumentReference docRef =
+        FirebaseFirestore.instance.doc('Tutor/$tutorSeekerId');
+    try {
+      DocumentSnapshot docSnapshot = await docRef.get();
+
+      if (docSnapshot.exists) {
+        return docSnapshot['Name'] ?? 'Name not found';
+      } else {
+        return 'Tutor not found';
+      }
+    } catch (e) {
+      return 'Failed to fetch name: $e';
+    }
+  }
+
+  void _updateMyStudent() async {
+    try {
+      User? currentUser = FirebaseAuth.instance.currentUser;
+      if (currentUser == null) {
+        _showDialog('Error', 'User not logged in');
+        return;
+      }
+
+      String tutorid = currentUser.uid;
+      String tutorName = await fetchTutorName(tutorid);
+      String documentId = "${tutorid}_${widget.tutorPostId}";
+      String documentId2 = "${widget.tutorSeekerId}_${widget.tutorPostId}";
+      var myTutorDocRef = FirebaseFirestore.instance.doc('Tutor Seeker/${widget.tutorSeekerId}/MyTutor/$documentId');
+      var myStudentDocRef = FirebaseFirestore.instance
+          .doc('Tutor/${tutorid}/MyStudent/$documentId2');
+
+      var docSnapshot = await myStudentDocRef.get();
+
+      if (docSnapshot.exists) {
+        DateTime? storedEndClassDate =
+            docSnapshot.data()?['EndClassDate']?.toDate();
+        DateTime now = DateTime.now();
+
+        if (storedEndClassDate != null && storedEndClassDate.isBefore(now)) {
+          await myTutorDocRef.delete();
+          await myStudentDocRef.delete();
+          StoreNotification().sendNotificationtoTutorSeeker(
+            widget.tutorSeekerId,
+            "Tuition Session Concluded",
+            "Your tuition sessions in ${widget.subject} with ${tutorName} have now concluded. This session will be removed from your MyTutor account.",
+            DateTime.now(),
+          );
+          
+        }
+      } else {
+        _showDialog('Error', 'Document does not exist');
+      }
+    } catch (e) {
+      _showDialog('Error', 'Failed to transfer data: $e');
+    }
+  }
+
+  String _formatDate(DateTime date) {
+    return DateFormat('yyyy-MM-dd').format(date);
+  }
 
   @override
   Widget build(BuildContext context) {
-    User currentUser = FirebaseAuth.instance.currentUser!;
-    Color cardColor;
-    String applicationStatusText;
-
-    switch (widget.status) {
-      case 'rejected':
-        cardColor = Colors.red;
-        applicationStatusText = 'Rejected';
-        break;
-      case 'pending':
-        cardColor = Colors.orange;
-        applicationStatusText = 'Pending';
-        break;
-      case 'accepted':
-        cardColor = Colors.green;
-        applicationStatusText = 'Accepted';
-        break;
-      default:
-        cardColor = Colors.grey;
-        applicationStatusText = 'Unknown';
-    }
-
     return Card(
       elevation: 4.0,
-      margin: EdgeInsets.all(10.0),
+      margin: EdgeInsets.all(8.0),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12.0),
+        borderRadius: BorderRadius.circular(8.0),
       ),
-      color: Colors.white,
       child: Padding(
-        padding: const EdgeInsets.all(10.0),
+        padding: const EdgeInsets.all(8.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            // First Row: Avatar and Text
-            Row(
-              children: <Widget>[
-                CircleAvatar(
-                  radius: 35,
-                  backgroundImage: NetworkImage(widget.imageURL),
-                ),
-                SizedBox(width: 30), // Space between avatar and text
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      Text(
-                        widget.name,
-                        style: const TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
+          children: [
+            ListTile(
+              leading: CircleAvatar(
+                backgroundImage: NetworkImage(_imageURL),
+              ),
+              title: Text(_name,
+                  style: TextStyle(
+                      color: Colors.black, fontWeight: FontWeight.bold)),
+              subtitle:
+                  Text(widget.subject, style: TextStyle(color: Colors.black)),
+            ),
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment
+                    .start, // Align the content to the start of the column
+                children: [
+                  _buildInfoWithIcon(Icons.schedule,
+                      '${_formatDate(widget.startClassDate)} - ${_formatDate(widget.endClassDate)}'),
+                  SizedBox(
+                      height: 8), // Add some vertical spacing between the rows
+                  _buildInfoWithIcon(Icons.timeline,
+                      '${widget.day} ${widget.startTime} - ${widget.endTime}'),
+                ],
+              ),
+            ),
+            ButtonBar(
+              alignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton.icon(
+                  icon: Icon(Icons.info_outline, size: 16.0),
+                  label: Text('Details'),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => TutorDetailPage(
+                          tutorId: widget.tutorSeekerId,
+                          tutorPostId: widget.tutorPostId,
+                          imageURL: _imageURL,
                         ),
                       ),
-                      SizedBox(height: 8), // Space between text lines
-                      Text('Subject: ${widget.subject}',
-                          style: TextStyle(fontSize: 13)),
-                      Text('Grade: ${widget.grade}',
-                          style: TextStyle(fontSize: 13)),
-                      if (widget.requirement != "N/A")
-                        Text('Requirement: ${widget.requirement}',
-                            style: TextStyle(fontSize: 13)),
-                      Text(
-                          'Day: ${widget.Day} ${widget.StartTime} - ${widget.EndTime}',
-                          style: TextStyle(fontSize: 13)),
-                    ],
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    backgroundColor: Theme.of(context).primaryColor,
                   ),
                 ),
               ],
             ),
-            // Second Row: Buttons
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoWithIcon(IconData icon, String text) {
+    return Row(
+      children: [
+        Icon(icon, size: 16.0, color: Colors.black),
+        SizedBox(width: 4.0),
+        Text(text, style: TextStyle(color: Colors.black)),
+      ],
+    );
+  }
+
+  Widget _buildActionButton(String text, VoidCallback onPressed) {
+    return ElevatedButton(
+      onPressed: onPressed,
+      child: Text(text),
+      style: ElevatedButton.styleFrom(
+        foregroundColor: Colors.black,
+        backgroundColor: Colors.black, // Replace with your onPrimary color
+        textStyle: TextStyle(
+          fontWeight: FontWeight.bold,
         ),
       ),
     );

@@ -1,6 +1,8 @@
+import 'package:edumateapp/TutorScreen/MyStudentCard.dart';
+import 'package:edumateapp/TutorSeekerScreen/MyTutorCard.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:edumateapp/TutorSeekerScreen/MyTutorCard.dart';
 import 'package:edumateapp/Widgets/PageHeader.dart';
 
 class MyTutor extends StatefulWidget {
@@ -10,9 +12,12 @@ class MyTutor extends StatefulWidget {
   State<MyTutor> createState() => _MyTutorState();
 }
 
+
+
 class _MyTutorState extends State<MyTutor> {
   @override
   Widget build(BuildContext context) {
+    final String currentUserId = FirebaseAuth.instance.currentUser!.uid;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 255, 255, 115),
@@ -25,91 +30,51 @@ class _MyTutorState extends State<MyTutor> {
             headerTitle: 'My Tutor',
           ),
           Expanded(
-            child: StreamBuilder(
+            child: StreamBuilder<QuerySnapshot>(
               stream: FirebaseFirestore.instance
                   .collection('Tutor Seeker')
+                  .doc(currentUserId)
+                  .collection('MyTutor')
                   .snapshots(),
-              builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
-                if (!snapshot.hasData) {
-                  return Center(
-                    child: SizedBox(
-                      width: 50,
-                      height: 50,
-                      child: CircularProgressIndicator(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                  return const Center(
+                    child: Text(
+                      'No My Tutor documents found',
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                   );
                 }
 
-                if (snapshot.data!.docs.isEmpty) {
-                 return const Center(
-                        child: Text(
-                          'There are no my tutors now.',
-                          style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold),
-                        ),
-                      );
-                }
+                // Directly use the documents to build the list
+                return ListView.builder(
+                  itemCount: snapshot.data!.docs.length,
+                  itemBuilder: (context, index) {
+                    var myStudentDoc = snapshot.data!.docs[index];
+                    String subject = myStudentDoc.get('Subject') ?? 'Subject not specified';
+                    DateTime startDate = (myStudentDoc.get('StartClassDate') as Timestamp).toDate();
+                    DateTime endDate = (myStudentDoc.get('EndClassDate') as Timestamp).toDate();
+                    String day = myStudentDoc.get('Day') ?? 'Day not specified';
+                    String startTime = myStudentDoc.get('StartTime') ?? 'StartTime not specified';
+                    String endTime = myStudentDoc.get('EndTime') ?? 'EndTime not specified';
+                    String TutorId = myStudentDoc.get('TutorId') ?? 'TutorSeekerId not specified';
+                    String tutorPostId = myStudentDoc.get('TutorPostId') ?? 'TutorPostId not specified';
 
-                return ListView(
-                  children: snapshot.data!.docs.map((document) {
-                    // This StreamBuilder listens for changes in the 'mytutor' collection for each TutorSeeker document.
-                    return StreamBuilder<QuerySnapshot>(
-                      stream:
-                          document.reference.collection('MyTutor').snapshots(),
-                      builder: (context,
-                          AsyncSnapshot<QuerySnapshot> tutorPostSnapshot) {
-                        // Check if there's data and the 'mytutor' collection is not empty.
-                        if (!tutorPostSnapshot.hasData) {
-                          return const Center(
-                            child: SizedBox(
-                              width: 50,
-                              height: 50,
-                              child: CircularProgressIndicator(),
-                            ),
-                          );
-                        } else if (tutorPostSnapshot.data!.docs.isEmpty) {
-                          return const Center(
-                            child: Text('No My Tutor found.'),
-                          );
-                        }
-
-                        var tutorPosts = tutorPostSnapshot.data!.docs;
-
-                        return Column(
-                          children: tutorPosts.map((tutorPostDoc) {
-                            String subject = tutorPostDoc.get('Subject') ??
-                                'Subject not specified';
-                            DateTime startDate =
-                                tutorPostDoc.get('StartClassDate').toDate();
-                            DateTime endDate =
-                                tutorPostDoc.get('EndClassDate').toDate();
-                            String day =
-                                tutorPostDoc.get('Day') ?? 'Day not specified';
-                            String startTime = tutorPostDoc.get('StartTime') ??
-                                'StartTime not specified';
-                            String endTime = tutorPostDoc.get('EndTime') ??
-                                'EndTime not specified';
-                             String TutorId = tutorPostDoc.get('TutorId') ??
-                                'TutorId not specified';
-
-                            String TutorPostId = tutorPostDoc.get('TutorPostId') ??
-                                'TutorPostId not specified';
-
-                            return MyTutorCard(
-                              tutorId: TutorId,
-                              tutorPostId: TutorPostId,
-                              subject: subject,
-                              startClassDate: startDate,
-                              endClassDate: endDate,
-                              day: day,
-                              startTime: startTime,
-                              endTime: endTime,
-                            );
-                          }).toList(),
-                        );
-                      },
+                    return MyTutorCard(
+                      tutorId: TutorId,
+                      tutorPostId: tutorPostId,
+                      subject: subject,
+                      startClassDate: startDate,
+                      endClassDate: endDate,
+                      day: day,
+                      startTime: startTime,
+                      endTime: endTime,
                     );
-                  }).toList(),
+                  },
                 );
               },
             ),

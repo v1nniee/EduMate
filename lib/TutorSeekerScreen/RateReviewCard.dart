@@ -7,19 +7,13 @@ import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 class RateReviewCard extends StatefulWidget {
   final String tutorId;
   final String tutorPostId;
-  final String name;
   final String subject;
-  final String imageURL;
-  final double rating;
   final String fees;
 
   const RateReviewCard({
     Key? key,
     required this.tutorId,
-    required this.name,
     required this.subject,
-    required this.imageURL,
-    required this.rating,
     required this.fees,
     required this.tutorPostId,
   }) : super(key: key);
@@ -31,23 +25,82 @@ class RateReviewCard extends StatefulWidget {
 class _RateReviewCardState extends State<RateReviewCard> {
   double _userRating = 0;
   String _reviewText = '';
+  String _tutorName = '';
+  String _imageURL = '';
+  double _rate = 0.0;
+  int _numberOfRating = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadTutorProfile();
+  }
+
+  Future<void> _loadTutorProfile() async {
+    try {
+      DocumentSnapshot tutorSnapshot = await FirebaseFirestore.instance
+          .collection('Tutor')
+          .doc(widget.tutorId)
+          .collection('UserProfile')
+          .doc(widget.tutorId)
+          .get();
+
+      if (tutorSnapshot.exists) {
+        setState(() {
+          _tutorName = tutorSnapshot.get('Name');
+          _imageURL = tutorSnapshot.get('ImageUrl');
+          _rate = tutorSnapshot.get('Rating');
+          _numberOfRating = tutorSnapshot.get('NumberOfRating');
+        });
+      } else {
+        setState(() {
+          _tutorName = 'Not found';
+        });
+      }
+    } catch (e) {
+      print('Error loading tutor name: $e');
+    }
+  }
 
   Future<void> _submitRatingAndReview() async {
-    // Get the current user
     User? user = FirebaseAuth.instance.currentUser;
 
-    // Create a document reference for the tutor's ratings and reviews
-    DocumentReference tutorRef = FirebaseFirestore.instance.collection('Tutor').doc(widget.tutorId);
+    if (user == null) {
+      // Handle the case where the user is not logged in
+      print("User is not logged in.");
+      return;
+    }
 
-    // Add the user's rating and review to the tutor's document
+    DocumentReference tutorRef =
+        FirebaseFirestore.instance.collection('Tutor').doc(widget.tutorId);
+
+    // Add the new rating and review to RatingsAndReviews subcollection
     await tutorRef.collection('RatingsAndReviews').add({
-      'TutorSeekerId': user!.uid,
+      'TutorSeekerId': user.uid,
       'Rating': _userRating,
       'Review': _reviewText,
       'Timestamp': Timestamp.now(),
     });
 
-    // Close the dialog
+    // Increment the number of ratings
+    _numberOfRating += 1;
+
+    // Calculate the new total rating including the user's rating
+    double newTotalRating = (_rate * (_numberOfRating - 1)) + _userRating;
+
+    // Calculate the new average rating
+    double newAverageRating = newTotalRating / _numberOfRating;
+
+    // Update the UserProfile data with new values
+    await tutorRef.collection('UserProfile').doc(widget.tutorId).update({
+      'Rating': newAverageRating,
+      'NumberOfRating': _numberOfRating,
+    });
+
+    // Optionally, to ensure UI updates with the latest data
+    await _loadTutorProfile();
+
+    // Close the dialog if open
     Navigator.pop(context);
 
     // Show a success message
@@ -58,8 +111,10 @@ class _RateReviewCardState extends State<RateReviewCard> {
 
   @override
   Widget build(BuildContext context) {
+    String ratingText = _numberOfRating != 0
+        ? '${_rate.toStringAsFixed(1)} (${_numberOfRating})'
+        : "No ratings yet";
     return Card(
-      color: const Color.fromARGB(255, 207, 240, 208),
       elevation: 4.0,
       margin: EdgeInsets.all(8.0),
       shape: RoundedRectangleBorder(
@@ -71,21 +126,21 @@ class _RateReviewCardState extends State<RateReviewCard> {
           children: [
             ListTile(
               leading: CircleAvatar(
-                backgroundImage: NetworkImage(widget.imageURL),
+                backgroundImage: NetworkImage(_imageURL),
               ),
-              title: Text(widget.name, style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
-              subtitle: Text(widget.subject, style: TextStyle(color: Colors.black)),
-              trailing: Text(
-                'Paid',
-                style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
-              ),
+              title: Text(_tutorName,
+                  style: const TextStyle(
+                      color: Colors.black, fontWeight: FontWeight.bold)),
+              subtitle:
+                  Text(widget.subject, style: TextStyle(color: Colors.black)),
             ),
             Padding(
-              padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+              padding:
+                  const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  _buildInfoWithIcon(Icons.star, 'Rating: ${widget.rating.toStringAsFixed(1)}'),
+                  _buildInfoWithIcon(Icons.star, 'Rating: ${ratingText}'),
                   _buildInfoWithIcon(Icons.attach_money, 'RM ${widget.fees}'),
                 ],
               ),
@@ -94,8 +149,8 @@ class _RateReviewCardState extends State<RateReviewCard> {
               alignment: MainAxisAlignment.spaceEvenly,
               children: [
                 ElevatedButton.icon(
-                  icon: Icon(Icons.info_outline, size: 16.0),
-                  label: Text('Details'),
+                  icon: const Icon(Icons.info_outline, size: 16.0),
+                  label: const Text('Details'),
                   onPressed: () {
                     Navigator.push(
                       context,
@@ -103,7 +158,7 @@ class _RateReviewCardState extends State<RateReviewCard> {
                         builder: (context) => TutorDetailPage(
                           tutorId: widget.tutorId,
                           tutorPostId: widget.tutorPostId,
-                          imageURL: widget.imageURL,
+                          imageURL: _imageURL,
                         ),
                       ),
                     );
@@ -115,13 +170,13 @@ class _RateReviewCardState extends State<RateReviewCard> {
                 ),
                 ElevatedButton.icon(
                   icon: Icon(Icons.star_rate, size: 16.0),
-                  label: Text('Rate & Review'),
+                  label: const Text('Rate & Review'),
                   onPressed: () {
                     showDialog(
                       context: context,
                       builder: (BuildContext context) {
                         return AlertDialog(
-                          title: Text('Rate & Review'),
+                          title: const Text('Rate & Review'),
                           content: Column(
                             mainAxisSize: MainAxisSize.min,
                             children: [
@@ -132,7 +187,7 @@ class _RateReviewCardState extends State<RateReviewCard> {
                                 allowHalfRating: true,
                                 itemCount: 5,
                                 itemSize: 40.0,
-                                itemBuilder: (context, _) => Icon(
+                                itemBuilder: (context, _) => const Icon(
                                   Icons.star,
                                   color: Colors.amber,
                                 ),
@@ -148,7 +203,7 @@ class _RateReviewCardState extends State<RateReviewCard> {
                                     _reviewText = value;
                                   });
                                 },
-                                decoration: InputDecoration(
+                                decoration: const InputDecoration(
                                   hintText: 'Write your review here...',
                                 ),
                                 maxLines: null,

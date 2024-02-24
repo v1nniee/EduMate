@@ -2,10 +2,11 @@ import 'package:edumateapp/TutorSeekerScreen/Favorite.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:edumateapp/TutorSeekerScreen/TutorCard.dart';
+import 'package:edumateapp/TutorSeekerScreen/FavoriteTutorCard.dart';
 import 'package:edumateapp/Widgets/PageHeader.dart';
 
 //cannot remove favorite directly from the screen yet
+
 
 class FavoriteTutor extends StatefulWidget {
   const FavoriteTutor({Key? key}) : super(key: key);
@@ -127,7 +128,7 @@ class _FavoriteTutorState extends State<FavoriteTutor> {
                   FirebaseFirestore.instance.collection('Tutor').snapshots(),
               builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
                 if (!snapshot.hasData) {
-                  return Center(
+                  return const Center(
                     child: SizedBox(
                       width: 50,
                       height: 50,
@@ -150,7 +151,7 @@ class _FavoriteTutorState extends State<FavoriteTutor> {
                   builder: (context, favoriteTutorIdsSnapshot) {
                     if (favoriteTutorIdsSnapshot.connectionState ==
                         ConnectionState.waiting) {
-                      return Center(
+                      return const Center(
                         child: SizedBox(
                           width: 50,
                           height: 50,
@@ -224,23 +225,24 @@ class _FavoriteTutorState extends State<FavoriteTutor> {
                                               'Subject not specified';
                                       String fees =
                                           tutorPostDoc.get('RatePerClass') ??
-                                              'Rate not specified';
+                                              'Fees not specified';
                                       String mode = tutorPostDoc.get('Mode') ??
                                           'Mode not specified';
                                       String tutorPostId = tutorPostDoc.id;
                                       String imageUrl =
                                           tutorPostDoc.get('ImageUrl') ??
                                               'tutor_seeker_profile.png';
+                                              
 
-                                      return TutorCard(
+                                      return FavoriteTutorCard(
                                         tutorId: document.id,
                                         tutorPostId: tutorPostId,
                                         name: document['Name'],
                                         subject: subject,
                                         imageURL: imageUrl,
-                                        rating: 4.0,
+                                        
                                         fees: fees,
-                                        mode: mode,
+                                        mode: mode, 
                                       );
                                     }
 
@@ -263,3 +265,4 @@ class _FavoriteTutorState extends State<FavoriteTutor> {
     );
   }
 }
+

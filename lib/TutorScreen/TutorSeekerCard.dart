@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:edumateapp/FCM/StoreNotification.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:edumateapp/TutorSeekerScreen/TutorDetailPage.dart';
@@ -158,7 +159,8 @@ class _TutorSeekerCardState extends State<TutorSeekerCard> {
       _showDialog('Error', 'An error occurred: $e');
     }
 
-    _sendNotification(widget.tutorseekerId, "Application Update",
+
+    StoreNotification().sendNotificationtoTutorSeeker(widget.tutorseekerId, "Application Update",
         "Your Application from ${_name} has been accepted.", now);
 
     _showDialog(
@@ -195,32 +197,13 @@ class _TutorSeekerCardState extends State<TutorSeekerCard> {
       _showDialog('Error', 'Failed to update status: $e');
     });
 
-    _sendNotification(widget.tutorseekerId, "Application Update",
+    StoreNotification().sendNotificationtoTutorSeeker(widget.tutorseekerId, "Application Update",
         "Your Application from ${_name} has been rejected.", now);
     _showDialog(
         'Application Update', 'The application status has been updated.');
   }
 
-  void _sendNotification(String tutorseekerId, String title, String content,
-      DateTime NotificationTime) async {
-    Map<String, dynamic> NotificationData = {
-      'Title': title,
-      'Content': content,
-      'Status': "Unsend",
-      'NotificationTime': NotificationTime,
-    };
-
-    try {
-      await FirebaseFirestore.instance
-          .collection('Tutor Seeker')
-          .doc(tutorseekerId)
-          .collection('Notification')
-          .add(NotificationData);
-    } catch (error) {
-      print('Error saving notification: $error');
-    }
-  }
-
+  
   @override
   Widget build(BuildContext context) {
     User currentUser = FirebaseAuth.instance.currentUser!;

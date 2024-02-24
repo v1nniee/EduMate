@@ -24,7 +24,7 @@ class TutorNotification extends StatelessWidget {
         .collection('Tutor')
         .doc(currentUser.uid)
         .collection('Notification')
-        .where('Status', isEqualTo: 'Unsend');
+        .where('Status', isEqualTo: 'Sent');
 
     return Scaffold(
       appBar: AppBar(

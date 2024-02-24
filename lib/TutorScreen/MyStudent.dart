@@ -1,6 +1,4 @@
-import 'package:edumateapp/TutorScreen/ApplicationDetails.dart';
 import 'package:edumateapp/TutorScreen/MyStudentCard.dart';
-import 'package:edumateapp/TutorSeekerScreen/ApplicationStatusTutorCard.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -10,77 +8,15 @@ class MyStudent extends StatefulWidget {
   const MyStudent({Key? key}) : super(key: key);
 
   @override
-  _MyStudentState createState() => _MyStudentState();
+  State<MyStudent> createState() => _MyStudentState();
 }
 
 class _MyStudentState extends State<MyStudent> {
-  final TextEditingController _searchController = TextEditingController();
 
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
-  }
-
-  Future<List<MyStudentCard>> _fetchApplicationRequests() async {
-    List<MyStudentCard> cards = [];
-    User currentUser = FirebaseAuth.instance.currentUser!;
-    String tutorId = currentUser.uid;
-
-    // Get the Application Requests for the current tutor
-    var applicationRequests = await FirebaseFirestore.instance
-        .collection('Tutor/$tutorId/ApplicationRequest')
-        .get();
-
-    if (applicationRequests.size == 0) {
-      return cards; // Return an empty list if the collection is empty
-    }
-
-    for (var applicationRequest in applicationRequests.docs) {
-      String seekerId = applicationRequest['TutorSeekerId'];
-      String subject = applicationRequest['Subject'];
-      String status = applicationRequest['Status'];
-      String start = applicationRequest['StartTime'];
-      String end = applicationRequest['EndTime'];
-      String day = applicationRequest['Day'];
-      String tutorPostId = applicationRequest['TutorPostId'];
-
-      if (status == 'paid') {
-        // Only include cards with status "paid"
-        var userProfile = await FirebaseFirestore.instance
-            .collection('Tutor Seeker/$seekerId/UserProfile')
-            .get();
-
-        for (var profile in userProfile.docs) {
-          String name = profile['Name'];
-          String imageURL = profile['ImageUrl'];
-          String grade = profile['Grade'];
-          String requirement = profile['Requirement'];
-
-          MyStudentCard card = MyStudentCard(
-            tutorseekerId: seekerId,
-            tutorPostId: tutorPostId,
-            name: name,
-            imageURL: imageURL,
-            subject: subject,
-            grade: grade,
-            requirement: requirement,
-            status: status,
-            StartTime: start,
-            EndTime: end,
-            Day: day,
-          );
-
-          cards.add(card);
-        }
-      }
-    }
-
-    return cards;
-  }
-
+  
   @override
   Widget build(BuildContext context) {
+    final String currentUserId = FirebaseAuth.instance.currentUser!.uid;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color.fromARGB(255, 255, 255, 115),
@@ -92,38 +28,53 @@ class _MyStudentState extends State<MyStudent> {
             backgroundColor: Color.fromARGB(255, 255, 255, 115),
             headerTitle: 'My Student',
           ),
-          const SizedBox(height: 12),
           Expanded(
-            child: FutureBuilder<List<MyStudentCard>>(
-              future: _fetchApplicationRequests(),
-              builder: (BuildContext context,
-                  AsyncSnapshot<List<MyStudentCard>> snapshot) {
+            child: StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance
+                  .collection('Tutor')
+                  .doc(currentUserId)
+                  .collection('MyStudent')
+                  .snapshots(),
+              builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(
-                    child: SizedBox(
-                      width: 50,
-                      height: 50,
-                      child: CircularProgressIndicator(),
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                  return const Center(
+                    child: Text(
+                      'No My Student documents found',
+                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                     ),
                   );
-                } else if (snapshot.hasError) {
-                  return Center(child: Text('Error: ${snapshot.error}'));
-                } else if (snapshot.hasData) {
-                  List<MyStudentCard> cards = snapshot.data!;
-                  if (cards.isEmpty) {
-                    return Center(child: Text('No student applications yet.'));
-                  } else {
-                    return ListView.builder(
-                      itemCount: cards.length,
-                      itemBuilder: (context, index) {
-                        MyStudentCard card = cards[index];
-                        return card;
-                      },
-                    );
-                  }
-                } else {
-                  return Center(child: Text('No student applications found.'));
                 }
+
+                // Directly use the documents to build the list
+                return ListView.builder(
+                  itemCount: snapshot.data!.docs.length,
+                  itemBuilder: (context, index) {
+                    var myStudentDoc = snapshot.data!.docs[index];
+                    String subject = myStudentDoc.get('Subject') ?? 'Subject not specified';
+                    DateTime startDate = (myStudentDoc.get('StartClassDate') as Timestamp).toDate();
+                    DateTime endDate = (myStudentDoc.get('EndClassDate') as Timestamp).toDate();
+                    String day = myStudentDoc.get('Day') ?? 'Day not specified';
+                    String startTime = myStudentDoc.get('StartTime') ?? 'StartTime not specified';
+                    String endTime = myStudentDoc.get('EndTime') ?? 'EndTime not specified';
+                    String tutorSeekerId = myStudentDoc.get('TutorSeekerId') ?? 'TutorSeekerId not specified';
+                    String tutorPostId = myStudentDoc.get('TutorPostId') ?? 'TutorPostId not specified';
+
+                    return MyStudentCard(
+                      tutorSeekerId: tutorSeekerId,
+                      tutorPostId: tutorPostId,
+                      subject: subject,
+                      startClassDate: startDate,
+                      endClassDate: endDate,
+                      day: day,
+                      startTime: startTime,
+                      endTime: endTime,
+                    );
+                  },
+                );
               },
             ),
           ),

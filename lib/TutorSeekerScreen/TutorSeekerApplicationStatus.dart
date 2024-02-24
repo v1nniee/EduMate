@@ -219,14 +219,53 @@ class _TutorSeekerApplicationStatusState
                                       String subject =
                                           tutorPostDoc.get('SubjectsToTeach') ??
                                               'Subject not specified';
+
                                       String fees =
                                           tutorPostDoc.get('RatePerClass') ??
                                               'Rate not specified';
                                       String tutorPostId = tutorPostDoc.id;
-                                      String imageUrl =
-                                          tutorPostDoc.get('ImageUrl') ??
-                                              'tutor_seeker_profile.png';
 
+                                      tutorCards.add(
+                                        FutureBuilder<DocumentSnapshot>(
+                                          future: document.reference
+                                              .collection('UserProfile')
+                                              .doc(document.id)
+                                              .get(),
+                                          builder: (context,
+                                              AsyncSnapshot<DocumentSnapshot>
+                                                  userProfileSnapshot) {
+                                            if (!userProfileSnapshot.hasData) {
+                                              return const Card(
+                                                child: ListTile(
+                                                  leading:
+                                                      CircularProgressIndicator(),
+                                                ),
+                                              );
+                                            }
+                                            String imageUrl;
+                                            double rating = 0.1;
+                                            int numberOfRating = 0;
+
+                                            if (userProfileSnapshot
+                                                    .data?.exists ??
+                                                false) {
+                                              imageUrl = userProfileSnapshot
+                                                      .data!
+                                                      .get('ImageUrl') ??
+                                                  'tutor_seeker_profile.png';
+                                              rating = userProfileSnapshot.data!
+                                                      .get('Rating') ??
+                                                  0.1;
+                                              numberOfRating =
+                                                  userProfileSnapshot.data!.get(
+                                                          'NumberOfRating') ??
+                                                      0;
+                                            } else {
+                                              imageUrl =
+                                                  'tutor_seeker_profile.png';
+                                              rating = 0.1;
+                                              numberOfRating = 0;
+                                            }
 
                                             return ApplicationStatusTutorCard(
                                               tutorId: document.id,
@@ -234,10 +273,14 @@ class _TutorSeekerApplicationStatusState
                                               name: document['Name'],
                                               subject: subject,
                                               imageURL: imageUrl,
-                                              rating: 4.0,
+                                              rating: rating,
+                                              numberOfRating: numberOfRating,
                                               fees: fees,
+                                              
                                             );
-
+                                          },
+                                        ),
+                                      );
                                     }
 
                                     return Column(children: tutorCards);

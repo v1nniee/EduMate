@@ -23,7 +23,7 @@ class UserTypeManager {
     final cachedType = prefs.getString('user_type_$userId');
     if (cachedType != null) {
       print("Cached Type: $cachedType");
-      if (!(cachedType == "New Tutor Seeker" || cachedType == "New Tutor")) {
+      if (!(cachedType == "New Tutor Seeker" || cachedType == "New Tutor"|| cachedType == "Unverified Tutor")) {
         return cachedType;
       }
     }

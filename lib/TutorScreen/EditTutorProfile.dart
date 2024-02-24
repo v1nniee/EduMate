@@ -23,6 +23,8 @@ class EditTutorProfile extends StatefulWidget {
   final String? city;
   final String? grade;
   final String? aboutMe;
+  final int numberOfRating;
+  final double rating;
 
   const EditTutorProfile({
     super.key,
@@ -38,11 +40,12 @@ class EditTutorProfile extends StatefulWidget {
     this.city,
     this.grade,
     this.aboutMe,
+    required this.rating,
+    required this.numberOfRating,
   });
 
   @override
-  State<EditTutorProfile> createState() =>
-      _EditTutorProfileState();
+  State<EditTutorProfile> createState() => _EditTutorProfileState();
 }
 
 class _EditTutorProfileState extends State<EditTutorProfile> {
@@ -93,7 +96,6 @@ class _EditTutorProfileState extends State<EditTutorProfile> {
 
   final List<String> _userTypes = ['Male', 'Female'];
 
-
   void _submit() async {
     if (!_formKey.currentState!.validate()) {
       return;
@@ -136,6 +138,8 @@ class _EditTutorProfileState extends State<EditTutorProfile> {
         'ZipCode': _enteredZip,
         'State': _enteredState,
         'City': _enteredCity,
+        'Rating': widget.rating,
+        'NumberOfRating':widget.numberOfRating,
         if (_enteredAboutme != null && _enteredAboutme.isNotEmpty)
           'AboutMe': _enteredAboutme
         else
@@ -148,7 +152,7 @@ class _EditTutorProfileState extends State<EditTutorProfile> {
             .collection('Tutor')
             .doc(userId)
             .collection('UserProfile')
-            .doc(userId) // The document ID will be the same as the userId
+            .doc(userId) 
             .set(userProfileData, SetOptions(merge: true));
 
         await FirebaseFirestore.instance
@@ -226,7 +230,6 @@ class _EditTutorProfileState extends State<EditTutorProfile> {
 
   @override
   Widget build(BuildContext context) {
-
     double screenHeight = MediaQuery.of(context).size.height;
     double screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(

@@ -26,7 +26,6 @@ class AdminTabScreenState extends State<AdminTabScreen> {
   Widget build(BuildContext context) {
     List<Widget> pages = [
       const AdminHome(),
-      const AdminHome(),
       const AdminNotification(),
       const AdminProfile(),
     ];
@@ -36,6 +35,8 @@ class AdminTabScreenState extends State<AdminTabScreen> {
       bottomNavigationBar: CustomNavigationBar(
         selectedIndex: _selectedPageIndex,
         onItemTapped: _selectPage,
+        numofIcon:3,
+
       ),
     );
   }
