@@ -235,11 +235,11 @@ class _EditTutorProfileState extends State<EditTutorProfile> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        backgroundColor: const Color.fromARGB(255, 255, 255, 115),
+        backgroundColor: const Color.fromARGB(255, 255, 116, 36),
         elevation: 0,
         toolbarHeight: screenHeight * 0.05,
       ),
-      backgroundColor: const Color.fromARGB(255, 255, 255, 230),
+      backgroundColor: const Color.fromARGB(255, 255, 203, 173),
       body: Scrollbar(
         thumbVisibility: true,
         thickness: 6.0,
@@ -248,11 +248,11 @@ class _EditTutorProfileState extends State<EditTutorProfile> {
           child: Column(
             children: <Widget>[
               const PageHeader(
-                  backgroundColor: Color.fromARGB(255, 255, 255, 115),
-                  headerTitle: "Tutor Seeker Profile"),
+                  backgroundColor: const Color.fromARGB(255, 255, 116, 36),
+                  headerTitle: "Tutor Profile"),
               Container(
                 width: screenWidth * 0.9,
-                height: screenHeight * 0.15,
+                height: screenHeight * 0.155,
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(30),
@@ -530,7 +530,7 @@ class _EditTutorProfileState extends State<EditTutorProfile> {
                             onPressed: _submit,
                             style: ElevatedButton.styleFrom(
                               backgroundColor:
-                                  const Color.fromARGB(255, 255, 255, 115),
+                                  const Color.fromARGB(255, 255, 116, 36),
                             ),
                             child: const Text("Save"),
                           ),

@@ -18,6 +18,7 @@ class TutorCard extends StatefulWidget {
   final int numberOfRating;
   final String fees;
   final String mode;
+  final String DocumentUrl;
   const TutorCard({
     Key? key,
     required this.tutorId,
@@ -28,7 +29,7 @@ class TutorCard extends StatefulWidget {
     required this.fees,
     required this.numberOfRating,
     required this.tutorPostId,
-    required this.mode,
+    required this.mode, required this.DocumentUrl,
   }) : super(key: key);
 
   @override
@@ -401,7 +402,6 @@ class _TutorCardState extends State<TutorCard> {
                 color: isFavorite ? Colors.red : Colors.grey,
               ),
               onPressed: _toggleFavorite,
-              
             ),
           ),
           Padding(
@@ -420,14 +420,14 @@ class _TutorCardState extends State<TutorCard> {
           ButtonBar(
             alignment: MainAxisAlignment.spaceEvenly,
             children: [
-               _buildActionButton(context, 'Chat', Icons.chat, () {
+              _buildActionButton(context, 'Chat', Icons.chat, () {
                 Navigator.of(context).pop();
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) =>
-                            TutorSeekerChat(ReceiverUserId: widget.tutorId)),
-                  );
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) =>
+                          TutorSeekerChat(ReceiverUserId: widget.tutorId)),
+                );
               }),
               _buildActionButton(context, 'Details', Icons.info_outline, () {
                 Navigator.push(
@@ -437,14 +437,12 @@ class _TutorCardState extends State<TutorCard> {
                       tutorId: widget.tutorId,
                       tutorPostId: widget.tutorPostId,
                       imageURL: widget.imageURL,
+                      DocumentUrl: widget.DocumentUrl,
                     ),
                   ),
                 );
               }),
-              
               _buildActionButton(context, 'Apply', Icons.send, _clickApply),
-
-              
             ],
           ),
         ],

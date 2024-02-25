@@ -28,14 +28,14 @@ class AdminNotification extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color.fromARGB(255, 255, 255, 115),
+        backgroundColor: const Color.fromARGB(255, 16, 212, 252),
         elevation: 0,
         automaticallyImplyLeading: false,
       ),
       body: Column(
         children: [
           const PageHeader(
-            backgroundColor: Color.fromARGB(255, 255, 255, 115),
+            backgroundColor: const Color.fromARGB(255, 16, 212, 252),
             headerTitle: 'Notification',
           ),
           Expanded(

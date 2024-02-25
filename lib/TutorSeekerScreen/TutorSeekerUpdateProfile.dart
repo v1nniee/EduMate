@@ -272,13 +272,16 @@ class _TutorSeekerUpdateProfileState extends State<TutorSeekerUpdateProfile> {
         radius: Radius.circular(10.0),
         child: SingleChildScrollView(
           child: Column(
+            
             children: <Widget>[
+              
               const PageHeader(
                   backgroundColor: Color.fromARGB(255, 255, 255, 115),
                   headerTitle: "Tutor Seeker Profile"),
+              
               Container(
                 width: screenWidth * 0.9,
-                height: screenHeight * 0.15,
+                height: screenHeight * 0.155,
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(30),

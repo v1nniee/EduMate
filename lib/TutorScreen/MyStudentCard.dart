@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:edumateapp/FCM/StoreNotification.dart';
+import 'package:edumateapp/TutorScreen/TutorSeekerDetail.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:edumateapp/TutorSeekerScreen/TutorDetailPage.dart';
@@ -192,9 +193,9 @@ class _MyStudentCardState extends State<MyStudentCard> {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => TutorDetailPage(
-                          tutorId: widget.tutorSeekerId,
-                          tutorPostId: widget.tutorPostId,
+                        builder: (context) => TutorSeekerDetails(
+                          tutorSeekerid: widget.tutorSeekerId,
+                          
                           imageURL: _imageURL,
                         ),
                       ),

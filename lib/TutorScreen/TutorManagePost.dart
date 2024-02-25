@@ -74,13 +74,14 @@ class _TutorManagePostState extends State<TutorManagePost> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color.fromARGB(255, 255, 255, 115),
+        backgroundColor: const Color.fromARGB(255, 255, 116, 36),
         elevation: 0,
       ),
+      backgroundColor: const Color.fromARGB(255, 255, 203, 173),
       body: Column(
         children: [
           const PageHeader(
-            backgroundColor: Color.fromARGB(255, 255, 255, 115),
+            backgroundColor: const Color.fromARGB(255, 255, 116, 36),
             headerTitle: 'Manage Post',
           ),
           Expanded(

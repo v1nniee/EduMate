@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:edumateapp/TutorSeekerScreen/TutorDetailPage.dart';
 import 'package:edumateapp/Payment/StripePaymentHandle.dart';
 import 'package:fluttertoast/fluttertoast.dart';
+import 'package:intl/intl.dart';
 import 'package:printing/printing.dart';
 
 class TutorSeekerPaymentCard extends StatefulWidget {
@@ -40,6 +41,7 @@ class _TutorSeekerPaymentCardState extends State<TutorSeekerPaymentCard> {
   String _tutorseekerName = '';
   String _tutorName = '';
   String _imageURL = '';
+  late String _DocumentUrl;
 
   @override
   void initState() {
@@ -47,6 +49,28 @@ class _TutorSeekerPaymentCardState extends State<TutorSeekerPaymentCard> {
     _loadUserProfile();
     _deleteDuePayment();
     _loadTutorProfile();
+  }
+
+  Future<void> updateAvailabilitySlots(
+      String day, String startTime, String endTime, String tutorId) async {
+    // Convert dates to the day of the week and time
+    
+    var availabilitySlotsRef = FirebaseFirestore.instance
+        .collection('Tutor')
+        .doc(tutorId)
+        .collection('AvailabilitySlot');
+
+    // Query for slots that match the day, start time, and end time
+    var querySnapshot = await availabilitySlotsRef
+        .where('day', isEqualTo: day)
+        .where('startTime', isEqualTo: startTime)
+        .where('endTime', isEqualTo: endTime)
+        .get();
+
+    // Loop through the matching slots and set them to unavailable
+    for (var doc in querySnapshot.docs) {
+      await doc.reference.update({'status': 'unavailable'});
+    }
   }
 
   Future<void> _deleteDuePayment() async {
@@ -176,6 +200,7 @@ class _TutorSeekerPaymentCardState extends State<TutorSeekerPaymentCard> {
       if (tutorSeekerSnapshot.exists) {
         setState(() {
           _tutorseekerName = tutorSeekerSnapshot.get('Name');
+          _DocumentUrl = tutorSeekerSnapshot.get('DocumentUrl');
         });
       } else {
         setState(() {
@@ -309,16 +334,12 @@ class _TutorSeekerPaymentCardState extends State<TutorSeekerPaymentCard> {
         "Payment",
         "Payment from ${_tutorseekerName} has been successfully processed.",
         now);
-    
+
     await FirebaseFirestore.instance
         .collection('Tutor')
         .doc(widget.tutorId)
         .collection('StudentPayment')
         .add(studentPaymentData);
-
-
-
-    
   }
 
   void _updateTutorSeeker(DateTime paymentDate, String paymentAmount,
@@ -452,6 +473,7 @@ class _TutorSeekerPaymentCardState extends State<TutorSeekerPaymentCard> {
                           tutorId: widget.tutorId,
                           tutorPostId: widget.tutorPostId,
                           imageURL: _imageURL,
+                          DocumentUrl: _DocumentUrl,
                         ),
                       ),
                     );
@@ -480,6 +502,8 @@ class _TutorSeekerPaymentCardState extends State<TutorSeekerPaymentCard> {
                       // Update the payment details
                       _updateTutor(paymentDate, removeCommisionFees(),
                           startclassDate, endclassDate);
+                      updateAvailabilitySlots(
+                          widget.day, widget.startTime, widget.endTime, widget.tutorId);
 
                       _updateTutorSeeker(paymentDate, calculateFees(),
                           startclassDate, endclassDate);

@@ -60,6 +60,9 @@ dependencies:
   share_plus: ^7.2.2
   printing: ^5.11.1
   flutter_rating_bar: ^4.0.1
+  url_launcher: ^6.2.5
+  google_sign_in: ^6.2.1
+  
   
   
 

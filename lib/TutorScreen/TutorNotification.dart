@@ -28,14 +28,14 @@ class TutorNotification extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color.fromARGB(255, 255, 255, 115),
+        backgroundColor: const Color.fromARGB(255, 255, 116, 36),
         elevation: 0,
         automaticallyImplyLeading: false,
       ),
       body: Column(
         children: [
           const PageHeader(
-            backgroundColor: Color.fromARGB(255, 255, 255, 115),
+            backgroundColor: const Color.fromARGB(255, 255, 116, 36),
             headerTitle: 'Notification',
           ),
           Expanded(

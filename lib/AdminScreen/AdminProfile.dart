@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:edumateapp/AdminScreen/AdminSetting.dart';
 import 'package:edumateapp/Provider/UserTypeNotifier.dart';
 import 'package:edumateapp/TutorScreen/EditTutorProfile.dart';
 import 'package:edumateapp/Widgets/PageHeader.dart';
@@ -38,13 +39,13 @@ class _AdminProfileState extends State<AdminProfile> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        backgroundColor: const Color.fromARGB(255, 255, 255, 115),
+        backgroundColor: const Color.fromARGB(255, 16, 212, 252),
         elevation: 0,
       ),
       body: Column(
         children: [
           const PageHeader(
-            backgroundColor: Color.fromARGB(255, 255, 255, 115),
+            backgroundColor: const Color.fromARGB(255, 16, 212, 252),
             headerTitle: 'Account',
           ),
           FutureBuilder<DocumentSnapshot>(
@@ -64,8 +65,7 @@ class _AdminProfileState extends State<AdminProfile> {
                     left: 0,
                     right: 0,
                     child: Card(
-                      color: const Color.fromARGB(255, 255, 255,
-                          230), 
+                      color: const Color.fromARGB(255, 240, 252, 252),
                       margin: const EdgeInsets.symmetric(horizontal: 16),
                       child: Padding(
                         padding: const EdgeInsets.all(16.0),
@@ -120,10 +120,12 @@ class _AdminProfileState extends State<AdminProfile> {
                 children: [
                   ElevatedButton(
                     onPressed: () {
-                      // Navigate to settings screen
+                      Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => AdminSetting()),);
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color.fromARGB(255, 255, 255, 115),
+                      backgroundColor: const Color.fromARGB(255, 16, 212, 252),
                       minimumSize: const Size(
                           double.infinity, 50), // Make the button wider
                     ),
@@ -139,7 +141,7 @@ class _AdminProfileState extends State<AdminProfile> {
                       // After logout, navigate user to the login screen
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color.fromARGB(255, 255, 255, 115),
+                      backgroundColor: const Color.fromARGB(255, 16, 212, 252),
                       minimumSize: const Size(
                           double.infinity, 50), // Make the button wider
                     ),

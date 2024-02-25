@@ -6,7 +6,6 @@ import 'package:edumateapp/AdminScreen/AdminTabScreen.dart';
 import 'package:edumateapp/FCM/FCMSetUp.dart';
 import 'package:edumateapp/Provider/TokenNotifier.dart';
 import 'package:edumateapp/Provider/UserTypeNotifier.dart';
-import 'package:edumateapp/TutorScreen/TutorNotification.dart';
 import 'package:edumateapp/TutorScreen/TutorTabScreen.dart';
 import 'package:edumateapp/TutorScreen/UnverifiedTutorHome.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -61,8 +60,6 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   });
 }
 
-
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -88,19 +85,14 @@ void main() async {
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
+  
+
   @override
   Widget build(BuildContext context) {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       FCMSetup.initFCM(context);
     });
-
     return MaterialApp(
-      navigatorKey: navigatorKey,
-      routes: {
-        '/notificationPage': (context) => const TutorSeekerTabScreen(
-              initialPageIndex: 1,
-            ), // Add this line
-      },
       debugShowCheckedModeBanner: false,
       title: 'EduMate',
       theme: ThemeData().copyWith(
@@ -118,8 +110,11 @@ class MyApp extends StatelessWidget {
 
           if (snapshot.hasData && snapshot.data != null) {
             Provider.of<UserTypeNotifier>(context, listen: false)
+                .resetUserType();
+            Provider.of<UserTypeNotifier>(context, listen: false)
                 .setUserType(snapshot.data!.uid);
 
+            // We use a Consumer here to listen to UserTypeNotifier updates
             return Consumer<UserTypeNotifier>(
               builder: (context, userTypeNotifier, child) {
                 final userType = userTypeNotifier.userType;
@@ -127,23 +122,22 @@ class MyApp extends StatelessWidget {
 
                 switch (userType) {
                   case 'Tutor':
-                    return const TutorTabScreen();
+                    return TutorTabScreen();
                   case 'Tutor Seeker':
-                    return const TutorSeekerTabScreen();
+                    return TutorSeekerTabScreen();
                   case 'New Tutor':
-                    return const UnverifiedTutorHome();
-                  case 'Unverified Tutor':
-                    return const UnverifiedTutorHome();
+                    return UnverifiedTutorHome();
                   case 'New Tutor Seeker':
-                    return const TutorSeekerTabScreen();
+                    return TutorSeekerTabScreen();
                   case 'Admin':
-                    return const AdminTabScreen();
+                    return AdminTabScreen();
                   default:
-                    return const AuthenticatePage();
+                    return SplashScreen();
                 }
               },
             );
           } else {
+            // If snapshot doesn't have data, meaning no user is logged in
             return const AuthenticatePage();
           }
         },

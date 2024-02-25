@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:edumateapp/TutorSeekerScreen/TutorSeekerRegistration.dart';
+import 'package:edumateapp/Widgets/PageHeader.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
@@ -37,7 +38,6 @@ class _AuthenticatePageState extends State<AuthenticatePage> {
   void _submit() async {
     final isValid = _form.currentState!.validate();
     if (!isValid) {
-      //show error msg...
       return;
     }
 
@@ -88,95 +88,91 @@ class _AuthenticatePageState extends State<AuthenticatePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(
-          'EduMate',
-          style: TextStyle(
-            color: Color(0xFF795ED9),
-          ),
-        ),
-        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+        backgroundColor: Color(0xFF795ED9),
         automaticallyImplyLeading: false,
       ),
-      body: Center(
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Image.asset(
-                'assets/images/s.png', // Replace with your asset image path
-                width: double.infinity,
-                height: 250.0,
-                fit: BoxFit.cover,
-              ),
-              Row(
-                mainAxisSize: MainAxisSize
-                    .min, // Use min to prevent the Row from expanding to the full width of the screen
-                children: [
-                  ElevatedButton(
-                    onPressed: () {
-                      setState(() {
-                        _isLogin = true;
-                        _LoginEmailController.clear();
-                        _SignUpEmailController.clear();
-                        _LoginPasswordController.clear();
-                        _SignUpPasswordController.clear();
-                        _SignUpConfirmPasswordController.clear();
-                        _form.currentState?.reset();
-                      });
-                    },
-                    style: ElevatedButton.styleFrom(
-                      foregroundColor: _isLogin
-                          ? Color(0xFF795ED9)
-                          : Colors.black, backgroundColor: _isLogin
-                          ? Theme.of(context).colorScheme.primaryContainer
-                          : Colors.white, // Text color
-                      shape: const RoundedRectangleBorder(
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(20),
-                          bottomLeft: Radius.circular(20),
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            const PageHeader(
+              backgroundColor: Color(0xFF795ED9),
+              headerTitle: 'EduMate',
+            ),
+            Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Image.asset(
+                    'assets/images/s.png', 
+                    width: double.infinity,
+                    height:300.0,
+                    fit: BoxFit.cover,
+                  ),
+                  SizedBox(height: 10,),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          setState(() {
+                            _isLogin = true;
+                            _LoginEmailController.clear();
+                            _LoginPasswordController.clear();
+                            _SignUpEmailController.clear();
+                            _SignUpPasswordController.clear();
+                            _SignUpConfirmPasswordController.clear();
+                            _form.currentState?.reset();
+                          });
+                        },
+                        icon: Icon(Icons.login),
+                        label: Text('Login'),
+                        style: ElevatedButton.styleFrom(
+                          foregroundColor: _isLogin ? Colors.white : Colors.black, backgroundColor: _isLogin ? Color(0xFF795ED9) : Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.only(
+                              topLeft: Radius.circular(20),
+                              bottomLeft: Radius.circular(20),
+                            ),
+                          ),
+                          side: BorderSide(
+                            color: Colors.white,
+                          ),
                         ),
                       ),
-                      side: BorderSide(color: Colors.white), // Border color
-                    ),
-                    child: Text('Login'),
-                  ),
-                  ElevatedButton(
-                    onPressed: () {
-                      setState(() {
-                        _isLogin = false;
-                        _LoginEmailController.clear();
-                        _SignUpEmailController.clear();
-                        _LoginPasswordController.clear();
-                        _SignUpPasswordController.clear();
-                        _SignUpConfirmPasswordController.clear();
-                        _form.currentState?.reset();
-                      });
-                    },
-                    style: ElevatedButton.styleFrom(
-                      foregroundColor: !_isLogin
-                          ? Color(0xFF795ED9)
-                          : Colors.black, backgroundColor: !_isLogin
-                          ? Theme.of(context).colorScheme.primaryContainer
-                          : Colors.white, // Text color
-                      shape: const RoundedRectangleBorder(
-                        borderRadius: BorderRadius.only(
-                          topRight: Radius.circular(20),
-                          bottomRight: Radius.circular(20),
+                      ElevatedButton.icon(
+                        onPressed: () {
+                          setState(() {
+                            _isLogin = false;
+                            _LoginEmailController.clear();
+                            _LoginPasswordController.clear();
+                            _SignUpEmailController.clear();
+                            _SignUpPasswordController.clear();
+                            _SignUpConfirmPasswordController.clear();
+                            _form.currentState?.reset();
+                          });
+                        },
+                        icon: Icon(Icons.person_add),
+                        label: Text('Sign Up'),
+                        style: ElevatedButton.styleFrom(
+                          foregroundColor: !_isLogin ? Colors.white : Colors.black, backgroundColor: !_isLogin ? Color(0xFF795ED9) : Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.only(
+                              topRight: Radius.circular(20),
+                              bottomRight: Radius.circular(20),
+                            ),
+                          ),
+                          side: BorderSide(
+                            color: Colors.white,
+                          ),
                         ),
                       ),
-                      side:
-                          const BorderSide(color: Colors.white), // Border color
-                    ),
-                    child: Text('Sign Up'),
+                    ],
                   ),
-                ],
-              ),
-              Card(
-                margin: const EdgeInsets.all(20),
-                child: SingleChildScrollView(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Form(
+                  Card(
+                    margin: const EdgeInsets.all(20),
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Form(
                         key: _form,
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
@@ -204,12 +200,13 @@ class _AuthenticatePageState extends State<AuthenticatePage> {
                                   });
                                 },
                               ),
-                            SizedBox(height: 16),
+                              SizedBox(height: 16),
                             if (!_isLogin)
                               TextFormField(
                                 controller: _SignUpEmailController,
                                 decoration: InputDecoration(
                                   labelText: 'Email Address',
+                                  prefixIcon: Icon(Icons.email),
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(20),
                                     borderSide: BorderSide.none,
@@ -225,7 +222,6 @@ class _AuthenticatePageState extends State<AuthenticatePage> {
                                       !value.contains('@')) {
                                     return 'Please enter a valid email address.';
                                   }
-
                                   return null;
                                 },
                                 onSaved: (value) {
@@ -237,6 +233,7 @@ class _AuthenticatePageState extends State<AuthenticatePage> {
                                 controller: _LoginEmailController,
                                 decoration: InputDecoration(
                                   labelText: 'Email Address',
+                                  prefixIcon: Icon(Icons.email),
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(20),
                                     borderSide: BorderSide.none,
@@ -252,7 +249,6 @@ class _AuthenticatePageState extends State<AuthenticatePage> {
                                       !value.contains('@')) {
                                     return 'Please enter a valid email address.';
                                   }
-
                                   return null;
                                 },
                                 onSaved: (value) {
@@ -260,58 +256,37 @@ class _AuthenticatePageState extends State<AuthenticatePage> {
                                 },
                               ),
                             SizedBox(height: 20),
-                            if (!_isLogin)
-                              TextFormField(
-                                controller: _SignUpPasswordController,
-                                decoration: InputDecoration(
-                                  labelText: 'Password',
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(20),
-                                    borderSide: BorderSide.none,
-                                  ),
-                                  filled: true,
+                            TextFormField(
+                              controller: _isLogin
+                                  ? _LoginPasswordController
+                                  : _SignUpPasswordController,
+                              decoration: InputDecoration(
+                                labelText: 'Password',
+                                prefixIcon: Icon(Icons.lock),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(20),
+                                  borderSide: BorderSide.none,
                                 ),
-                                obscureText: true,
-                                validator: (value) {
-                                  if (value == null ||
-                                      value.trim().length < 6) {
-                                    return 'Password must be at least 6 characters long.';
-                                  }
-                                  return null;
-                                },
-                                onSaved: (value) {
-                                  _enteredPassword = value!;
-                                },
+                                filled: true,
                               ),
-                            if (_isLogin)
-                              TextFormField(
-                                controller: _LoginPasswordController,
-                                decoration: InputDecoration(
-                                  labelText: 'Password',
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(20),
-                                    borderSide: BorderSide.none,
-                                  ),
-                                  filled: true,
-                                ),
-                                obscureText: true,
-                                validator: (value) {
-                                  if (value == null ||
-                                      value.trim().length < 6) {
-                                    return 'Password must be at least 6 characters long.';
-                                  }
-                                  return null;
-                                },
-                                onSaved: (value) {
-                                  _enteredPassword = value!;
-                                },
-                              ),
+                              obscureText: true,
+                              validator: (value) {
+                                if (value == null || value.trim().length < 6) {
+                                  return 'Password must be at least 6 characters long.';
+                                }
+                                return null;
+                              },
+                              onSaved: (value) {
+                                _enteredPassword = value!;
+                              },
+                            ),
                             SizedBox(height: 20),
                             if (!_isLogin)
                               TextFormField(
                                 controller: _SignUpConfirmPasswordController,
                                 decoration: InputDecoration(
                                   labelText: 'Confirm Password',
+                                  prefixIcon: Icon(Icons.lock),
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(20),
                                     borderSide: BorderSide.none,
@@ -320,14 +295,13 @@ class _AuthenticatePageState extends State<AuthenticatePage> {
                                 ),
                                 obscureText: true,
                                 validator: (value) {
-                                  if (value == null ||
-                                      value.trim().length < 6) {
+                                  if (value == null || value.trim().length < 6) {
                                     return 'Password must be at least 6 characters long.';
                                   }
-                                  if (_SignUpPasswordController.text != value) {
+                                  if (_SignUpPasswordController.text !=
+                                      value) {
                                     return 'Password does not match';
                                   }
-
                                   return null;
                                 },
                                 onSaved: (value) {
@@ -348,12 +322,14 @@ class _AuthenticatePageState extends State<AuthenticatePage> {
                                 child: Text(_isLogin ? 'Login' : 'Sign Up'),
                               ),
                           ],
-                        )),
+                        ),
+                      ),
+                    ),
                   ),
-                ),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

@@ -3,6 +3,7 @@ import 'package:edumateapp/Provider/UserTypeNotifier.dart';
 import 'package:edumateapp/TutorScreen/TutorChat.dart';
 import 'package:edumateapp/TutorSeekerScreen/TutorSeekerChat.dart';
 import 'package:edumateapp/TutorSeekerScreen/TutorSeekerTutorSearchScreen.dart';
+import 'package:edumateapp/Widgets/PageHeader.dart';
 import 'package:edumateapp/main.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -81,74 +82,86 @@ class _TutorHomeChatState extends State<TutorHomeChat> {
     });
   }
 
-  @override
+ @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        title: const Text("Chat Home Page"),
+        backgroundColor: const Color.fromARGB(255, 255, 116, 36),
+        elevation: 0,
       ),
-      body: StreamBuilder<List<ChatPreviewData>>(
-        stream: getChatPreviews(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          }
-          if (!snapshot.hasData || snapshot.data!.isEmpty) {
-            return const Center(child: Text("No chats found"));
-          }
+      body: Column(
+        children: [
+          const PageHeader(
+            backgroundColor: const Color.fromARGB(255, 255, 116, 36),
+            headerTitle: 'Chat',
+          ),
+          Expanded(
+            // Use Expanded to fill the remaining space with the chat list
+            child: StreamBuilder<List<ChatPreviewData>>(
+              stream: getChatPreviews(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (snapshot.hasError) {
+                  return Center(child: Text('Error: ${snapshot.error}'));
+                }
+                if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                  return const Center(child: Text("No chats found"));
+                }
 
-          final chatPreviews = snapshot.data!;
+                final chatPreviews = snapshot.data!;
 
-          return ListView.builder(
-            itemCount: chatPreviews.length,
-            itemBuilder: (context, index) {
-              final chatPreview = chatPreviews[index];
-              return InkWell(
-                // Wrap ListTile with InkWell for tap functionality
-                onTap: () {
-                  // Navigate to the chat screen
-                  // You'll need to replace 'ChatScreen' with the actual name of your chat screen widget
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => TutorChat(
-                            ReceiverUserId: chatPreview.chatId.split('_')[1]),
-                      ));
-                },
-                child: ListTile(
-                  leading: CircleAvatar(
-                    backgroundImage: NetworkImage(chatPreview.imageUrl),
-                    backgroundColor: Colors.grey.shade200,
-                    radius: 24,
-                  ),
-                  title: Text(chatPreview.name),
-                  subtitle: Text(
-                    chatPreview.lastMessage,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  trailing: Text(
-                    _formatTimestamp(chatPreview.timestamp),
-                    style: TextStyle(
-                      color: Colors.grey.shade600,
-                      fontSize: 12,
-                    ),
-                  ),
-                ),
-              );
-            },
-          );
-        },
+                return ListView.builder(
+                  itemCount: chatPreviews.length,
+                  itemBuilder: (context, index) {
+                    final chatPreview = chatPreviews[index];
+                    return InkWell(
+                      // Wrap ListTile with InkWell for tap functionality
+                      onTap: () {
+                        // Navigate to the chat screen
+                        // You'll need to replace 'TutorChat' with the actual name of your chat screen widget
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => TutorChat(
+                              ReceiverUserId: chatPreview.chatId.split('_')[1]),
+                          ),
+                        );
+                      },
+                      child: ListTile(
+                        leading: CircleAvatar(
+                          backgroundImage: NetworkImage(chatPreview.imageUrl),
+                          backgroundColor: Colors.grey.shade200,
+                          radius: 24,
+                        ),
+                        title: Text(chatPreview.name),
+                        subtitle: Text(
+                          chatPreview.lastMessage,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        trailing: Text(
+                          _formatTimestamp(chatPreview.timestamp),
+                          style: TextStyle(
+                            color: Colors.grey.shade600,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
 
   String _formatTimestamp(DateTime timestamp) {
-    return DateFormat('h:mm a')
-        .format(timestamp); // Using the intl package for date formatting
+    return DateFormat('h:mm a').format(timestamp); // Using the intl package for date formatting
   }
 }
 

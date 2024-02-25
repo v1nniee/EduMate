@@ -49,7 +49,7 @@ const TutorFunctionCategories = [
   ),
   Category(
     id: 't6',
-    title: 'To Pay Tutor Seeker',
+    title: 'Pending Payment',
     color: Colors.white,
     icon: Icons.payment, 
     nextPage: ToPayTutorSeeker(),

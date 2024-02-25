@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:edumateapp/Provider/UserTypeNotifier.dart';
 import 'package:edumateapp/TutorScreen/EditTutorProfile.dart';
+import 'package:edumateapp/TutorScreen/TutorSeeting.dart';
 import 'package:edumateapp/Widgets/PageHeader.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -41,7 +42,7 @@ class _TutorProfileState extends State<TutorProfile> {
         child: Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: const Color.fromARGB(255, 255, 255, 230),
+            color: const Color.fromARGB(255, 255, 244, 236),
             borderRadius: BorderRadius.circular(15),
           ),
           child: EditTutorProfile(
@@ -115,13 +116,13 @@ class _TutorProfileState extends State<TutorProfile> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        backgroundColor: const Color.fromARGB(255, 255, 255, 115),
+        backgroundColor: const Color.fromARGB(255, 255, 116, 36),
         elevation: 0,
       ),
       body: Column(
         children: [
           const PageHeader(
-            backgroundColor: Color.fromARGB(255, 255, 255, 115),
+            backgroundColor: const Color.fromARGB(255, 255, 116, 36),
             headerTitle: 'Account',
           ),
           FutureBuilder<DocumentSnapshot>(
@@ -141,8 +142,7 @@ class _TutorProfileState extends State<TutorProfile> {
                     left: 0,
                     right: 0,
                     child: Card(
-                      color: const Color.fromARGB(255, 255, 255,
-                          230), 
+                      color: const Color.fromARGB(255, 255, 203, 173),
                       margin: const EdgeInsets.symmetric(horizontal: 16),
                       child: Padding(
                         padding: const EdgeInsets.all(16.0),
@@ -202,10 +202,12 @@ class _TutorProfileState extends State<TutorProfile> {
                 children: [
                   ElevatedButton(
                     onPressed: () {
-                      // Navigate to settings screen
+                      Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => TutorSetting()),);
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color.fromARGB(255, 255, 255, 115),
+                      backgroundColor: const Color.fromARGB(255, 255, 116, 36),
                       minimumSize: const Size(
                           double.infinity, 50), // Make the button wider
                     ),
@@ -218,10 +220,10 @@ class _TutorProfileState extends State<TutorProfile> {
                   ElevatedButton(
                     onPressed: () {
                       FirebaseAuth.instance.signOut();
-                      // After logout, navigate user to the login screen
+                      
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color.fromARGB(255, 255, 255, 115),
+                      backgroundColor: const Color.fromARGB(255, 255, 116, 36),
                       minimumSize: const Size(
                           double.infinity, 50), // Make the button wider
                     ),

@@ -232,7 +232,7 @@ class _TutorAddPostState extends State<TutorAddPost> {
         elevation: 0,
         toolbarHeight: screenHeight * 0.05,
       ),
-      backgroundColor: const Color.fromARGB(255, 255, 255, 230),
+      backgroundColor: const Color.fromARGB(255, 255, 203, 173),
       body: Scrollbar(
         thumbVisibility: true,
         thickness: 6.0,
@@ -435,7 +435,7 @@ class _TutorAddPostState extends State<TutorAddPost> {
                 ElevatedButton(
                   onPressed: _submit,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color.fromARGB(255, 255, 255, 115),
+                    backgroundColor: const Color.fromARGB(255, 255, 116, 36),
                   ),
                   child: const Text("Save"),
                 ),

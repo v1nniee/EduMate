@@ -35,6 +35,7 @@ class MyTutorCard extends StatefulWidget {
 class _MyTutorCardState extends State<MyTutorCard> {
   String _name = '';
   String _imageURL = '';
+  late String _DocumentUrl;
   @override
   void initState() {
     super.initState();
@@ -57,6 +58,7 @@ class _MyTutorCardState extends State<MyTutorCard> {
         setState(() {
           _name = tutorPostApplicationSnapshot["Name"];
           _imageURL = tutorPostApplicationSnapshot["ImageUrl"];
+          _DocumentUrl = tutorPostApplicationSnapshot['DocumentUrl'];
         });
       }
     } catch (e) {
@@ -100,6 +102,28 @@ class _MyTutorCardState extends State<MyTutorCard> {
     }
   }
 
+  Future<void> updateAvailabilitySlots(
+      String day, String startTime, String endTime, String tutorId) async {
+    // Convert dates to the day of the week and time
+
+    var availabilitySlotsRef = FirebaseFirestore.instance
+        .collection('Tutor')
+        .doc(tutorId)
+        .collection('AvailabilitySlot');
+
+    // Query for slots that match the day, start time, and end time
+    var querySnapshot = await availabilitySlotsRef
+        .where('day', isEqualTo: day)
+        .where('startTime', isEqualTo: startTime)
+        .where('endTime', isEqualTo: endTime)
+        .get();
+
+    // Loop through the matching slots and set them to unavailable
+    for (var doc in querySnapshot.docs) {
+      await doc.reference.update({'status': 'available'});
+    }
+  }
+
   void _updateMyTutor() async {
     try {
       User? currentUser = FirebaseAuth.instance.currentUser;
@@ -127,7 +151,9 @@ class _MyTutorCardState extends State<MyTutorCard> {
         if (storedEndClassDate != null && storedEndClassDate.isBefore(now)) {
           await myTutorDocRef.delete();
           await myStudentDocRef.delete();
-          
+          updateAvailabilitySlots(
+              widget.day, widget.startTime, widget.startTime, widget.tutorId);
+
           StoreNotification().sendNotificationtoTutor(
             widget.tutorId,
             "Tuition Session Concluded",
@@ -214,6 +240,7 @@ class _MyTutorCardState extends State<MyTutorCard> {
                           tutorId: widget.tutorId,
                           tutorPostId: widget.tutorPostId,
                           imageURL: _imageURL,
+                          DocumentUrl: _DocumentUrl,
                         ),
                       ),
                     );
@@ -223,7 +250,6 @@ class _MyTutorCardState extends State<MyTutorCard> {
                     backgroundColor: Theme.of(context).primaryColor,
                   ),
                 ),
-                
               ],
             ),
           ],

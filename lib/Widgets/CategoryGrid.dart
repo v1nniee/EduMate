@@ -9,8 +9,8 @@ class CategoryGridItem extends StatelessWidget {
     super.key,
     required this.category,
     required this.onSelectCategory,
-    this.fontSize = 17.0, 
-    this.iconSize = 40.0, 
+    this.fontSize = 15.0, 
+    this.iconSize = 35.0, 
     this.imageSize = 50.0,
   });
   final Category category;
@@ -26,7 +26,7 @@ class CategoryGridItem extends StatelessWidget {
       splashColor: Theme.of(context).primaryColor,
       borderRadius: BorderRadius.circular(16),
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
           boxShadow: [

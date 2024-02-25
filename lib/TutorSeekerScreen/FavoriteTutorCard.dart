@@ -37,12 +37,12 @@ class _FavoriteTutorCardState extends State<FavoriteTutorCard> {
   Map<String, dynamic>? selectedSlot;
   double _rating = 0.0;
   int _numberOfRating = 0;
+  late String _DocumentUrl;
 
   @override
   void initState() {
     super.initState();
     checkFavorite();
-    
   }
 
   Future<void> _loadTutorUserProfile() async {
@@ -61,6 +61,7 @@ class _FavoriteTutorCardState extends State<FavoriteTutorCard> {
         setState(() {
           _rating = tutorPostApplicationSnapshot.get('Rating');
           _numberOfRating = tutorPostApplicationSnapshot.get('NumberOfRating');
+          _DocumentUrl = tutorPostApplicationSnapshot.get('DocumentUrl');
         });
       } else {
         setState(() {
@@ -463,6 +464,7 @@ class _FavoriteTutorCardState extends State<FavoriteTutorCard> {
                       tutorId: widget.tutorId,
                       tutorPostId: widget.tutorPostId,
                       imageURL: widget.imageURL,
+                      DocumentUrl: _DocumentUrl,
                     ),
                   ),
                 );

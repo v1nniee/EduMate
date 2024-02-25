@@ -1,7 +1,7 @@
 //if the zip code is wrong?
 //date of birth is not logic?
 //all the value validation
-//if the user click save button but they didnt fill all the info, there is a bug there because the red word wont disappear
+
 
 import 'dart:io';
 
@@ -226,10 +226,10 @@ class _TutorSeekerRegistrationState extends State<TutorSeekerRegistration> {
                   headerTitle: "Tutor Seeker Profile"),
               Container(
                 width: screenWidth * 0.9,
-                height: screenHeight * 0.15,
+                height: screenHeight * 0.155,
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(30),
+                  borderRadius: BorderRadius.circular(25),
                 ),
                 child: UserImagePicker(onPickImage: (pickedImage) {
                   setState(() {
@@ -417,6 +417,7 @@ class _TutorSeekerRegistrationState extends State<TutorSeekerRegistration> {
                             ),
                             filled: true,
                           ),
+                          keyboardType: TextInputType.number,
                           validator: (value) {
                             if (value == null || value.trim().isEmpty) {
                               return 'Please enter a valid zip code.';

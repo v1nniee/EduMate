@@ -16,8 +16,8 @@ class CategoriesScreen extends StatelessWidget {
     super.key,
     required this.categories,
     required this.backgroundColor,
-    this.fontSize = 17.0,
-    this.iconSize = 40.0,
+   this.fontSize = 16.0, 
+    this.iconSize = 35.0, 
     this.imageSize = 50.0,
   });
 

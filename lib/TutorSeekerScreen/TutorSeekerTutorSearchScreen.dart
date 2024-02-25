@@ -59,7 +59,6 @@ class _TutorSeekerTutorSearchScreenState extends State<TutorSeekerTutorSearchScr
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: TextField(
-              focusNode: _searchFocusNode, // Assign FocusNode to TextField
               decoration: const InputDecoration(
                 labelText: 'Search for a Tutor',
                 border: OutlineInputBorder(),

@@ -9,9 +9,36 @@ import 'package:edumateapp/Widgets/HomeHeader.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class UnverifiedTutorHome extends StatelessWidget {
+class UnverifiedTutorHome extends StatefulWidget {
   const UnverifiedTutorHome({super.key});
+
+  @override
+  State<UnverifiedTutorHome> createState() => _UnverifiedTutorHomeState();
+}
+
+class _UnverifiedTutorHomeState extends State<UnverifiedTutorHome> {
+  String _status = '';
+
+  Future<String> _fetchUserStatus(User? user) async {
+    if (user == null) {
+      return Future.error('No user logged in');
+    }
+
+    final tutorSnapshot = await FirebaseFirestore.instance
+        .collection('Tutor')
+        .doc(user.uid)
+        .collection('UserProfile')
+        .doc(user.uid)
+        .get();
+
+    if (tutorSnapshot.exists && tutorSnapshot.data() != null) {
+      return tutorSnapshot.data()!['Status'] as String;
+    } else {
+      return 'Not found';
+    }
+  }
 
   void _showRegistrationForm(BuildContext context) {
     showDialog(
@@ -27,7 +54,7 @@ class UnverifiedTutorHome extends StatelessWidget {
             borderRadius: BorderRadius.circular(15),
           ),
           child: TutorRegistration(onSaved: () async {
-            Navigator.of(ctx).pop();
+            Navigator.of(ctx).pop(); // Close the TutorRegistration dialog
             await showDialog(
               context: context,
               builder: (context) => AlertDialog(
@@ -37,7 +64,10 @@ class UnverifiedTutorHome extends StatelessWidget {
                 actions: <Widget>[
                   TextButton(
                     onPressed: () {
-                      Navigator.of(context).pop();
+                      Navigator.of(context).pop(); // Close the AlertDialog
+                      setState(() {
+                      _status = 'Unverified';
+                    });
                     },
                     child: const Text('OK'),
                   ),
@@ -50,44 +80,65 @@ class UnverifiedTutorHome extends StatelessWidget {
     );
   }
 
+  Widget _buildUserStatusBasedScreen(BuildContext context, String status) {
+    if (status == 'Unverified') {
+      return const UnverifiedTutorScreen();
+    } else if (status == 'Rejected') {
+      return const RejectedTutorScreen();
+    } else {
+      Future.microtask(() {
+        if (ModalRoute.of(context)!.isCurrent) {
+          _showRegistrationForm(context);
+        }
+      });
+      return Container();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     User? user = FirebaseAuth.instance.currentUser;
-
-    // If there's a user, then let's check the userType and act accordingly
-    if (user != null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        final userTypeNotifier =
-            Provider.of<UserTypeNotifier>(context, listen: false);
-        final userType = userTypeNotifier.userType;
-
-        switch (userType) {
-          case 'Unverified Tutor':
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                  builder: (context) => const UnverifiedTutorScreen()),
-            );
-            break;
-          case 'New Tutor':
-            _showRegistrationForm(context);
-            break;
-        }
-      });
-    }
 
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
         backgroundColor: const Color.fromARGB(255, 255, 116, 36),
         elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: () async {
+              await FirebaseAuth.instance.signOut();
+            },
+          ),
+        ],
       ),
       backgroundColor: const Color.fromARGB(255, 255, 244, 236),
       body: Column(
         children: [
           const HomeHeader(backgroundColor: Color.fromARGB(255, 255, 116, 36)),
-          // Here you might want to show some content or a loading indicator
-          user == null ? CircularProgressIndicator() : const SizedBox.shrink(),
+          Expanded(
+            child: FutureBuilder<String>(
+              future: _fetchUserStatus(user),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(
+                    child: SizedBox(
+                      width: 50,
+                      height: 50,
+                      child: CircularProgressIndicator(),
+                    ),
+                  );
+                }
+
+                if (snapshot.hasData) {
+                  final status = snapshot.data!;
+                  return _buildUserStatusBasedScreen(context, status);
+                }
+                return const Text('No user data available');
+              },
+            ),
+          ),
         ],
       ),
     );
@@ -101,28 +152,15 @@ class UnverifiedTutorScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-      automaticallyImplyLeading: false,
-      backgroundColor: const Color.fromARGB(255, 255, 116, 36),
-      elevation: 0,
-      actions: [
-        IconButton(
-          icon: const Icon(Icons.logout),
-          onPressed: () async {
-            await FirebaseAuth.instance.signOut();
-            // Replace with your route to the login screen
-            Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) => AuthenticatePage()));
-          },
-        ),
-      ],
-    ),
+        automaticallyImplyLeading: false,
+        backgroundColor: const Color.fromARGB(255, 255, 244, 236),
+        elevation: 0,
+      ),
       backgroundColor: const Color.fromARGB(255, 255, 244, 236),
       body: SafeArea(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const HomeHeader(
-                backgroundColor: Color.fromARGB(255, 255, 116, 36)),
-            Spacer(), // Push everything to the middle
             Expanded(
               flex: 2, // Take up 2/3 of the screen height
               child: SingleChildScrollView(
@@ -170,7 +208,83 @@ class UnverifiedTutorScreen extends StatelessWidget {
                       ),
                     ),
                     SizedBox(height: MediaQuery.of(context).size.height * 0.05),
-                    
+                  ],
+                ),
+              ),
+            ),
+            Spacer(), // Push everything to the middle
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class RejectedTutorScreen extends StatelessWidget {
+  const RejectedTutorScreen({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        automaticallyImplyLeading: false,
+        backgroundColor: const Color.fromARGB(255, 255, 244, 236),
+        elevation: 0,
+      ),
+      backgroundColor: const Color.fromARGB(255, 255, 244, 236),
+      body: SafeArea(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Expanded(
+              flex: 2, // Take up 2/3 of the screen height
+              child: SingleChildScrollView(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Text(
+                      'Your registration have been rejected!',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 36, // Larger font size for the header
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                    SizedBox(
+                        height: MediaQuery.of(context).size.height *
+                            0.05), // Adjust the size as needed
+                    Container(
+                      padding: const EdgeInsets.all(
+                          24), // More padding for larger card
+                      margin: const EdgeInsets.symmetric(
+                          horizontal: 24), // Larger horizontal margin
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(
+                            20), // Rounded corners for the card
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.1),
+                            blurRadius: 10,
+                            offset: const Offset(0, 5),
+                          ),
+                        ],
+                      ),
+                      child: const Text(
+                        'We regret to inform you that your registration has been rejected. '
+                        'However, your profile is currently under review by our team. '
+                        'We are evaluating the provided information and will update you '
+                        'once the review process is complete. If you have any questions or need to '
+                        'update your information, please contact support.',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 16, // Appropriate font size for body text
+                          color: Colors.black54,
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: MediaQuery.of(context).size.height * 0.05),
                   ],
                 ),
               ),

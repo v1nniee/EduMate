@@ -45,7 +45,7 @@ class _TutorSeekerPaymentState extends State<TutorSeekerPayment> {
                 if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
                   return const Center(
                     child: Text(
-                      'No To Pay documents found',
+                      'No Pending Payment Found',
                       style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
                     ),
                   );

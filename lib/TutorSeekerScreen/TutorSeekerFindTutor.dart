@@ -91,8 +91,6 @@ class _TutorSeekerFindTutorState extends State<TutorSeekerFindTutor> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-
-              
               SizedBox(height: 20),
               const Text(
                 "Mode",
@@ -383,9 +381,6 @@ class _TutorSeekerFindTutorState extends State<TutorSeekerFindTutor> {
                             continue;
                           }
 
-
-                          
-
                           tutorCards.add(
                             FutureBuilder<DocumentSnapshot>(
                               future: document.reference
@@ -412,6 +407,8 @@ class _TutorSeekerFindTutorState extends State<TutorSeekerFindTutor> {
                                 double rating = userData?.get('Rating') ?? 0.0;
                                 int numberOfRating =
                                     userData?.get('NumberOfRating') ?? 0;
+                                String DocumentUrl =
+                                    userData?.get('DocumentUrl') ?? "";
 
                                 return TutorCard(
                                   tutorId: document.id,
@@ -423,6 +420,7 @@ class _TutorSeekerFindTutorState extends State<TutorSeekerFindTutor> {
                                   fees: fees,
                                   mode: mode,
                                   numberOfRating: numberOfRating,
+                                  DocumentUrl: DocumentUrl,
                                 );
                               },
                             ),

@@ -84,7 +84,7 @@ class _TutorRegistrationState extends State<TutorRegistration> {
     final isDocumentSelected = _selectedCertification != null;
     if (!_formKey.currentState!.validate() || !isDocumentSelected) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
             content: Text('Please fill all fields and upload a document.')),
       );
       return;
@@ -134,6 +134,7 @@ class _TutorRegistrationState extends State<TutorRegistration> {
         'Rating': 0.1,
         'NumberOfRating': 0,
         'HighestQualification': _enteredQualification,
+        'Status': 'Unverified',
         if (imageURL != null) 'ImageUrl': imageURL else 'ImageUrl': null,
       };
 
@@ -154,6 +155,13 @@ class _TutorRegistrationState extends State<TutorRegistration> {
         }
 
         await FirebaseFirestore.instance
+            .collection('Admin')
+            .doc("IlRy3c7wNpWuvfVeCkLPbHGhg1W2")
+            .collection('TutorRegistrationRequest')
+            .doc(userId)
+            .set(userProfileData, SetOptions(merge: true));
+        
+        await FirebaseFirestore.instance
             .collection('Tutor')
             .doc(userId)
             .collection('UserProfile')
@@ -168,7 +176,7 @@ class _TutorRegistrationState extends State<TutorRegistration> {
         await FirebaseFirestore.instance
             .collection('Tutor')
             .doc(userId)
-            .set({'UserType': "Unverified Tutor"}, SetOptions(merge: true));
+            .set({'UserType': "New Tutor"}, SetOptions(merge: true));
         setState(() {
           _isLoading = false;
         });
@@ -241,11 +249,11 @@ class _TutorRegistrationState extends State<TutorRegistration> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        backgroundColor: const Color.fromARGB(255, 255, 255, 115),
+        backgroundColor: const Color.fromARGB(255, 255, 116, 36),
         elevation: 0,
         toolbarHeight: screenHeight * 0.05,
       ),
-      backgroundColor: const Color.fromARGB(255, 255, 255, 230),
+      backgroundColor: const Color.fromARGB(255, 255, 203, 173),
       body: Scrollbar(
         thumbVisibility: true,
         thickness: 6.0,
@@ -254,11 +262,11 @@ class _TutorRegistrationState extends State<TutorRegistration> {
           child: Column(
             children: <Widget>[
               const PageHeader(
-                  backgroundColor: Color.fromARGB(255, 255, 255, 115),
+                  backgroundColor: const Color.fromARGB(255, 255, 116, 36),
                   headerTitle: "Tutor Profile"),
               Container(
                 width: screenWidth * 0.9,
-                height: screenHeight * 0.15,
+                height: screenHeight * 0.155,
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(30),
@@ -449,6 +457,7 @@ class _TutorRegistrationState extends State<TutorRegistration> {
                             ),
                             filled: true,
                           ),
+                          keyboardType: TextInputType.number,
                           validator: (value) {
                             if (value == null || value.trim().isEmpty) {
                               return 'Please enter a valid zip code.';
@@ -575,7 +584,7 @@ class _TutorRegistrationState extends State<TutorRegistration> {
                             onPressed: _submit,
                             style: ElevatedButton.styleFrom(
                               backgroundColor:
-                                  const Color.fromARGB(255, 255, 255, 115),
+                                  const Color.fromARGB(255, 255, 116, 36),
                             ),
                             child: const Text("Save"),
                           ),

@@ -270,7 +270,7 @@ class _AvailabilitySlotState extends State<AvailabilitySlot> {
         elevation: 0,
         toolbarHeight: screenHeight * 0.05,
       ),
-      backgroundColor: const Color.fromARGB(255, 255, 255, 230),
+      backgroundColor: const Color.fromARGB(255, 255, 203, 173),
       body: Scrollbar(
         thumbVisibility: true,
         thickness: 6.0,
@@ -283,7 +283,7 @@ class _AvailabilitySlotState extends State<AvailabilitySlot> {
               children: <Widget>[
                 PageHeader(
                     backgroundColor: Color.fromARGB(255, 255, 116, 36),
-                    headerTitle: "Tutor Add Post"),
+                    headerTitle: "Time Availibility"),
                 SizedBox(
                   height: 10,
                 ),

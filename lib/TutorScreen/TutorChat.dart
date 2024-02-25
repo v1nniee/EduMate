@@ -1,3 +1,4 @@
+import 'package:edumateapp/Widgets/PageHeader.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -33,10 +34,15 @@ class _TutorChatState extends State<TutorChat> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Chat"),
+        backgroundColor: const Color.fromARGB(255, 255, 116, 36),
+        elevation: 0,
       ),
       body: Column(
         children: [
+          const PageHeader(
+            backgroundColor: const Color.fromARGB(255, 255, 116, 36),
+            headerTitle: 'Chat',
+          ),
           Expanded(
             child: ChatMessages(ReceiverUserId: widget.ReceiverUserId),
           ),

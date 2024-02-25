@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:edumateapp/main.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/widgets.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -8,13 +9,21 @@ class UserTypeNotifier with ChangeNotifier {
 
   String? get userType => _userType;
 
+  void resetUserType() {
+    _userType = null;
+    notifyListeners();
+  }
+
   Future<void> setUserType(String userId) async {
     var manager = UserTypeManager();
     var userType = await manager.getUserType(userId);
-    _userType = userType;
-    notifyListeners();
+    if (_userType != userType) {
+      _userType = userType;
+      notifyListeners();
+    }
   }
 }
+
 
 class UserTypeManager {
   Future<String?> getUserType(String userId) async {
@@ -23,7 +32,7 @@ class UserTypeManager {
     final cachedType = prefs.getString('user_type_$userId');
     if (cachedType != null) {
       print("Cached Type: $cachedType");
-      if (!(cachedType == "New Tutor Seeker" || cachedType == "New Tutor"|| cachedType == "Unverified Tutor")) {
+      if (!(cachedType == "New Tutor Seeker" || cachedType == "New Tutor")) {
         return cachedType;
       }
     }
@@ -59,6 +68,4 @@ class UserTypeManager {
     print('User document does not exist in both collections.');
     return null;
   }
-
-  
 }

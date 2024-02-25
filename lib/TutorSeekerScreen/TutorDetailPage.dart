@@ -2,18 +2,26 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:edumateapp/Widgets/PageHeader.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class TutorDetailPage extends StatelessWidget {
   final String tutorId;
   final String tutorPostId;
   final String imageURL;
+  final String DocumentUrl;
 
   const TutorDetailPage(
       {Key? key,
       required this.tutorId,
       required this.tutorPostId,
-      required this.imageURL})
+      required this.imageURL,
+      required this.DocumentUrl})
       : super(key: key);
+  Future<void> _launchURL(String url) async {
+    if (!await launch(url)) {
+      throw 'Could not launch $url';
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -84,6 +92,8 @@ class TutorDetailPage extends StatelessWidget {
                 rate = tutorPostData.get('RatePerClass') ?? 'Unavailable';
                 teachingLevel =
                     tutorPostData.get('LevelofTeaching') ?? 'Unavailable';
+                var experienceDocUrls =
+                    tutorPostData.get('Experience') as List<dynamic>? ?? [];
 
                 return FutureBuilder<DocumentSnapshot>(
                   future: firestore
@@ -159,14 +169,49 @@ class TutorDetailPage extends StatelessWidget {
                             ],
                           ),
                         ),
+                        if (DocumentUrl != null && DocumentUrl!.isNotEmpty)
+                          Card(
+                            elevation: 4.0,
+                            margin: const EdgeInsets.all(8.0),
+                            child: ListTile(
+                              leading: Icon(Icons.picture_as_pdf,
+                                  color: Theme.of(context).primaryColor),
+                              title: Text('View Certification',
+                                  style:
+                                      TextStyle(fontWeight: FontWeight.bold)),
+                              onTap: () => _launchURL(DocumentUrl!),
+                            ),
+                          ),
+                        if (experienceDocUrls != null &&
+                            experienceDocUrls!.isNotEmpty)
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Column(
+                              children: experienceDocUrls!.map((docUrl) {
+                                return Card(
+                                  elevation: 4.0,
+                                  margin:
+                                      const EdgeInsets.symmetric(vertical: 4.0),
+                                  child: ListTile(
+                                    leading: Icon(Icons.picture_as_pdf,
+                                        color: Theme.of(context).primaryColor),
+                                    title: Text("View Experience",
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold)),
+                                    onTap: () => _launchURL(docUrl.toString()),
+                                  ),
+                                );
+                              }).toList(),
+                            ),
+                          ),
                         Card(
                           elevation: 4.0,
                           margin: const EdgeInsets.all(8.0),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
+                              const Padding(
+                                padding: EdgeInsets.all(8.0),
                                 child: Text(
                                   'Reviews',
                                   style: TextStyle(
@@ -207,8 +252,9 @@ class TutorDetailPage extends StatelessWidget {
                                               allowHalfRating: true,
                                               itemCount: 5,
                                               itemSize: 20,
-                                              itemPadding: const EdgeInsets.symmetric(
-                                                  horizontal: 2.0),
+                                              itemPadding:
+                                                  const EdgeInsets.symmetric(
+                                                      horizontal: 2.0),
                                               itemBuilder: (context, _) => Icon(
                                                 Icons.star,
                                                 color: Colors.amber,
@@ -218,7 +264,6 @@ class TutorDetailPage extends StatelessWidget {
                                               },
                                             ),
                                             SizedBox(width: 8),
-                                            
                                           ],
                                         ),
                                         subtitle: Text(data['Review']),

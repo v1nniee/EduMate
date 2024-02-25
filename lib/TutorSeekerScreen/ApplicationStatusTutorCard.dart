@@ -15,6 +15,7 @@ class ApplicationStatusTutorCard extends StatefulWidget {
   final double rating;
   final String fees;
   final int numberOfRating;
+  final String DocumentUrl;
   const ApplicationStatusTutorCard({
     Key? key,
     required this.tutorId,
@@ -25,6 +26,7 @@ class ApplicationStatusTutorCard extends StatefulWidget {
     required this.fees,
     required this.numberOfRating,
     required this.tutorPostId,
+    required this.DocumentUrl,
   }) : super(key: key);
 
   @override
@@ -236,6 +238,7 @@ class _ApplicationStatusTutorCardState
                           tutorId: widget.tutorId,
                           tutorPostId: widget.tutorPostId,
                           imageURL: widget.imageURL,
+                          DocumentUrl: widget.DocumentUrl,
                         ),
                       ),
                     );

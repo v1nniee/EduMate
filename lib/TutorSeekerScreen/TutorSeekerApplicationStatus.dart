@@ -245,6 +245,7 @@ class _TutorSeekerApplicationStatusState
                                             String imageUrl;
                                             double rating = 0.1;
                                             int numberOfRating = 0;
+                                            String DocumentUrl = "";
 
                                             if (userProfileSnapshot
                                                     .data?.exists ??
@@ -260,6 +261,10 @@ class _TutorSeekerApplicationStatusState
                                                   userProfileSnapshot.data!.get(
                                                           'NumberOfRating') ??
                                                       0;
+                                              DocumentUrl = userProfileSnapshot
+                                                      .data!
+                                                      .get('DocumentUrl') ??
+                                                  "";
                                             } else {
                                               imageUrl =
                                                   'tutor_seeker_profile.png';
@@ -275,8 +280,8 @@ class _TutorSeekerApplicationStatusState
                                               imageURL: imageUrl,
                                               rating: rating,
                                               numberOfRating: numberOfRating,
+                                              DocumentUrl: DocumentUrl,
                                               fees: fees,
-                                              
                                             );
                                           },
                                         ),

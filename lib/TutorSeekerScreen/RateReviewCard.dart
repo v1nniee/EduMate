@@ -1,3 +1,4 @@
+import 'package:edumateapp/FCM/StoreNotification.dart';
 import 'package:edumateapp/TutorSeekerScreen/TutorDetailPage.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -29,6 +30,7 @@ class _RateReviewCardState extends State<RateReviewCard> {
   String _imageURL = '';
   double _rate = 0.0;
   int _numberOfRating = 0;
+  late String _DocumentUrl;
 
   @override
   void initState() {
@@ -51,6 +53,7 @@ class _RateReviewCardState extends State<RateReviewCard> {
           _imageURL = tutorSnapshot.get('ImageUrl');
           _rate = tutorSnapshot.get('Rating');
           _numberOfRating = tutorSnapshot.get('NumberOfRating');
+          _DocumentUrl = tutorSnapshot.get('DocumentUrl');
         });
       } else {
         setState(() {
@@ -82,31 +85,48 @@ class _RateReviewCardState extends State<RateReviewCard> {
       'Timestamp': Timestamp.now(),
     });
 
-    // Increment the number of ratings
     _numberOfRating += 1;
 
-    // Calculate the new total rating including the user's rating
     double newTotalRating = (_rate * (_numberOfRating - 1)) + _userRating;
 
-    // Calculate the new average rating
     double newAverageRating = newTotalRating / _numberOfRating;
 
-    // Update the UserProfile data with new values
     await tutorRef.collection('UserProfile').doc(widget.tutorId).update({
       'Rating': newAverageRating,
       'NumberOfRating': _numberOfRating,
     });
 
-    // Optionally, to ensure UI updates with the latest data
     await _loadTutorProfile();
 
-    // Close the dialog if open
     Navigator.pop(context);
 
-    // Show a success message
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Rating and review submitted successfully')),
     );
+
+    if (newAverageRating < 2.0 && _numberOfRating > 10) {
+      await FirebaseFirestore.instance
+          .collection('Admin')
+          .doc('IlRy3c7wNpWuvfVeCkLPbHGhg1W2')
+          .collection('TutorUnderRate')
+          .doc(widget.tutorId)
+          .set({
+        'Name': _tutorName,
+        'Rate': newAverageRating,
+        'ImageURL': _imageURL,
+        'NumberOfRating': _numberOfRating,
+      });
+      DateTime now = DateTime.now();
+      StoreNotification().sendNotificationtoAdmin(
+          "Tutor Performance Alert",
+          "Attention: Tutor ${_tutorName}'s rating has fallen below the acceptable threshold of 2.0. Immediate review is recommended.",
+          now);
+      StoreNotification().sendNotificationtoTutor(
+          widget.tutorId,
+          "Tutor Performance Update",
+          "Dear ${_tutorName}, your current rating has dropped below 2.0, which indicates you might be disqualified. ",
+          now);
+    }
   }
 
   @override
@@ -159,6 +179,7 @@ class _RateReviewCardState extends State<RateReviewCard> {
                           tutorId: widget.tutorId,
                           tutorPostId: widget.tutorPostId,
                           imageURL: _imageURL,
+                          DocumentUrl: _DocumentUrl,
                         ),
                       ),
                     );

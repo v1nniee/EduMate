@@ -48,7 +48,9 @@ class _TutorTabScreenState extends State<TutorTabScreen> {
       bottomNavigationBar: CustomNavigationBar(
           selectedIndex: _selectedPageIndex,
           onItemTapped: _selectPage,
+          selectedIconColor: const Color.fromARGB(255, 255, 116, 36),
           color: const Color.fromARGB(255, 255, 203, 173)),
+          
     );
   }
 }

@@ -19,14 +19,16 @@ class HomeHeader extends StatelessWidget {
 
     String _getGreeting() {
       var hour = DateTime.now().hour;
-      if (hour < 12 || hour > 5) {
+      if (hour < 12) {
         return 'Good Morning';
       } else if (hour < 18) {
+        // From 12:00 to 17:59
         return 'Good Afternoon';
       } else if (hour < 22) {
+        // From 18:00 to 21:59
         return 'Good Evening';
       } else {
-        return 'Good Night';
+        return 'Good Night'; // From 22:00 to 23:59
       }
     }
 

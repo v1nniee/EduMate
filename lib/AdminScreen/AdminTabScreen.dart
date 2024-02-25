@@ -36,7 +36,8 @@ class AdminTabScreenState extends State<AdminTabScreen> {
         selectedIndex: _selectedPageIndex,
         onItemTapped: _selectPage,
         numofIcon:3,
-
+        selectedIconColor: const Color.fromARGB(255, 16, 212, 252),
+        color: const Color.fromARGB(255, 240, 252, 252),
       ),
     );
   }

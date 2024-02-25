@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:edumateapp/FCM/StoreNotification.dart';
+import 'package:edumateapp/TutorScreen/TutorSeekerDetail.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:edumateapp/TutorSeekerScreen/TutorDetailPage.dart';
@@ -87,6 +88,25 @@ class _TutorSeekerCardState extends State<TutorSeekerCard> {
     );
   }
 
+  Future<bool> checkAvailabilitySlots(String day, String startTime, String endTime, String tutorId) async {
+  // Reference to the availability slots of the tutor
+  var availabilitySlotsRef = FirebaseFirestore.instance
+      .collection('Tutor')
+      .doc(tutorId)
+      .collection('AvailabilitySlot');
+
+  // Query for slots that match the day, start time, and end time and are available
+  var querySnapshot = await availabilitySlotsRef
+      .where('day', isEqualTo: day)
+      .where('startTime', isEqualTo: startTime)
+      .where('endTime', isEqualTo: endTime)
+      .where('status', isEqualTo: 'available')
+      .get();
+
+  return querySnapshot.docs.isEmpty;
+}
+
+
   void _updateAccepted() async {
     User? currentUser = FirebaseAuth.instance.currentUser;
     if (currentUser == null) {
@@ -159,9 +179,11 @@ class _TutorSeekerCardState extends State<TutorSeekerCard> {
       _showDialog('Error', 'An error occurred: $e');
     }
 
-
-    StoreNotification().sendNotificationtoTutorSeeker(widget.tutorseekerId, "Application Update",
-        "Your Application from ${_name} has been accepted.", now);
+    StoreNotification().sendNotificationtoTutorSeeker(
+        widget.tutorseekerId,
+        "Application Update",
+        "Your Application from ${_name} has been accepted.",
+        now);
 
     _showDialog(
         'Application Update', 'The application status has been updated.');
@@ -197,13 +219,15 @@ class _TutorSeekerCardState extends State<TutorSeekerCard> {
       _showDialog('Error', 'Failed to update status: $e');
     });
 
-    StoreNotification().sendNotificationtoTutorSeeker(widget.tutorseekerId, "Application Update",
-        "Your Application from ${_name} has been rejected.", now);
+    StoreNotification().sendNotificationtoTutorSeeker(
+        widget.tutorseekerId,
+        "Application Update",
+        "Your Application from ${_name} has been rejected.",
+        now);
     _showDialog(
         'Application Update', 'The application status has been updated.');
   }
 
-  
   @override
   Widget build(BuildContext context) {
     User currentUser = FirebaseAuth.instance.currentUser!;
@@ -283,6 +307,25 @@ class _TutorSeekerCardState extends State<TutorSeekerCard> {
                 mainAxisAlignment: MainAxisAlignment
                     .center, // Align buttons to the start of the row
                 children: <Widget>[
+                  ElevatedButton.icon(
+                    icon: Icon(Icons.info_outline, size: 16.0),
+                    label: Text('Details'),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => TutorSeekerDetails(
+                            tutorSeekerid: widget.tutorseekerId,
+                            imageURL: widget.imageURL,
+                          ),
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      backgroundColor: Theme.of(context).primaryColor,
+                    ),
+                  ),
                   ElevatedButton(
                     onPressed: () {
                       _updateReject();
@@ -299,8 +342,35 @@ class _TutorSeekerCardState extends State<TutorSeekerCard> {
                   ),
                   const SizedBox(width: 20),
                   ElevatedButton(
-                    onPressed: () {
-                      _updateAccepted();
+                    onPressed: () async {
+                      bool booked = await checkAvailabilitySlots(
+                        widget.Day,
+                        widget.StartTime,
+                        widget.EndTime,
+                        currentUser.uid,
+                      );
+                      if (!booked) {
+                        _updateAccepted();
+                      } else {
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return AlertDialog(
+                              title: Text('Slot Unavailable'),
+                              content: Text('The availability slot is full.'),
+                              actions: <Widget>[
+                                TextButton(
+                                  child: Text('OK'),
+                                  onPressed: () {
+                                    Navigator.of(context)
+                                        .pop(); // Dismiss the dialog
+                                  },
+                                ),
+                              ],
+                            );
+                          },
+                        );
+                      }
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor:
