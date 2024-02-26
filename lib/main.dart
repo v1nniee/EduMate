@@ -1,14 +1,14 @@
-//havent debug the background notification to navigate to the notification page.
-
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:edumateapp/AdminScreen/AdminTabScreen.dart';
 import 'package:edumateapp/FCM/FCMSetUp.dart';
+import 'package:edumateapp/FCM/LoginNotificationChecker.dart';
 import 'package:edumateapp/Provider/TokenNotifier.dart';
 import 'package:edumateapp/Provider/UserTypeNotifier.dart';
 import 'package:edumateapp/TutorScreen/TutorTabScreen.dart';
 import 'package:edumateapp/TutorScreen/UnverifiedTutorHome.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
@@ -71,21 +71,25 @@ void main() async {
     options: DefaultFirebaseOptions.currentPlatform,
   );
 
-  runApp(MultiProvider(
-    providers: [
-      ChangeNotifierProvider<UserTypeNotifier>(
-          create: (context) => UserTypeNotifier()),
-      ChangeNotifierProvider<UserTokenNotifier>(
-          create: (context) => UserTokenNotifier()),
-    ],
-    child: const OverlaySupport.global(child: MyApp()),
-    //child: MyApp(),
-  ));
+  SystemChrome.setPreferredOrientations([
+    // Set orientations.
+    DeviceOrientation.portraitUp,
+  ]).then((_) {
+    runApp(MultiProvider(
+      providers: [
+        ChangeNotifierProvider<UserTypeNotifier>(
+            create: (context) => UserTypeNotifier()),
+        ChangeNotifierProvider<UserTokenNotifier>(
+            create: (context) => UserTokenNotifier()),
+      ],
+      child: const OverlaySupport.global(child: MyApp()),
+      //child: MyApp(),
+    )); // Run the app.
+  });
 }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
-  
 
   @override
   Widget build(BuildContext context) {
@@ -113,26 +117,30 @@ class MyApp extends StatelessWidget {
                 .resetUserType();
             Provider.of<UserTypeNotifier>(context, listen: false)
                 .setUserType(snapshot.data!.uid);
+            
 
             // We use a Consumer here to listen to UserTypeNotifier updates
             return Consumer<UserTypeNotifier>(
               builder: (context, userTypeNotifier, child) {
                 final userType = userTypeNotifier.userType;
                 print('User type is: $userType');
+                if(userType!=null){LoginNotificationChecker()
+                .checkAndSendNotifications(context, userType);}
+                
 
                 switch (userType) {
                   case 'Tutor':
-                    return TutorTabScreen();
+                    return const TutorTabScreen();
                   case 'Tutor Seeker':
-                    return TutorSeekerTabScreen();
+                    return const TutorSeekerTabScreen();
                   case 'New Tutor':
-                    return UnverifiedTutorHome();
+                    return const UnverifiedTutorHome();
                   case 'New Tutor Seeker':
-                    return TutorSeekerTabScreen();
+                    return const TutorSeekerTabScreen();
                   case 'Admin':
-                    return AdminTabScreen();
+                    return const AdminTabScreen();
                   default:
-                    return SplashScreen();
+                    return const SplashScreen();
                 }
               },
             );

@@ -3,7 +3,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:edumateapp/Widgets/PageHeader.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class ApproveRejectTutorRegistration extends StatefulWidget {
   const ApproveRejectTutorRegistration({Key? key}) : super(key: key);
@@ -70,7 +69,7 @@ class _ApproveRejectTutorRegistrationState
       body: Column(
         children: [
           const PageHeader(
-            backgroundColor: const Color.fromARGB(255, 16, 212, 252),
+            backgroundColor:  Color.fromARGB(255, 16, 212, 252),
             headerTitle: 'Tutor Registration',
           ),
           const SizedBox(height: 12),
@@ -80,7 +79,7 @@ class _ApproveRejectTutorRegistrationState
               builder: (BuildContext context,
                   AsyncSnapshot<List<TutorRegistrationCard>> snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(child: CircularProgressIndicator());
+                  return const Center(child: CircularProgressIndicator());
                 } else if (snapshot.hasError) {
                   return Center(child: Text('Error: ${snapshot.error}'));
                 } else if (snapshot.hasData) {
@@ -99,7 +98,7 @@ class _ApproveRejectTutorRegistrationState
                     );
                   }
                 } else {
-                  return Center(child: Text('No tutor registration requests found.'));
+                  return const Center(child: Text('No tutor registration requests found.'));
                 }
               },
             ),

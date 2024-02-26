@@ -6,7 +6,6 @@ import 'package:edumateapp/TutorSeekerScreen/TutorSeekerApplicationStatus.dart';
 import 'package:edumateapp/TutorSeekerScreen/TutorSeekerFindTutor.dart';
 import 'package:edumateapp/TutorSeekerScreen/TutorSeekerPayment.dart';
 import 'package:edumateapp/TutorSeekerScreen/TutorSeekerPaymentHistory.dart';
-import 'package:edumateapp/TutorSeekerScreen/TutorSeekerTabScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:edumateapp/Models/Category.dart';
 

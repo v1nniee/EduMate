@@ -28,7 +28,6 @@ class _AvailabilitySlotState extends State<AvailabilitySlot> {
 
   final _formKey = GlobalKey<FormState>();
   List<Map<String, dynamic>> _availability = [];
-  List<Map<String, dynamic>> _existingSlots = [];
   var _isLoading = false;
   var _isValid = false;
 
@@ -78,7 +77,7 @@ class _AvailabilitySlotState extends State<AvailabilitySlot> {
     if (!_formKey.currentState!.validate() || !_isAvailabilityValid()) {
       // Show an error message if availability is not valid
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text('Please fill in all availability slots.'),
           backgroundColor: Colors.red,
         ),
@@ -114,7 +113,7 @@ class _AvailabilitySlotState extends State<AvailabilitySlot> {
                   onPressed: () {
                     Navigator.of(context).pop();
                   },
-                  child: Text('OK'),
+                  child: const Text('OK'),
                 ),
               ],
             );
@@ -274,25 +273,25 @@ class _AvailabilitySlotState extends State<AvailabilitySlot> {
       body: Scrollbar(
         thumbVisibility: true,
         thickness: 6.0,
-        radius: Radius.circular(10.0),
+        radius: const Radius.circular(10.0),
         child: SingleChildScrollView(
           child: Form(
             // Wrap your column in a Form widget
             key: _formKey,
             child: Column(
               children: <Widget>[
-                PageHeader(
+                const PageHeader(
                     backgroundColor: Color.fromARGB(255, 255, 116, 36),
                     headerTitle: "Time Availibility"),
-                SizedBox(
+                const SizedBox(
                   height: 10,
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Expanded(
+                    const Expanded(
                       child: Padding(
-                        padding: const EdgeInsets.only(left: 16.0),
+                        padding:  EdgeInsets.only(left: 16.0),
                         child: Text(
                           "Teacher Availability",
                           style: TextStyle(fontSize: 20),
@@ -300,7 +299,7 @@ class _AvailabilitySlotState extends State<AvailabilitySlot> {
                       ),
                     ),
                     Padding(
-                      padding: EdgeInsets.only(right: 16.0),
+                      padding: const EdgeInsets.only(right: 16.0),
                       child: ElevatedButton(
                         onPressed: _addAvailability,
                         style: ElevatedButton.styleFrom(
@@ -310,7 +309,7 @@ class _AvailabilitySlotState extends State<AvailabilitySlot> {
                             borderRadius: BorderRadius.circular(20),
                           ),
                         ),
-                        child: Text('Add'),
+                        child: const Text('Add'),
                       ),
                     ),
                   ],
@@ -373,7 +372,7 @@ class _AvailabilitySlotState extends State<AvailabilitySlot> {
                                         vertical: 8.0),
                                     child: Text(
                                       _formatTimeOfDay(slot['startTime']),
-                                      style: TextStyle(color: Colors.blue),
+                                      style: const TextStyle(color: Colors.blue),
                                     ),
                                   ),
                                 ),
@@ -387,7 +386,7 @@ class _AvailabilitySlotState extends State<AvailabilitySlot> {
                                         vertical: 8.0),
                                     child: Text(
                                       _formatTimeOfDay(slot['endTime']),
-                                      style: TextStyle(color: Colors.blue),
+                                      style: const TextStyle(color: Colors.blue),
                                     ),
                                   ),
                                 ),
@@ -395,7 +394,7 @@ class _AvailabilitySlotState extends State<AvailabilitySlot> {
                             ],
                           ),
                           IconButton(
-                            icon: Icon(Icons.delete, color: Colors.red),
+                            icon: const Icon(Icons.delete, color: Colors.red),
                             onPressed: () => _removeAvailability(
                                 _availability.indexOf(slot)),
                           ),
@@ -404,8 +403,8 @@ class _AvailabilitySlotState extends State<AvailabilitySlot> {
                     ),
                   );
                 }).toList(),
-                SizedBox(height: 12),
-                if (_isValid) SizedBox(height: 12),
+                const SizedBox(height: 12),
+                if (_isValid) const SizedBox(height: 12),
                 if (!_isValid)
                   if (_isLoading) const CircularProgressIndicator(),
                 if (!_isLoading)
@@ -416,7 +415,7 @@ class _AvailabilitySlotState extends State<AvailabilitySlot> {
                     ),
                     child: const Text("Save"),
                   ),
-                SizedBox(height: 12),
+                const SizedBox(height: 12),
               ],
             ),
           ),

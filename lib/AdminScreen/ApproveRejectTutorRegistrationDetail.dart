@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:edumateapp/Widgets/PageHeader.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 
 class ApproveRejectTutorRegistrationDetail extends StatelessWidget {
   final String tutorId;
@@ -16,7 +15,7 @@ class ApproveRejectTutorRegistrationDetail extends StatelessWidget {
     Widget buildInfoCard(String title, dynamic value, IconData icon) {
       return ListTile(
         leading: Icon(icon, color: Theme.of(context).primaryColor),
-        title: Text(title, style: TextStyle(fontWeight: FontWeight.bold)),
+        title: Text(title, style: const TextStyle(fontWeight: FontWeight.bold)),
         subtitle: Text(value.toString()),
       );
     }
@@ -80,10 +79,10 @@ class ApproveRejectTutorRegistrationDetail extends StatelessWidget {
                   children: [
                     // Ensure PageHeader is defined elsewhere
                     const PageHeader(
-                      backgroundColor: const Color.fromARGB(255, 16, 212, 252),
+                      backgroundColor:  Color.fromARGB(255, 16, 212, 252),
                       headerTitle: 'Tutor Details',
                     ),
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                     Card(
                       elevation: 4.0,
                       margin: const EdgeInsets.all(8.0),
@@ -93,7 +92,7 @@ class ApproveRejectTutorRegistrationDetail extends StatelessWidget {
                             radius: 50,
                             backgroundImage: NetworkImage(imageURL),
                           ),
-                          SizedBox(height: 10),
+                          const SizedBox(height: 10),
                           buildInfoCard('Name', tutorName, Icons.person),
                           buildInfoCard('Gender', gender, Icons.transgender),
                           buildInfoCard('Mobile Number',

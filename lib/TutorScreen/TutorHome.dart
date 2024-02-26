@@ -1,8 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:edumateapp/Data/TutorData.dart';
 import 'package:edumateapp/Screen/CategoriesScreen.dart';
-import 'package:edumateapp/TutorScreen/DisqualifyTutor.dart';
-import 'package:edumateapp/TutorScreen/TutorRegistration.dart';
 import 'package:edumateapp/Widgets/HomeHeader.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';

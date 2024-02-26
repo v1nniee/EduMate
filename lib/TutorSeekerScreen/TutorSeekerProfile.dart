@@ -1,13 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:edumateapp/Provider/UserTypeNotifier.dart';
-import 'package:edumateapp/Screen/Authenticate.dart';
-import 'package:edumateapp/Screen/CategoriesScreen.dart';
 import 'package:edumateapp/TutorSeekerScreen/Setting.dart';
-import 'package:edumateapp/TutorSeekerScreen/TutorSeekerRegistration.dart';
 import 'package:edumateapp/TutorSeekerScreen/TutorSeekerUpdateProfile.dart';
-import 'package:edumateapp/Widgets/HomeHeader.dart';
 import 'package:edumateapp/Widgets/PageHeader.dart';
-import 'package:edumateapp/main.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';

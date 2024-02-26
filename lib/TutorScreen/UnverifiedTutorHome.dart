@@ -1,15 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:edumateapp/Data/TutorData.dart';
-import 'package:edumateapp/Provider/UserTypeNotifier.dart';
-import 'package:edumateapp/Screen/Authenticate.dart';
-import 'package:edumateapp/Screen/CategoriesScreen.dart';
 import 'package:edumateapp/TutorScreen/TutorRegistration.dart';
-import 'package:edumateapp/TutorScreen/TutorTabScreen.dart';
 import 'package:edumateapp/Widgets/HomeHeader.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+
 
 class UnverifiedTutorHome extends StatefulWidget {
   const UnverifiedTutorHome({super.key});
@@ -66,8 +60,8 @@ class _UnverifiedTutorHomeState extends State<UnverifiedTutorHome> {
                     onPressed: () {
                       Navigator.of(context).pop(); // Close the AlertDialog
                       setState(() {
-                      _status = 'Unverified';
-                    });
+                        _status = 'Unverified';
+                      });
                     },
                     child: const Text('OK'),
                   ),

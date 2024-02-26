@@ -1,5 +1,4 @@
-import 'package:edumateapp/TutorSeekerScreen/Favorite.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:edumateapp/TutorSeekerScreen/TutorCard.dart';
@@ -349,7 +348,6 @@ class _TutorSeekerFindTutorState extends State<TutorSeekerFindTutor> {
 
                         var tutorPosts = tutorPostSnapshot.data!.docs;
                         List<Widget> tutorCards = [];
-
                         for (var tutorPostDoc in tutorPosts) {
                           String subject =
                               tutorPostDoc.get('SubjectsToTeach') ??
@@ -365,7 +363,6 @@ class _TutorSeekerFindTutorState extends State<TutorSeekerFindTutor> {
                                   _selectedMode.toLowerCase()) {
                             continue;
                           }
-
                           if ((_priceRange.start > 0 ||
                               _priceRange.end < 100)) {
                             double price = double.parse(fees);
@@ -374,13 +371,11 @@ class _TutorSeekerFindTutorState extends State<TutorSeekerFindTutor> {
                               continue;
                             }
                           }
-
                           if (_selectedSubject.isNotEmpty &&
                               !_selectedSubject.contains("All") &&
                               !_selectedSubject.contains(subject)) {
                             continue;
                           }
-
                           tutorCards.add(
                             FutureBuilder<DocumentSnapshot>(
                               future: document.reference

@@ -1,6 +1,5 @@
 import 'package:edumateapp/AdminScreen/AdminNotification.dart';
 import 'package:edumateapp/AdminScreen/AdminProfile.dart';
-import 'package:edumateapp/Data/AdminData.dart';
 import 'package:edumateapp/AdminScreen/AdminHome.dart';
 import 'package:edumateapp/Widgets/CustomNavigationBar.dart';
 import 'package:flutter/material.dart';

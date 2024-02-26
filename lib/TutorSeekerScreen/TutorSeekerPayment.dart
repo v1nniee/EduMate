@@ -1,10 +1,8 @@
-import 'package:edumateapp/TutorSeekerScreen/Favorite.dart';
-import 'package:edumateapp/TutorSeekerScreen/MyTutorCard.dart';
+
 import 'package:edumateapp/TutorSeekerScreen/TutorSeekerPaymentCard.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:edumateapp/TutorSeekerScreen/TutorCard.dart';
 import 'package:edumateapp/Widgets/PageHeader.dart';
 
 

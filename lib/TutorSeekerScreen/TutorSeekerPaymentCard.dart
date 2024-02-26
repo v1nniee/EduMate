@@ -5,9 +5,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:edumateapp/TutorSeekerScreen/TutorDetailPage.dart';
 import 'package:edumateapp/Payment/StripePaymentHandle.dart';
-import 'package:fluttertoast/fluttertoast.dart';
-import 'package:intl/intl.dart';
-import 'package:printing/printing.dart';
 
 class TutorSeekerPaymentCard extends StatefulWidget {
   final String tutorId;
@@ -53,21 +50,18 @@ class _TutorSeekerPaymentCardState extends State<TutorSeekerPaymentCard> {
 
   Future<void> updateAvailabilitySlots(
       String day, String startTime, String endTime, String tutorId) async {
-    // Convert dates to the day of the week and time
     
     var availabilitySlotsRef = FirebaseFirestore.instance
         .collection('Tutor')
         .doc(tutorId)
         .collection('AvailabilitySlot');
 
-    // Query for slots that match the day, start time, and end time
     var querySnapshot = await availabilitySlotsRef
         .where('day', isEqualTo: day)
         .where('startTime', isEqualTo: startTime)
         .where('endTime', isEqualTo: endTime)
         .get();
 
-    // Loop through the matching slots and set them to unavailable
     for (var doc in querySnapshot.docs) {
       await doc.reference.update({'status': 'unavailable'});
     }
@@ -310,11 +304,6 @@ class _TutorSeekerPaymentCardState extends State<TutorSeekerPaymentCard> {
       'TutorSeekerName': _tutorseekerName,
     };
 
-    await FirebaseFirestore.instance
-        .collection('Tutor')
-        .doc(widget.tutorId)
-        .collection('StudentPayment')
-        .add(studentPaymentData);
 
     DocumentReference ApplicationRequestDocRef = FirebaseFirestore.instance
         .collection('Tutor')
@@ -492,14 +481,10 @@ class _TutorSeekerPaymentCardState extends State<TutorSeekerPaymentCard> {
                     if (result) {
                       DateTime paymentDate = DateTime.now();
                       int dayOfWeekNumber = getDayOfWeekNumber(widget.day);
-
-                      // Define startclassDate and endclassDate before the async gap
                       DateTime startclassDate = _getNextClassDate(
                           paymentDate, dayOfWeekNumber, widget.startTime);
                       DateTime endclassDate =
                           _getEndDate(startclassDate, widget.endTime);
-
-                      // Update the payment details
                       _updateTutor(paymentDate, removeCommisionFees(),
                           startclassDate, endclassDate);
                       updateAvailabilitySlots(
@@ -507,11 +492,7 @@ class _TutorSeekerPaymentCardState extends State<TutorSeekerPaymentCard> {
 
                       _updateTutorSeeker(paymentDate, calculateFees(),
                           startclassDate, endclassDate);
-
-                      // Store the BuildContext in a variable before the async operation
                       BuildContext currentContext = context;
-
-                      // Use the stored context to navigate to the next screen after the async operation
                       Navigator.push(
                         currentContext,
                         MaterialPageRoute(

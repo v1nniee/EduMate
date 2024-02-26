@@ -1,10 +1,5 @@
 import 'package:edumateapp/Widgets/PageHeader.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-
-import 'package:flutter/material.dart';
-import 'dart:async';
 import 'dart:math' as math;
 
 class SplashScreen extends StatefulWidget {
@@ -36,7 +31,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Color(0xFF795ED9),
+        backgroundColor: const Color(0xFF795ED9),
         automaticallyImplyLeading: false,
       ),
       body: Center(
@@ -52,12 +47,12 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
               child: Container(
                 height: 100.0,
                 width: 100.0,
-                child: Icon(
+                child: const Icon(
                   Icons.school,
                   color: Colors.white,
                   size: 50,
                 ),
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   shape: BoxShape.circle,
                   color: Color(0xFF795ED9),
                 ),
@@ -69,7 +64,7 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                 );
               },
             ),
-            SizedBox(height: 40),
+            const SizedBox(height: 40),
             Text(
               'Loading EduMate...',
               style: TextStyle(

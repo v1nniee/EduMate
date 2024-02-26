@@ -344,7 +344,7 @@ class _TutorCardState extends State<TutorCard> {
                                 StoreNotification().sendNotificationtoTutor(
                                     widget.tutorId,
                                     "Application Request",
-                                    "You have Received Application from ${widget.name}.",
+                                    "You have Received an Application.",
                                     now);
                               }
 

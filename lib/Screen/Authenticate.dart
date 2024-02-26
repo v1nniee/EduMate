@@ -1,8 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:edumateapp/TutorSeekerScreen/TutorSeekerRegistration.dart';
 import 'package:edumateapp/Widgets/PageHeader.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 
 //after sign up and fill in details, cannot log out
@@ -52,15 +50,6 @@ class _AuthenticatePageState extends State<AuthenticatePage> {
       } else {
         final UserCredentials = await _firebase.createUserWithEmailAndPassword(
             email: _enteredEmail, password: _enteredPassword);
-        /*
-        FirebaseFirestore.instance
-            .collection('users')
-            .doc(UserCredentials.user!.uid)
-            .set({
-          'email': _enteredEmail,
-          'user type': _userType,
-        });
-        */
         FirebaseFirestore.instance
             .collection(_userType)
             .doc(UserCredentials.user!.uid)
@@ -88,7 +77,7 @@ class _AuthenticatePageState extends State<AuthenticatePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Color(0xFF795ED9),
+        backgroundColor: const Color(0xFF795ED9),
         automaticallyImplyLeading: false,
       ),
       body: SingleChildScrollView(
@@ -108,7 +97,7 @@ class _AuthenticatePageState extends State<AuthenticatePage> {
                     height:300.0,
                     fit: BoxFit.cover,
                   ),
-                  SizedBox(height: 10,),
+                  const SizedBox(height: 10,),
                   Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
@@ -124,17 +113,17 @@ class _AuthenticatePageState extends State<AuthenticatePage> {
                             _form.currentState?.reset();
                           });
                         },
-                        icon: Icon(Icons.login),
-                        label: Text('Login'),
+                        icon: const Icon(Icons.login),
+                        label: const Text('Login'),
                         style: ElevatedButton.styleFrom(
-                          foregroundColor: _isLogin ? Colors.white : Colors.black, backgroundColor: _isLogin ? Color(0xFF795ED9) : Colors.white,
-                          shape: RoundedRectangleBorder(
+                          foregroundColor: _isLogin ? Colors.white : Colors.black, backgroundColor: _isLogin ? const Color(0xFF795ED9) : Colors.white,
+                          shape: const RoundedRectangleBorder(
                             borderRadius: BorderRadius.only(
                               topLeft: Radius.circular(20),
                               bottomLeft: Radius.circular(20),
                             ),
                           ),
-                          side: BorderSide(
+                          side: const BorderSide(
                             color: Colors.white,
                           ),
                         ),
@@ -151,17 +140,17 @@ class _AuthenticatePageState extends State<AuthenticatePage> {
                             _form.currentState?.reset();
                           });
                         },
-                        icon: Icon(Icons.person_add),
-                        label: Text('Sign Up'),
+                        icon: const Icon(Icons.person_add),
+                        label: const Text('Sign Up'),
                         style: ElevatedButton.styleFrom(
-                          foregroundColor: !_isLogin ? Colors.white : Colors.black, backgroundColor: !_isLogin ? Color(0xFF795ED9) : Colors.white,
-                          shape: RoundedRectangleBorder(
+                          foregroundColor: !_isLogin ? Colors.white : Colors.black, backgroundColor: !_isLogin ? const Color(0xFF795ED9) : Colors.white,
+                          shape: const RoundedRectangleBorder(
                             borderRadius: BorderRadius.only(
                               topRight: Radius.circular(20),
                               bottomRight: Radius.circular(20),
                             ),
                           ),
-                          side: BorderSide(
+                          side: const BorderSide(
                             color: Colors.white,
                           ),
                         ),
@@ -200,13 +189,13 @@ class _AuthenticatePageState extends State<AuthenticatePage> {
                                   });
                                 },
                               ),
-                              SizedBox(height: 16),
+                              const SizedBox(height: 16),
                             if (!_isLogin)
                               TextFormField(
                                 controller: _SignUpEmailController,
                                 decoration: InputDecoration(
                                   labelText: 'Email Address',
-                                  prefixIcon: Icon(Icons.email),
+                                  prefixIcon: const Icon(Icons.email),
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(20),
                                     borderSide: BorderSide.none,
@@ -233,7 +222,7 @@ class _AuthenticatePageState extends State<AuthenticatePage> {
                                 controller: _LoginEmailController,
                                 decoration: InputDecoration(
                                   labelText: 'Email Address',
-                                  prefixIcon: Icon(Icons.email),
+                                  prefixIcon: const Icon(Icons.email),
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(20),
                                     borderSide: BorderSide.none,
@@ -255,14 +244,14 @@ class _AuthenticatePageState extends State<AuthenticatePage> {
                                   _enteredEmail = value!;
                                 },
                               ),
-                            SizedBox(height: 20),
+                            const SizedBox(height: 20),
                             TextFormField(
                               controller: _isLogin
                                   ? _LoginPasswordController
                                   : _SignUpPasswordController,
                               decoration: InputDecoration(
                                 labelText: 'Password',
-                                prefixIcon: Icon(Icons.lock),
+                                prefixIcon: const Icon(Icons.lock),
                                 border: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(20),
                                   borderSide: BorderSide.none,
@@ -280,13 +269,13 @@ class _AuthenticatePageState extends State<AuthenticatePage> {
                                 _enteredPassword = value!;
                               },
                             ),
-                            SizedBox(height: 20),
+                           const  SizedBox(height: 20),
                             if (!_isLogin)
                               TextFormField(
                                 controller: _SignUpConfirmPasswordController,
                                 decoration: InputDecoration(
                                   labelText: 'Confirm Password',
-                                  prefixIcon: Icon(Icons.lock),
+                                  prefixIcon: const Icon(Icons.lock),
                                   border: OutlineInputBorder(
                                     borderRadius: BorderRadius.circular(20),
                                     borderSide: BorderSide.none,
@@ -308,7 +297,7 @@ class _AuthenticatePageState extends State<AuthenticatePage> {
                                   _enteredConfirmedPassword = value!;
                                 },
                               ),
-                            if (!_isLogin) SizedBox(height: 12),
+                            if (!_isLogin) const SizedBox(height: 12),
                             if (_isAuthenticating)
                               const CircularProgressIndicator(),
                             if (!_isAuthenticating)

@@ -47,7 +47,7 @@ class _UserImagePickerState extends State<UserImagePicker> {
           content: const Text("Where do you want to get the image from?"),
           actions: [
             TextButton(
-              child: Text("Camera"),
+              child: const Text("Camera"),
               onPressed: () {
                 Navigator.of(context).pop(ImageSource.camera);
               },

@@ -1,7 +1,4 @@
-import 'package:edumateapp/TutorScreen/ApplicationDetails.dart';
-import 'package:edumateapp/TutorScreen/MyStudentCard.dart';
 import 'package:edumateapp/TutorScreen/ToPayTutorSeekerCard.dart';
-import 'package:edumateapp/TutorSeekerScreen/ApplicationStatusTutorCard.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';

@@ -117,7 +117,7 @@ class _TutorManagePostState extends State<TutorManagePost> {
                           ],
                         ),
                         trailing: IconButton(
-                          icon: Icon(
+                          icon: const Icon(
                             Icons.delete,
                             color: Colors.red,
                           ),
@@ -127,7 +127,7 @@ class _TutorManagePostState extends State<TutorManagePost> {
                               builder: (BuildContext context) {
                                 return AlertDialog(
                                   title: Text('Delete Tutor Post?'),
-                                  content: Text(
+                                  content: const Text(
                                     'Are you sure you want to delete this tutor post?',
                                   ),
                                   actions: [
@@ -142,7 +142,7 @@ class _TutorManagePostState extends State<TutorManagePost> {
                                         _deleteTutorPost(doc.id);
                                         Navigator.of(context).pop();
                                       },
-                                      child: Text(
+                                      child: const Text(
                                         'Delete',
                                         style: TextStyle(color: Colors.red),
                                       ),

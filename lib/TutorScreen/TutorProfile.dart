@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:edumateapp/Provider/UserTypeNotifier.dart';
 import 'package:edumateapp/TutorScreen/EditTutorProfile.dart';
-import 'package:edumateapp/TutorScreen/TutorSeeting.dart';
+import 'package:edumateapp/TutorScreen/TutorSetting.dart';
 import 'package:edumateapp/Widgets/PageHeader.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';

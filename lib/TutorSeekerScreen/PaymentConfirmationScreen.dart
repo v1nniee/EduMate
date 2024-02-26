@@ -1,5 +1,4 @@
 import 'package:edumateapp/Payment/GenrateReceipt.dart';
-import 'package:edumateapp/Payment/StripePaymentHandle.dart';
 import 'package:edumateapp/Widgets/PageHeader.dart';
 import 'package:flutter/material.dart';
 

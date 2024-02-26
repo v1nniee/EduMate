@@ -7,8 +7,6 @@
 import 'dart:io';
 
 import 'package:edumateapp/Data/ZipCodeData.dart';
-import 'package:edumateapp/Provider/TokenNotifier.dart';
-import 'package:edumateapp/TutorSeekerScreen/TutorSeekerTabScreen.dart';
 import 'package:edumateapp/Widgets/PageHeader.dart';
 import 'package:edumateapp/Widgets/UserImagePicker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -16,8 +14,6 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 class TutorSeekerUpdateProfile extends StatefulWidget {
   final VoidCallback onSaved;
@@ -166,7 +162,7 @@ class _TutorSeekerUpdateProfileState extends State<TutorSeekerUpdateProfile> {
         if (_enteredRequirement != null && _enteredRequirement.isNotEmpty)
           'Requirement': _enteredRequirement
         else
-          'Requirement': null,
+          'Requirement': "N/A",
         if (imageURL != null) 'ImageUrl': imageURL else 'ImageUrl': null,
       };
 
@@ -175,27 +171,17 @@ class _TutorSeekerUpdateProfileState extends State<TutorSeekerUpdateProfile> {
             .collection('Tutor Seeker')
             .doc(userId)
             .collection('UserProfile')
-            .doc(userId) // The document ID will be the same as the userId
+            .doc(userId) 
             .set(userProfileData, SetOptions(merge: true));
 
         await FirebaseFirestore.instance
             .collection('Tutor Seeker')
             .doc(userId)
             .set({'Name': userProfileData['Name']}, SetOptions(merge: true));
+  
         setState(() {
           _isLoading = false;
         });
-
-        await FirebaseFirestore.instance
-            .collection('Tutor Seeker')
-            .doc(userId)
-            .set({'UserType': "Tutor Seeker"}, SetOptions(merge: true));
-        setState(() {
-          _isLoading = false;
-        });
-
-        
-
         widget.onSaved();
       } catch (error) {
         print('Error saving profile: $error');

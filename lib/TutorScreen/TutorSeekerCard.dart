@@ -3,7 +3,6 @@ import 'package:edumateapp/FCM/StoreNotification.dart';
 import 'package:edumateapp/TutorScreen/TutorSeekerDetail.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:edumateapp/TutorSeekerScreen/TutorDetailPage.dart';
 
 class TutorSeekerCard extends StatefulWidget {
   final String tutorseekerId;
@@ -39,6 +38,7 @@ class TutorSeekerCard extends StatefulWidget {
 
 class _TutorSeekerCardState extends State<TutorSeekerCard> {
   String _name = '';
+
   @override
   void initState() {
     super.initState();
@@ -88,24 +88,24 @@ class _TutorSeekerCardState extends State<TutorSeekerCard> {
     );
   }
 
-  Future<bool> checkAvailabilitySlots(String day, String startTime, String endTime, String tutorId) async {
-  // Reference to the availability slots of the tutor
-  var availabilitySlotsRef = FirebaseFirestore.instance
-      .collection('Tutor')
-      .doc(tutorId)
-      .collection('AvailabilitySlot');
+  Future<bool> checkAvailabilitySlots(
+      String day, String startTime, String endTime, String tutorId) async {
+    // Reference to the availability slots of the tutor
+    var availabilitySlotsRef = FirebaseFirestore.instance
+        .collection('Tutor')
+        .doc(tutorId)
+        .collection('AvailabilitySlot');
 
-  // Query for slots that match the day, start time, and end time and are available
-  var querySnapshot = await availabilitySlotsRef
-      .where('day', isEqualTo: day)
-      .where('startTime', isEqualTo: startTime)
-      .where('endTime', isEqualTo: endTime)
-      .where('status', isEqualTo: 'available')
-      .get();
+    // Query for slots that match the day, start time, and end time and are available
+    var querySnapshot = await availabilitySlotsRef
+        .where('day', isEqualTo: day)
+        .where('startTime', isEqualTo: startTime)
+        .where('endTime', isEqualTo: endTime)
+        .where('status', isEqualTo: 'unavailable')
+        .get();
 
-  return querySnapshot.docs.isEmpty;
-}
-
+    return querySnapshot.docs.isEmpty;
+  }
 
   void _updateAccepted() async {
     User? currentUser = FirebaseAuth.instance.currentUser;
@@ -343,13 +343,13 @@ class _TutorSeekerCardState extends State<TutorSeekerCard> {
                   const SizedBox(width: 20),
                   ElevatedButton(
                     onPressed: () async {
-                      bool booked = await checkAvailabilitySlots(
+                      bool available = await checkAvailabilitySlots(
                         widget.Day,
                         widget.StartTime,
                         widget.EndTime,
                         currentUser.uid,
                       );
-                      if (!booked) {
+                      if (available) {
                         _updateAccepted();
                       } else {
                         showDialog(

@@ -1,8 +1,5 @@
 import 'package:edumateapp/AdminScreen/AdminDisqualifyTutor.dart';
-import 'package:edumateapp/AdminScreen/AdminHome.dart';
 import 'package:edumateapp/AdminScreen/ApproveRejectTutorRegistration.dart';
-import 'package:edumateapp/TutorScreen/TutorRegistration.dart';
-
 import 'package:flutter/material.dart';
 import 'package:edumateapp/Models/Category.dart';
 

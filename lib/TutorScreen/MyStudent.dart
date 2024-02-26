@@ -42,12 +42,7 @@ class _MyStudentState extends State<MyStudent> {
                 }
 
                 if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-                  return const Center(
-                    child: Text(
-                      'No My Student documents found',
-                      style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                    ),
-                  );
+                  return const Center(child: Text('No My Student found.'));
                 }
 
                 // Directly use the documents to build the list

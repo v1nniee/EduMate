@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:edumateapp/AdminScreen/AdminSetting.dart';
 import 'package:edumateapp/Provider/UserTypeNotifier.dart';
-import 'package:edumateapp/TutorScreen/EditTutorProfile.dart';
 import 'package:edumateapp/Widgets/PageHeader.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -45,7 +44,7 @@ class _AdminProfileState extends State<AdminProfile> {
       body: Column(
         children: [
           const PageHeader(
-            backgroundColor: const Color.fromARGB(255, 16, 212, 252),
+            backgroundColor:  Color.fromARGB(255, 16, 212, 252),
             headerTitle: 'Account',
           ),
           FutureBuilder<DocumentSnapshot>(
@@ -71,7 +70,7 @@ class _AdminProfileState extends State<AdminProfile> {
                         padding: const EdgeInsets.all(16.0),
                         child: Row(
                           children: [
-                            CircleAvatar(
+                            const CircleAvatar(
                               radius: 50, // Adjust for a larger icon
                               backgroundColor: Colors.transparent,
                               backgroundImage: AssetImage('assets/images/tutor_seeker_profile.png'),
@@ -110,7 +109,7 @@ class _AdminProfileState extends State<AdminProfile> {
               return const CircularProgressIndicator();
             },
           ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           Align(
             alignment: Alignment.bottomCenter,
             child: Padding(
@@ -122,7 +121,7 @@ class _AdminProfileState extends State<AdminProfile> {
                     onPressed: () {
                       Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => AdminSetting()),);
+                    MaterialPageRoute(builder: (context) => const AdminSetting()),);
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color.fromARGB(255, 16, 212, 252),
@@ -151,7 +150,7 @@ class _AdminProfileState extends State<AdminProfile> {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  SizedBox(
+                  const SizedBox(
                     height: 15,
                   ),
                   const Text(

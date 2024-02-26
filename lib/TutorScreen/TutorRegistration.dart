@@ -1,8 +1,5 @@
 import 'dart:io';
-
 import 'package:edumateapp/Data/ZipCodeData.dart';
-import 'package:edumateapp/Provider/TokenNotifier.dart';
-import 'package:edumateapp/TutorSeekerScreen/TutorSeekerTabScreen.dart';
 import 'package:edumateapp/Widgets/PageHeader.dart';
 import 'package:edumateapp/Widgets/UserImagePicker.dart';
 import 'package:file_picker/file_picker.dart';
@@ -10,7 +7,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:provider/provider.dart';
+import 'package:edumateapp/FCM/StoreNotification.dart';
 
 class TutorRegistration extends StatefulWidget {
   final VoidCallback onSaved;
@@ -48,6 +45,7 @@ class _TutorRegistrationState extends State<TutorRegistration> {
   File? _selectedImageFile;
   File? _selectedCertification;
   String? _selectedCertificationName;
+  late DateTime now;
 
   var _isValid = false;
 
@@ -138,10 +136,9 @@ class _TutorRegistrationState extends State<TutorRegistration> {
         if (imageURL != null) 'ImageUrl': imageURL else 'ImageUrl': null,
       };
 
-
       try {
-
         if (_selectedCertification != null) {
+          now = DateTime.now();
           String docFileName =
               'TutorCertificationDocuments/${userId}_${DateTime.now().millisecondsSinceEpoch}.pdf';
           Reference storageRef =
@@ -160,7 +157,7 @@ class _TutorRegistrationState extends State<TutorRegistration> {
             .collection('TutorRegistrationRequest')
             .doc(userId)
             .set(userProfileData, SetOptions(merge: true));
-        
+
         await FirebaseFirestore.instance
             .collection('Tutor')
             .doc(userId)
@@ -177,14 +174,16 @@ class _TutorRegistrationState extends State<TutorRegistration> {
             .collection('Tutor')
             .doc(userId)
             .set({'UserType': "New Tutor"}, SetOptions(merge: true));
-        setState(() {
-          _isLoading = false;
-        });
+
+        StoreNotification().sendNotificationtoAdmin(
+            "Tutor Registration Request",
+            "${userProfileData['Name']} has registered as Tutor.",
+            now);
 
         setState(() {
           _isLoading = false;
         });
-        
+
         widget.onSaved();
       } catch (error) {
         print('Error saving profile: $error');

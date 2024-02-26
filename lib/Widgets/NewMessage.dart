@@ -1,8 +1,8 @@
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:edumateapp/FCM/StoreNotification.dart';
 import 'package:edumateapp/Provider/UserTypeNotifier.dart';
-import 'package:edumateapp/main.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:file_picker/file_picker.dart';
@@ -91,10 +91,17 @@ class _NewMessageState extends State<NewMessage> {
           .doc(user.uid)
           .get();
 
+      DateTime now = DateTime.now();
+
       if (userType == "Tutor") {
-        print("New Messageee: TUtor");
+        StoreNotification().sendNotificationtoTutorSeeker(widget.ReceiverUserId,
+            "New Chat", "You have received a new message.", now);
         Tutor_TutorSeekerChatId = '${user.uid}_${widget.ReceiverUserId}';
       } else if (userType == "Tutor Seeker") {
+        StoreNotification().sendNotificationtoTutor(widget.ReceiverUserId,
+            "New Chat", "You have received a new message.", now);
+        Tutor_TutorSeekerChatId = '${user.uid}_${widget.ReceiverUserId}';
+
         Tutor_TutorSeekerChatId = '${widget.ReceiverUserId}_${user.uid}';
       }
       final userDataMap = userData.data();

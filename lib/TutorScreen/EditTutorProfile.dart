@@ -1,14 +1,11 @@
 import 'dart:io';
-
 import 'package:edumateapp/Data/ZipCodeData.dart';
-import 'package:edumateapp/TutorSeekerScreen/TutorSeekerTabScreen.dart';
 import 'package:edumateapp/Widgets/PageHeader.dart';
 import 'package:edumateapp/Widgets/UserImagePicker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
 
 class EditTutorProfile extends StatefulWidget {
   final VoidCallback onSaved;
@@ -243,12 +240,12 @@ class _EditTutorProfileState extends State<EditTutorProfile> {
       body: Scrollbar(
         thumbVisibility: true,
         thickness: 6.0,
-        radius: Radius.circular(10.0),
+        radius: const Radius.circular(10.0),
         child: SingleChildScrollView(
           child: Column(
             children: <Widget>[
               const PageHeader(
-                  backgroundColor: const Color.fromARGB(255, 255, 116, 36),
+                  backgroundColor:  Color.fromARGB(255, 255, 116, 36),
                   headerTitle: "Tutor Profile"),
               Container(
                 width: screenWidth * 0.9,
@@ -347,7 +344,7 @@ class _EditTutorProfileState extends State<EditTutorProfile> {
                           ),
                           onTap: () {
                             FocusScope.of(context).requestFocus(
-                                new FocusNode()); // to prevent opening the keyboard
+                                FocusNode()); // to prevent opening the keyboard
                             _pickDate(context);
                           },
                           readOnly: true,
@@ -522,7 +519,7 @@ class _EditTutorProfileState extends State<EditTutorProfile> {
                             _enteredAboutme = value!;
                           },
                         ),
-                        if (_isValid) SizedBox(height: 12),
+                        if (_isValid) const SizedBox(height: 12),
                         if (!_isValid)
                           if (_isLoading) const CircularProgressIndicator(),
                         if (!_isLoading)

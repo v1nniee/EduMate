@@ -1,17 +1,10 @@
-import 'dart:convert';
-import 'package:edumateapp/FCM/SendNotification.dart';
-import 'package:edumateapp/Provider/TokenNotifier.dart';
+
 import 'package:edumateapp/Widgets/PageHeader.dart';
-import 'package:http/http.dart' as http;
-import 'package:edumateapp/Screen/CategoriesScreen.dart';
-import 'package:edumateapp/Widgets/HomeHeader.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:provider/provider.dart';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
+
 
 class TutorSeekerPaymentHistory extends StatefulWidget {
   const TutorSeekerPaymentHistory({Key? key}) : super(key: key);

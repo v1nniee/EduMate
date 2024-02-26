@@ -1,17 +1,6 @@
-import 'dart:convert';
-import 'package:edumateapp/FCM/SendNotification.dart';
-import 'package:edumateapp/Provider/TokenNotifier.dart';
-import 'package:http/http.dart' as http;
-import 'package:edumateapp/Screen/CategoriesScreen.dart';
-import 'package:edumateapp/Widgets/HomeHeader.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-
-
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:edumateapp/Widgets/PageHeader.dart';
 
 class AdminNotification extends StatelessWidget {
@@ -35,7 +24,7 @@ class AdminNotification extends StatelessWidget {
       body: Column(
         children: [
           const PageHeader(
-            backgroundColor: const Color.fromARGB(255, 16, 212, 252),
+            backgroundColor:  Color.fromARGB(255, 16, 212, 252),
             headerTitle: 'Notification',
           ),
           Expanded(
@@ -43,7 +32,7 @@ class AdminNotification extends StatelessWidget {
               stream: notificationsRef.snapshots(),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(child: CircularProgressIndicator());
+                  return const Center(child: CircularProgressIndicator());
                 }
 
                 if (snapshot.hasError) {
@@ -53,12 +42,12 @@ class AdminNotification extends StatelessWidget {
                 final documents = snapshot.data!.docs;
 
                 if (documents.isEmpty) {
-                  return Center(child: Text('No notifications available.'));
+                  return const Center(child: Text('No notifications available.'));
                 }
 
                 // Group notifications by date
                 Map<String, List<DocumentSnapshot>> groupedNotifications = {};
-                documents.forEach((document) {
+                for (var document in documents) {
                   final notification =
                       document.data() as Map<String, dynamic>;
                   final notificationTime =
@@ -67,7 +56,7 @@ class AdminNotification extends StatelessWidget {
                   String date = getDateText(notificationTime);
                   groupedNotifications.putIfAbsent(date, () => []);
                   groupedNotifications[date]!.add(document);
-                });
+                }
 
                 // Sort keys in descending order
                 List<String> sortedKeys = groupedNotifications.keys.toList();
@@ -87,7 +76,7 @@ class AdminNotification extends StatelessWidget {
                           padding: const EdgeInsets.all(8.0),
                           child: Text(
                             date,
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 18,
                             ),
@@ -95,7 +84,7 @@ class AdminNotification extends StatelessWidget {
                         ),
                         ListView.builder(
                           shrinkWrap: true,
-                          physics: ClampingScrollPhysics(),
+                          physics: const ClampingScrollPhysics(),
                           itemCount: notifications.length,
                           itemBuilder: (context, index) {
                             final notification =
@@ -126,12 +115,12 @@ class AdminNotification extends StatelessWidget {
                                   ),
                                   title: Text(
                                     title,
-                                    style: TextStyle(fontWeight: FontWeight.bold),
+                                    style: const TextStyle(fontWeight: FontWeight.bold),
                                   ),
                                   subtitle: Text(content),
                                   trailing: Text(
                                     '${notificationTime.hour}:${notificationTime.minute.toString().padLeft(2, '0')}',
-                                    style: TextStyle(
+                                    style: const TextStyle(
                                       fontStyle: FontStyle.italic,
                                     ),
                                   ),

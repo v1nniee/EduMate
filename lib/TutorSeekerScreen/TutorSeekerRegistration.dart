@@ -1,20 +1,12 @@
-//if the zip code is wrong?
-//date of birth is not logic?
-//all the value validation
-
-
 import 'dart:io';
 
 import 'package:edumateapp/Data/ZipCodeData.dart';
-import 'package:edumateapp/Provider/TokenNotifier.dart';
-import 'package:edumateapp/TutorSeekerScreen/TutorSeekerTabScreen.dart';
 import 'package:edumateapp/Widgets/PageHeader.dart';
 import 'package:edumateapp/Widgets/UserImagePicker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:provider/provider.dart';
 
 class TutorSeekerRegistration extends StatefulWidget {
   final VoidCallback onSaved;
@@ -72,17 +64,13 @@ class _TutorSeekerRegistrationState extends State<TutorSeekerRegistration> {
       return;
     }
     _formKey.currentState!.save();
-
     User? user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       String userId = user.uid;
-
       setState(() {
         _isLoading = true;
       });
-
       String? imageURL;
-
       if (_selectedImageFile != null) {
         String fileName = 'TutorSeekerProfileImages';
         Reference storageRef =
@@ -96,12 +84,11 @@ class _TutorSeekerRegistrationState extends State<TutorSeekerRegistration> {
           // After upload is complete, get the download URL
           imageURL = await taskSnapshot.ref.getDownloadURL();
 
-          print(imageURL); // This is your image URL
+          print(imageURL);
         } on FirebaseException catch (error) {
           print('Error uploading image: $error');
         }
       }
-
       Map<String, dynamic> userProfileData = {
         'Name': _enteredFirstName + ' ' + _enteredLastName,
         'DOB': _enteredDate,
@@ -115,17 +102,15 @@ class _TutorSeekerRegistrationState extends State<TutorSeekerRegistration> {
         if (_enteredRequirement != null && _enteredRequirement.isNotEmpty)
           'Requirement': _enteredRequirement
         else
-          'Requirement': null,
+          'Requirement': "N/A",
         if (imageURL != null) 'ImageUrl': imageURL else 'ImageUrl': null,
       };
-
-
       try {
         await FirebaseFirestore.instance
             .collection('Tutor Seeker')
             .doc(userId)
             .collection('UserProfile')
-            .doc(userId) 
+            .doc(userId)
             .set(userProfileData, SetOptions(merge: true));
 
         await FirebaseFirestore.instance
@@ -143,8 +128,6 @@ class _TutorSeekerRegistrationState extends State<TutorSeekerRegistration> {
         setState(() {
           _isLoading = false;
         });
-
-
         widget.onSaved();
       } catch (error) {
         print('Error saving profile: $error');

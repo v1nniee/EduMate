@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:edumateapp/AdminScreen/ApproveRejectTutorRegistration.dart';
 import 'package:edumateapp/AdminScreen/ApproveRejectTutorRegistrationDetail.dart';
 import 'package:edumateapp/FCM/StoreNotification.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -41,7 +40,7 @@ class _TutorRegistrationCardState extends State<TutorRegistrationCard> {
           content: Text(content),
           actions: <Widget>[
             TextButton(
-              child: Text('OK'),
+              child: const Text('OK'),
               onPressed: () {
                 Navigator.of(dialogContext).pop();
               },
@@ -63,7 +62,7 @@ class _TutorRegistrationCardState extends State<TutorRegistrationCard> {
     DateTime now = DateTime.now();
 
     var tutorApplicationRequestDocRef = FirebaseFirestore.instance
-        .doc('Admin/${adminId}/TutorRegistrationRequest/${widget.tutorId}');
+        .doc('Admin/$adminId/TutorRegistrationRequest/${widget.tutorId}');
 
     try {
       var docSnapshot = await tutorApplicationRequestDocRef.get();
@@ -116,7 +115,7 @@ class _TutorRegistrationCardState extends State<TutorRegistrationCard> {
         .set({'Status': "Rejected"}, SetOptions(merge: true));
 
     var tutorApplicationRequestDocRef = FirebaseFirestore.instance
-        .doc('Admin/${adminId}/TutorRegistrationRequest/${widget.tutorId}');
+        .doc('Admin/$adminId/TutorRegistrationRequest/${widget.tutorId}');
     await tutorApplicationRequestDocRef.delete();
 
     StoreNotification().sendNotificationtoTutorSeeker(
@@ -132,7 +131,7 @@ class _TutorRegistrationCardState extends State<TutorRegistrationCard> {
   Widget build(BuildContext context) {
     return Card(
       elevation: 4.0,
-      margin: EdgeInsets.all(10.0),
+      margin: const EdgeInsets.all(10.0),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12.0),
       ),
@@ -154,15 +153,15 @@ class _TutorRegistrationCardState extends State<TutorRegistrationCard> {
                     children: <Widget>[
                       Text(
                         widget.name,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
                           color: Colors.black, // Ensuring text is black
                         ),
                       ),
-                      SizedBox(height: 4),
+                      const SizedBox(height: 4),
                       Text('Qualification: ${widget.qualification}',
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 14,
                             color: Colors.black, // Ensuring text is black
                           )),
@@ -171,42 +170,42 @@ class _TutorRegistrationCardState extends State<TutorRegistrationCard> {
                 ),
               ],
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             Center(
               child: Wrap(
                 spacing: 8, // space between buttons
                 children: <Widget>[
                   OutlinedButton.icon(
-                    icon: Icon(Icons.person, color: Colors.blue),
+                    icon: const Icon(Icons.person, color: Colors.blue),
                     label:
-                        Text('Profile', style: TextStyle(color: Colors.blue)),
+                        const Text('Profile', style: TextStyle(color: Colors.blue)),
                     onPressed: () => _navigateToProfile(),
                   ),
                   OutlinedButton.icon(
-                    icon: Icon(Icons.document_scanner, color: Colors.blue),
-                    label: Text('Certification',
+                    icon: const Icon(Icons.document_scanner, color: Colors.blue),
+                    label: const Text('Certification',
                         style: TextStyle(color: Colors.blue)),
                     onPressed: () => _launchDocumentURL(),
                   ),
-                  SizedBox(width: 4,),
+                  const SizedBox(width: 4,),
                   ElevatedButton.icon(
-                    icon: Icon(Icons.thumb_down, size: 20, color: Colors.blue,),
-                    label: Text('Reject'),
+                    icon: const Icon(Icons.thumb_down, size: 20, color: Colors.blue,),
+                    label: const Text('Reject'),
                     onPressed: _updateReject,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Color.fromARGB(255, 231, 205, 204),
+                      backgroundColor: const Color.fromARGB(255, 231, 205, 204),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(20),
                       ),
                     ),
                   ),
-                  SizedBox(width: 4,),
+                  const SizedBox(width: 4,),
                   ElevatedButton.icon(
-                    icon: Icon(Icons.thumb_up, size: 20, color: Colors.blue,),
-                    label: Text('Accept'),
+                    icon: const Icon(Icons.thumb_up, size: 20, color: Colors.blue,),
+                    label: const Text('Accept'),
                     onPressed: _updateAccepted,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Color.fromARGB(255, 199, 226, 200),
+                      backgroundColor: const Color.fromARGB(255, 199, 226, 200),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(20),
                       ),
@@ -233,7 +232,9 @@ class _TutorRegistrationCardState extends State<TutorRegistrationCard> {
   }
 
   void _launchDocumentURL() async {
+    // ignore: deprecated_member_use
     if (await canLaunch(widget.documentURL)) {
+      // ignore: deprecated_member_use
       await launch(widget.documentURL);
     } else {
       _showDialog('Error', 'Could not launch document.');

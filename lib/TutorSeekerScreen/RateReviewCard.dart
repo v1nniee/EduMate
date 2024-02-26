@@ -67,16 +67,13 @@ class _RateReviewCardState extends State<RateReviewCard> {
 
   Future<void> _submitRatingAndReview() async {
     User? user = FirebaseAuth.instance.currentUser;
-
     if (user == null) {
       // Handle the case where the user is not logged in
       print("User is not logged in.");
       return;
     }
-
     DocumentReference tutorRef =
         FirebaseFirestore.instance.collection('Tutor').doc(widget.tutorId);
-
     // Add the new rating and review to RatingsAndReviews subcollection
     await tutorRef.collection('RatingsAndReviews').add({
       'TutorSeekerId': user.uid,
@@ -84,22 +81,16 @@ class _RateReviewCardState extends State<RateReviewCard> {
       'Review': _reviewText,
       'Timestamp': Timestamp.now(),
     });
-
     _numberOfRating += 1;
 
     double newTotalRating = (_rate * (_numberOfRating - 1)) + _userRating;
-
     double newAverageRating = newTotalRating / _numberOfRating;
-
     await tutorRef.collection('UserProfile').doc(widget.tutorId).update({
       'Rating': newAverageRating,
       'NumberOfRating': _numberOfRating,
     });
-
     await _loadTutorProfile();
-
     Navigator.pop(context);
-
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text('Rating and review submitted successfully')),
     );

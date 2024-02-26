@@ -2,8 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:edumateapp/FCM/StoreNotification.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:edumateapp/TutorSeekerScreen/TutorDetailPage.dart';
-
 
 class DisqualifyTutorCard extends StatefulWidget {
   final String tutorId;
@@ -40,7 +38,7 @@ class _DisqualifyTutorCardState extends State<DisqualifyTutorCard> {
           content: Text(content),
           actions: <Widget>[
             TextButton(
-              child: Text('OK'),
+              child: const Text('OK'),
               onPressed: () {
                 Navigator.of(dialogContext).pop();
               },
@@ -79,7 +77,7 @@ class _DisqualifyTutorCardState extends State<DisqualifyTutorCard> {
       _showDialog('Error', 'User not logged in');
       return;
     }
-    String tutorId = currentUser.uid;
+
     // Get the current date/time as the accepted date
     DateTime now = DateTime.now();
 
@@ -117,7 +115,7 @@ class _DisqualifyTutorCardState extends State<DisqualifyTutorCard> {
   Widget build(BuildContext context) {
     return Card(
       elevation: 4.0,
-      margin: EdgeInsets.all(10.0),
+      margin: const EdgeInsets.all(10.0),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12.0),
       ),
@@ -133,7 +131,7 @@ class _DisqualifyTutorCardState extends State<DisqualifyTutorCard> {
                   radius: 35,
                   backgroundImage: NetworkImage(widget.imageURL),
                 ),
-                SizedBox(width: 30),
+                const SizedBox(width: 30),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -145,10 +143,10 @@ class _DisqualifyTutorCardState extends State<DisqualifyTutorCard> {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      SizedBox(height: 8),
+                      const SizedBox(height: 8),
                       Text(
                           'Rating: ${widget.rate} (${widget.numberofRating} reviews)',
-                          style: TextStyle(fontSize: 13)),
+                          style: const TextStyle(fontSize: 13)),
                     ],
                   ),
                 ),

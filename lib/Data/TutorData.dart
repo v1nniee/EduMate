@@ -4,7 +4,6 @@ import 'package:edumateapp/TutorScreen/StudentPayment.dart';
 import 'package:edumateapp/TutorScreen/ToPayTutorSeeker.dart';
 import 'package:edumateapp/TutorScreen/TutorAddPost.dart';
 import 'package:edumateapp/TutorScreen/TutorManagePost.dart';
-import 'package:edumateapp/TutorScreen/TutorHome.dart';
 import 'package:edumateapp/TutorScreen/TutorSeekerApplicationRequest.dart';
 import 'package:flutter/material.dart';
 import 'package:edumateapp/Models/Category.dart';

@@ -176,7 +176,7 @@ class TutorDetailPage extends StatelessWidget {
                             child: ListTile(
                               leading: Icon(Icons.picture_as_pdf,
                                   color: Theme.of(context).primaryColor),
-                              title: Text('View Certification',
+                              title: const Text('View Certification',
                                   style:
                                       TextStyle(fontWeight: FontWeight.bold)),
                               onTap: () => _launchURL(DocumentUrl!),
@@ -195,7 +195,7 @@ class TutorDetailPage extends StatelessWidget {
                                   child: ListTile(
                                     leading: Icon(Icons.picture_as_pdf,
                                         color: Theme.of(context).primaryColor),
-                                    title: Text("View Experience",
+                                    title: const Text("View Experience",
                                         style: TextStyle(
                                             fontWeight: FontWeight.bold)),
                                     onTap: () => _launchURL(docUrl.toString()),

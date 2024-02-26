@@ -81,6 +81,62 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
     }
   }
 
+  Future<bool> reauthenticateUser(String password) async {
+    User? user = FirebaseAuth.instance.currentUser;
+    AuthCredential credential = EmailAuthProvider.credential(
+      email: user!.email!, // Assuming the user's email is not null
+      password: password,
+    );
+
+    try {
+      await user.reauthenticateWithCredential(credential);
+      return true; // Re-authentication successful
+    } catch (error) {
+      return false; // Re-authentication failed
+    }
+  }
+
+  void showPasswordMismatchDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Password Mismatch"),
+          content: Text(
+              "The current password you entered does not match. Please try again."),
+          actions: <Widget>[
+            TextButton(
+              child: Text("OK"),
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void showPasswordChangedDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Password Changed"),
+          content: Text("Your password has been changed."),
+          actions: <Widget>[
+            TextButton(
+              child: Text("OK"),
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -156,23 +212,29 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                     child: ElevatedButton(
                       onPressed: () async {
                         if (_formKey.currentState!.validate()) {
-                          try {
-                            User? user = FirebaseAuth.instance.currentUser;
-                            if (user != null &&
-                                _passwordController.text.isNotEmpty) {
-                              // You should reauthenticate user here before updating the password
-                              // Reauthentication code goes here
-
-                              // After reauthentication, update the password
-                              await user
-                                  .updatePassword(_newPasswordController.text);
-                              // Password updated successfully
-                              Navigator.pop(context);
+                          // Re-authenticate user with current password
+                          bool isReauthenticated = await reauthenticateUser(
+                              _passwordController.text);
+                          if (isReauthenticated) {
+                            try {
+                              User? user = FirebaseAuth.instance.currentUser;
+                              if (user != null &&
+                                  _passwordController.text.isNotEmpty) {
+                                // After reauthentication, update the password
+                                await user.updatePassword(
+                                    _newPasswordController.text);
+                                // Password updated successfully
+                                Navigator.pop(context);
+                              }
+                            } on FirebaseAuthException catch (error) {
+                              setState(() {
+                                _errorMessage = error.message;
+                              });
                             }
-                          } on FirebaseAuthException catch (error) {
-                            setState(() {
-                              _errorMessage = error.message;
-                            });
+                            showPasswordChangedDialog();
+                          } else {
+                            // If reauthentication fails, show dialog
+                            showPasswordMismatchDialog();
                           }
                         }
                       },

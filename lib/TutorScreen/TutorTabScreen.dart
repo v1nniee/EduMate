@@ -1,4 +1,4 @@
-import 'package:edumateapp/TutorScreen/TutorChat.dart';
+
 import 'package:edumateapp/TutorScreen/TutorHome.dart';
 import 'package:edumateapp/TutorScreen/TutorHomeChat.dart';
 import 'package:edumateapp/TutorScreen/TutorNotification.dart';

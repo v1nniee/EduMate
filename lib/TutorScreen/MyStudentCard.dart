@@ -3,7 +3,6 @@ import 'package:edumateapp/FCM/StoreNotification.dart';
 import 'package:edumateapp/TutorScreen/TutorSeekerDetail.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:edumateapp/TutorSeekerScreen/TutorDetailPage.dart';
 import 'package:intl/intl.dart';
 
 class MyStudentCard extends StatefulWidget {
@@ -73,7 +72,7 @@ class _MyStudentCardState extends State<MyStudentCard> {
           content: Text(content),
           actions: <Widget>[
             TextButton(
-              child: Text('OK'),
+              child: const Text('OK'),
               onPressed: () {
                 Navigator.of(dialogContext).pop();
               },

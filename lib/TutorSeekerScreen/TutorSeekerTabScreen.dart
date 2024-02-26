@@ -1,6 +1,4 @@
-import 'dart:convert';
 
-import 'package:edumateapp/TutorSeekerScreen/TutorSeekerChat.dart';
 import 'package:edumateapp/TutorSeekerScreen/TutorSeekerHomeChat.dart';
 import 'package:edumateapp/TutorSeekerScreen/TutorSeekerProfile.dart';
 import 'package:edumateapp/TutorSeekerScreen/TutorSeekerHome.dart';

@@ -1,16 +1,10 @@
-import 'package:edumateapp/TutorScreen/ApplicationDetails.dart';
+
 import 'package:edumateapp/TutorScreen/TutorSeekerCard.dart';
-import 'package:edumateapp/TutorSeekerScreen/ApplicationStatusTutorCard.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:edumateapp/Widgets/PageHeader.dart';
 
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:edumateapp/Widgets/PageHeader.dart';
-import 'package:edumateapp/TutorScreen/TutorSeekerCard.dart';
 
 class TutorSeekerApplicationRequest extends StatefulWidget {
   const TutorSeekerApplicationRequest({Key? key}) : super(key: key);
