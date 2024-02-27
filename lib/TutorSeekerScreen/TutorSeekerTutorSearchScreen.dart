@@ -4,10 +4,12 @@ import 'package:edumateapp/TutorSeekerScreen/TutorSeekerChat.dart';
 
 class TutorSeekerTutorSearchScreen extends StatefulWidget {
   @override
-  _TutorSeekerTutorSearchScreenState createState() => _TutorSeekerTutorSearchScreenState();
+  _TutorSeekerTutorSearchScreenState createState() =>
+      _TutorSeekerTutorSearchScreenState();
 }
 
-class _TutorSeekerTutorSearchScreenState extends State<TutorSeekerTutorSearchScreen> {
+class _TutorSeekerTutorSearchScreenState
+    extends State<TutorSeekerTutorSearchScreen> {
   List<Map<String, dynamic>> tutors = [];
   List<Map<String, dynamic>> searchResults = [];
   late FocusNode _searchFocusNode; // Declare FocusNode
@@ -29,7 +31,7 @@ class _TutorSeekerTutorSearchScreenState extends State<TutorSeekerTutorSearchScr
     final results = tutors.where((tutor) {
       final tutorName = tutor['Name'].toLowerCase();
       final input = query.toLowerCase();
-      
+
       return tutorName.contains(input);
     }).toList();
 
@@ -41,15 +43,13 @@ class _TutorSeekerTutorSearchScreenState extends State<TutorSeekerTutorSearchScr
   void fetchAllTutors() async {
     var results = await FirebaseFirestore.instance.collection('Tutor').get();
     setState(() {
-      tutors = results.docs.map((doc) => {'id': doc.id, ...doc.data()}).toList();
+      tutors =
+          results.docs.map((doc) => {'id': doc.id, ...doc.data()}).toList();
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    // Request focus for the search TextField
-    FocusScope.of(context).requestFocus(_searchFocusNode);
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('Search Tutors'),

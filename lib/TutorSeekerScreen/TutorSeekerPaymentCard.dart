@@ -50,7 +50,6 @@ class _TutorSeekerPaymentCardState extends State<TutorSeekerPaymentCard> {
 
   Future<void> updateAvailabilitySlots(
       String day, String startTime, String endTime, String tutorId) async {
-    
     var availabilitySlotsRef = FirebaseFirestore.instance
         .collection('Tutor')
         .doc(tutorId)
@@ -304,7 +303,6 @@ class _TutorSeekerPaymentCardState extends State<TutorSeekerPaymentCard> {
       'TutorSeekerName': _tutorseekerName,
     };
 
-
     DocumentReference ApplicationRequestDocRef = FirebaseFirestore.instance
         .collection('Tutor')
         .doc(widget.tutorId)
@@ -487,8 +485,8 @@ class _TutorSeekerPaymentCardState extends State<TutorSeekerPaymentCard> {
                           _getEndDate(startclassDate, widget.endTime);
                       _updateTutor(paymentDate, removeCommisionFees(),
                           startclassDate, endclassDate);
-                      updateAvailabilitySlots(
-                          widget.day, widget.startTime, widget.endTime, widget.tutorId);
+                      updateAvailabilitySlots(widget.day, widget.startTime,
+                          widget.endTime, widget.tutorId);
 
                       _updateTutorSeeker(paymentDate, calculateFees(),
                           startclassDate, endclassDate);

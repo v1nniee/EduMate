@@ -38,7 +38,7 @@ class _AdminDisqualifyTutorState extends State<AdminDisqualifyTutor> {
       String tutorId = tutor['TutorId'];
       String name = tutor['Name'];
       double rate = tutor['Rate'];
-      String imageURL = tutor['ImageUrl']??'assets/images/tutor_seeker_profile.png';
+      String imageURL = tutor['ImageURL']??'assets/images/tutor_seeker_profile.png';
       int numberofRating = tutor['NumberOfRating'];
 
       DisqualifyTutorCard card = DisqualifyTutorCard(

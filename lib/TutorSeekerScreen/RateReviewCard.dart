@@ -106,6 +106,7 @@ class _RateReviewCardState extends State<RateReviewCard> {
         'Rate': newAverageRating,
         'ImageURL': _imageURL,
         'NumberOfRating': _numberOfRating,
+        'TutorId':widget.tutorId,
       });
       DateTime now = DateTime.now();
       StoreNotification().sendNotificationtoAdmin(

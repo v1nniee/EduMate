@@ -29,7 +29,8 @@ class TutorCard extends StatefulWidget {
     required this.fees,
     required this.numberOfRating,
     required this.tutorPostId,
-    required this.mode, required this.DocumentUrl,
+    required this.mode,
+    required this.DocumentUrl,
   }) : super(key: key);
 
   @override
